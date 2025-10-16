@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/badge"
 import { Search, Mic, Database, Gauge, Clock } from "lucide-react"
 import { useModal } from "@/hooks/use-modal"
+import Image from "next/image"
 
 export default function HomePage() {
   const { openModal } = useModal()
@@ -71,11 +72,13 @@ export default function HomePage() {
               {/* Labs Card */}
               <div className="rounded-lg border bg-gradient-to-br from-pink-50 to-purple-50 p-8">
                 <div className="mb-6 flex h-48 items-center justify-center">
-                  <div className="grid grid-cols-3 gap-3">
-                    {[...Array(9)].map((_, i) => (
-                      <div key={i} className="h-16 w-16 rounded-lg bg-white/80 shadow-sm" />
-                    ))}
-                  </div>
+                  <Image
+                    src="/card1.png"
+                    alt="Labs - AI experimentation and validation"
+                    width={200}
+                    height={200}
+                    className="object-contain"
+                  />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Labs</h3>
                 <p className="text-sm text-muted-foreground">
@@ -86,11 +89,13 @@ export default function HomePage() {
               {/* Foundry Card */}
               <div className="rounded-lg border bg-gradient-to-br from-blue-50 to-cyan-50 p-8">
                 <div className="mb-6 flex h-48 items-center justify-center">
-                  <div className="relative h-32 w-32">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="h-24 w-24 rounded-full border-4 border-blue-200" />
-                    </div>
-                  </div>
+                  <Image
+                    src="/card2.png"
+                    alt="Foundry - Scale AI pilots with governance"
+                    width={200}
+                    height={200}
+                    className="object-contain"
+                  />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Foundry</h3>
                 <p className="text-sm text-muted-foreground">
@@ -101,20 +106,13 @@ export default function HomePage() {
               {/* Factory Card */}
               <div className="rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 p-8">
                 <div className="mb-6 flex h-48 items-center justify-center">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full bg-blue-400" />
-                      <div className="text-sm">Data Received</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full bg-green-400" />
-                      <div className="text-sm">Customization</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full bg-yellow-400" />
-                      <div className="text-sm">Deploy Agent</div>
-                    </div>
-                  </div>
+                  <Image
+                    src="/card3.png"
+                    alt="Factory - Operationalize AI at scale"
+                    width={200}
+                    height={200}
+                    className="object-contain"
+                  />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Factory</h3>
                 <p className="text-sm text-muted-foreground">

@@ -39,9 +39,9 @@ async function fetchAgents() {
       // API `tags` may be a comma-separated string; convert to array
       tags: a.tags
         ? a.tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean)
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
         : [],
       badges: [
         { label: (a as any).by_value || "", variant: "default" as const },
@@ -61,17 +61,29 @@ export default async function AgentLibraryPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="gradient-bg py-16">
+      <section className="relative py-16">
+        <div aria-hidden="true" className="absolute inset-0 -z-10">
+          <img src="/gradiant%20image%20right.png" alt="" className="h-full w-full object-cover" />
+        </div>
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="text-left">
             <h1 className="mb-4 font-inter font-extrabold text-[64px] leading-[110%] tracking-[-0.02em] text-balance">
-              <span className="gradient-text">
+              <span
+                style={{
+                  background:
+                    "radial-gradient(80.73% 80.73% at 3.12% 25.58%, #7935F4 0%, #9A4681 49.5%, #614BDB 96.87%)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  color: "transparent",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
                 The AI platform accelerating <br /> business solutions
               </span>
             </h1>
             <p
               className="mb-8 text-balance text-[18px] font-normal leading-[150%] tracking-[0] text-[background: #374151;
-] rounded-md p-4"
+] rounded-md"
               style={{
                 fontFamily: "Inter, sans-serif",
               }}
@@ -81,24 +93,23 @@ export default async function AgentLibraryPage() {
               drives business transformation.
             </p>
 
-            {/* Partner Logos */}
-            <div className="mb-8 flex items-center justify-center gap-8">
+            {/* Loved by (left-aligned) */}
+            <div className="mb-[266px] flex items-center justify-start gap-6">
               <div className="text-sm text-muted-foreground">Loved by</div>
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded bg-red-500" />
-                  <span className="font-semibold">crayon</span>
+              {/* Overlapping circular company logos */}
+              <div className="flex -space-x-3">
+                <div className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white bg-white flex items-center justify-center shadow-sm">
+                  <img src="/crayon_bw.png" alt="Crayon" className="h-6 w-6 object-contain" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-blue-500" />
-                  <span className="font-semibold">Veehive</span>
+                <div className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white bg-white flex items-center justify-center shadow-sm">
+                  <img src="/veehive_bw.png" alt="Veehive" className="h-6 w-6 object-contain" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded bg-gray-700" />
-                  <span className="font-semibold">MOZARK</span>
+                <div className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white bg-white flex items-center justify-center shadow-sm">
+                  <img src="/mozak_bw.png" alt="Mozark" className="h-6 w-6 object-contain" />
                 </div>
               </div>
-              <div className="text-sm font-semibold">32,000 +</div>
+              <div className="text-sm font-semibold whitespace-nowrap">32,000+</div>
+              {/* Overlapping people avatars (6) */}
             </div>
 
             {/* Enterprise Partners Row */}
@@ -135,35 +146,40 @@ export default async function AgentLibraryPage() {
         </div>
       </section>
 
-      {/* Search and Filters */}
-      <section className="border-b bg-white py-6">
+      {/* Unified Search + Filters Bar */}
+      <section className="bg-white border-y">
         <div className="mx-auto max-w-[1280px] px-6">
-          <div className="mb-4 flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="h-16 flex items-center justify-between gap-4">
+            {/* Search (left 60%) */}
+            <div className="relative w-[60%] max-w-none">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search Agents and Solutions"
-                className="pl-10"
+                className="pl-10 border-0 bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button variant="outline" size="sm">
-              Service Provider <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              Capability <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              Persona <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              Value <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              Category <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
+            {/* Divider */}
+            <div className="mx-4 text-gray-300 select-none" aria-hidden="true">|</div>
+
+            {/* Filters (right 40%, borderless) */}
+            <div className="flex items-center justify-end gap-3 w-[40%]">
+              <Button variant="ghost" size="sm" className="px-2">
+                Service Provider <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="px-2">
+                Capability <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="px-2">
+                Persona <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="px-2">
+                Value <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="px-2">
+                Category <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -187,3 +203,4 @@ export default async function AgentLibraryPage() {
     </div>
   );
 }
+

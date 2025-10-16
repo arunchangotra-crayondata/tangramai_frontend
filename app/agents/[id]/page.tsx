@@ -5,7 +5,52 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-export default function AgentDetailsPage({ params }: { params: { id: string } }) {
+type AgentDetailApiResponse = {
+  agent?: {
+    agent_id: string
+    agent_name?: string
+    description?: string
+    by_persona?: string
+    by_value?: string
+    asset_type?: string
+    demo_link?: string
+    demo_preview?: string
+    features?: string
+    tags?: string
+  }
+  capabilities?: Array<{ serial_id?: string; by_capability?: string }>
+  deployments?: Array<{ service_provider?: string; service_name?: string; deployment?: string; cloud_region?: string }>
+  demo_assets?: Array<{ demo_asset_link?: string; demo_link?: string }>
+  documentation?: Array<{ sdk_details?: string; swagger_details?: string; sample_input?: string; sample_output?: string }>
+  isv_info?: { isv_name?: string; isv_email_no?: string }
+}
+
+async function fetchAgentDetail(agentId: string) {
+  try {
+    const res = await fetch(`https://agents-store.onrender.com/api/agents/${agentId}`, { cache: "no-store" })
+    if (!res.ok) throw new Error(`Failed to fetch agent ${agentId}: ${res.status}`)
+    const data: AgentDetailApiResponse = await res.json()
+    return data
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err)
+    return null
+  }
+}
+
+export default async function AgentDetailsPage({ params }: { params: { id: string } }) {
+  const id = params.id
+  const data = await fetchAgentDetail(id)
+  const agent = data?.agent
+
+  const title = agent?.agent_name || "Business Representative"
+  const description = agent?.description ||
+    `Whether you're nurturing inbound leads, answering marketing inquiries, or booking meetings, this tool
+                  streamlines engagement and ensures no opportunity slips through the cracks.`
+  const categories = data?.capabilities?.map((c) => c.by_capability || "") .filter(Boolean) || ["Marketing"]
+  const personas = agent?.by_persona ? [agent.by_persona] : ["Executives (CXO)"]
+  const valueProps = agent?.by_value ? [agent.by_value] : ["Productivity"]
+  const worksWith = data?.deployments?.slice(0, 1).map((d) => d.service_name || "").filter(Boolean) || ["OpenAI GPT-4o"]
   return (
     <div className="flex flex-col">
       {/* Breadcrumb */}
@@ -27,56 +72,56 @@ export default function AgentDetailsPage({ params }: { params: { id: string } })
               <div className="mb-6">
                 <div className="mb-2 flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">Agent</span>
-                  <span className="text-sm text-muted-foreground">Build by: Crayon Team</span>
+                  <span className="text-sm text-muted-foreground">Build by: {data?.isv_info?.isv_name || 'Crayon Team'}</span>
                 </div>
-                <h1 className="mb-4 text-4xl font-bold">Business Representative</h1>
+                <h1 className="mb-4 text-4xl font-bold">{title}</h1>
               </div>
 
               {/* Description */}
               <div className="mb-8">
                 <h2 className="mb-3 text-lg font-semibold">Description</h2>
-                <p className="mb-4 text-muted-foreground">
-                  Whether you're nurturing inbound leads, answering marketing inquiries, or booking meetings, this tool
-                  streamlines engagement and ensures no opportunity slips through the cracks.
-                </p>
-                <p className="mb-4 text-muted-foreground">
-                  Responds to Inbound Marketing Emails with Contextual Answers
-                </p>
-                <p className="mb-4 text-muted-foreground">Asks Smart Lead Capture Questions</p>
-                <p className="mb-4 text-muted-foreground">Schedules Meetings Directly via Calendar Integration</p>
-                <p className="text-muted-foreground">
-                  Maintains Consistent Tone and Brand Voice Across All Interactions
-                </p>
+                <p className="mb-4 text-muted-foreground">{description}</p>
+                {agent?.features && <p className="mb-4 text-muted-foreground">{agent.features}</p>}
+                {agent?.demo_link && (
+                  <p className="mb-4">
+                    Demo: <a href={agent.demo_link} target="_blank" rel="noreferrer" className="text-primary underline">{agent.demo_link}</a>
+                  </p>
+                )}
               </div>
 
               {/* Metadata */}
               <div className="mb-8 space-y-4">
                 <div>
                   <span className="font-semibold">Categories : </span>
-                  <Badge variant="default" className="ml-2">
-                    Marketing
-                  </Badge>
-                  <Badge variant="default" className="ml-2">
-                    Conversational AI & Advisory
-                  </Badge>
+                  {categories.map((c, i) => (
+                    <Badge key={i} variant="default" className="ml-2">
+                      {c}
+                    </Badge>
+                  ))}
                 </div>
                 <div>
                   <span className="font-semibold">Target Personas : </span>
-                  <Badge variant="outline" className="ml-2">
-                    Executives (CXO)
-                  </Badge>
+                  {personas.map((p, i) => (
+                    <Badge key={i} variant="outline" className="ml-2">
+                      {p}
+                    </Badge>
+                  ))}
                 </div>
                 <div>
                   <span className="font-semibold">Value Propositions: </span>
-                  <Badge variant="primary" className="ml-2">
-                    Productivity
-                  </Badge>
+                  {valueProps.map((v, i) => (
+                    <Badge key={i} variant="primary" className="ml-2">
+                      {v}
+                    </Badge>
+                  ))}
                 </div>
                 <div>
                   <span className="font-semibold">Works with : </span>
-                  <Badge variant="outline" className="ml-2">
-                    OpenAI GPT-4o
-                  </Badge>
+                  {worksWith.map((w, i) => (
+                    <Badge key={i} variant="outline" className="ml-2">
+                      {w}
+                    </Badge>
+                  ))}
                 </div>
               </div>
 
@@ -177,7 +222,11 @@ export default function AgentDetailsPage({ params }: { params: { id: string } })
                   <div className="space-y-4">
                     <div>
                       <div className="text-sm text-muted-foreground">Developer</div>
-                      <div className="font-semibold">Crayon Data Team</div>
+                      <div className="font-semibold">{data?.isv_info?.isv_name || 'Crayon Data Team'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Contact</div>
+                      <div className="font-semibold">{data?.isv_info?.isv_email_no || 'na'}</div>
                     </div>
                     <div>
                       <div className="text-sm text-muted-foreground">Last Updated</div>
@@ -186,18 +235,6 @@ export default function AgentDetailsPage({ params }: { params: { id: string } })
                     <div>
                       <div className="text-sm text-muted-foreground">Language</div>
                       <div className="font-semibold">English</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Installs</div>
-                      <div className="font-semibold">6</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Enterprise users</div>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline">ADIB</Badge>
-                        <Badge variant="outline">HDFC</Badge>
-                        <Badge variant="outline">Redington</Badge>
-                      </div>
                     </div>
                   </div>
                 </CardContent>

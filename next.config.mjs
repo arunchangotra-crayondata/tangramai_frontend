@@ -9,6 +9,14 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://agents-store.onrender.com/api/:path*',
+      },
+    ]
+  },
 }
 
 export default nextConfig

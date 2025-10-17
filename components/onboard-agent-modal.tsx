@@ -2,6 +2,9 @@
 
 import { ModalWrapper } from "./modal-wrapper"
 import { useModal } from "@/hooks/use-modal"
+import { Button } from "./ui/button"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 interface OnboardAgentModalProps {
   isOpen: boolean
@@ -10,6 +13,7 @@ interface OnboardAgentModalProps {
 
 export function OnboardAgentModal({ isOpen, onClose }: OnboardAgentModalProps) {
   const { role } = useModal()
+  const router = useRouter()
 
   const content = {
     vendor: {
@@ -26,24 +30,35 @@ export function OnboardAgentModal({ isOpen, onClose }: OnboardAgentModalProps) {
 
   const currentContent = role === "vendor" ? content.vendor : content.reseller
 
+  const handleOnboard = () => {
+    onClose()
+    router.push("/onboard")
+  }
+
   return (
     <ModalWrapper isOpen={isOpen} onClose={onClose}>
       <div className="max-w-[640px] text-center">
         {/* Illustration */}
         <div className="mb-8 flex justify-center">
-          <img
-            src="/person-with-laptop-and-ai-robot-illustration.jpg"
+          <Image
+            src="/person-with-laptop-and-ai-robot-high-fiving-illust.jpg"
             alt="Onboard illustration"
-            className="h-60 w-80 object-contain"
+            width={320}
+            height={240}
+            className="object-contain"
           />
         </div>
 
         <h2 className="mb-4 text-2xl font-bold text-gray-900">{currentContent.title}</h2>
         <p className="mb-8 text-sm leading-relaxed text-gray-600">{currentContent.subtitle}</p>
 
-        <button className="mb-4 h-11 w-full max-w-xs rounded-lg bg-gray-900 px-6 font-medium text-white transition-colors hover:bg-gray-800">
+        <Button
+          onClick={handleOnboard}
+          size="lg"
+          className="mb-4 w-full max-w-xs bg-black text-white hover:bg-black/90"
+        >
           Onboard Agent
-        </button>
+        </Button>
 
         <button onClick={onClose} className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline">
           I'll do it later

@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FileText, Trash2 } from "lucide-react"
 
-interface ISV {
+interface DisplayISV {
   id: string
   name: string
   position: string
@@ -24,16 +24,23 @@ interface ISV {
   }
 }
 
-interface ISVDetailsDrawerProps {
-  isv: ISV
+interface ISVDetailsDrawerProps<TISV extends DisplayISV = DisplayISV> {
+  isv: TISV
   open: boolean
   onOpenChange: (open: boolean) => void
-  onApprove: (isv: ISV) => void
+  onApprove: (isv: TISV) => void | Promise<void>
   onReject: () => void
-  onUpdate: (isv: ISV, newStatus: "Active" | "Inactive") => void
+  onUpdate: (isv: TISV, newStatus: "Active" | "Inactive") => void | Promise<void>
 }
 
-export function ISVDetailsDrawer({ isv, open, onOpenChange, onApprove, onReject, onUpdate }: ISVDetailsDrawerProps) {
+export function ISVDetailsDrawer<TISV extends DisplayISV = DisplayISV>({
+  isv,
+  open,
+  onOpenChange,
+  onApprove,
+  onReject,
+  onUpdate,
+}: ISVDetailsDrawerProps<TISV>) {
   const [status, setStatus] = useState<"Active" | "Inactive">(isv.status)
   const isPending = isv.processingStatus === "Pending"
 

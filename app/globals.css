@@ -144,4 +144,24 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* Horizontal marquee for partner logos */
+  @keyframes scroll-horizontal {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-scroll {
+    animation: scroll-horizontal 30s linear infinite;
+    will-change: transform;
+  }
+
+  /* Vertical marquee for cards */
+  @keyframes scroll-vertical {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
+  .animate-scroll-vertical {
+    animation: scroll-vertical 20s linear infinite;
+    will-change: transform;
+  }
 }

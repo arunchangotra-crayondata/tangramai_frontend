@@ -67,7 +67,7 @@ export function Navbar() {
               <Link href="/agents" className="text-sm font-medium hover:text-primary">
                 Agent Store
               </Link>
-              <Link href="/partners" className="text-sm font-medium hover:text-primary">
+              <Link href="/isv" className="text-sm font-medium hover:text-primary">
                 ISV
               </Link>
               <Link href="/partners" className="text-sm font-medium hover:text-primary">

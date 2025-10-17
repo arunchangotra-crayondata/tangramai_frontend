@@ -26,7 +26,7 @@ export function AuthTabs({ activeTab, onTabChange }: AuthTabsProps) {
         onClick={() => onTabChange?.("vendor")}
       >
         <User className="h-4 w-4" />
-        Vendor
+        ISV
       </button>
     </div>
   )

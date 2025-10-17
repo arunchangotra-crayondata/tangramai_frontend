@@ -7,6 +7,7 @@ import { AuthTabs } from "./auth-tabs"
 import { InputField } from "./input-field"
 import { PrimaryButton } from "./primary-button"
 import { useModal } from "@/hooks/use-modal"
+import { useAuthStore } from "@/lib/store/auth.store"
 
 interface ResellerLoginModalProps {
   isOpen: boolean
@@ -14,21 +15,29 @@ interface ResellerLoginModalProps {
 }
 
 export function ResellerLoginModal({ isOpen, onClose }: ResellerLoginModalProps) {
-  const [buttonState, setButtonState] = useState<"default" | "loading" | "success">("default")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const { swapModal, openModal } = useModal()
+  const { login, isLoading, error, clearError } = useAuthStore()
 
-  const handleLogin = () => {
-    setButtonState("loading")
-    setTimeout(() => {
-      setButtonState("success")
-      // After success, open onboard agent modal
-      setTimeout(() => {
-        openModal("onboard-agent", "reseller")
-      }, 500)
-    }, 1500)
+  const handleLogin = async () => {
+    clearError()
+    
+    if (!email || !password) {
+      return
+    }
+
+    const result = await login(email, password)
+    
+    if (result.success) {
+      // Only ISV can onboard agents, resellers go to their profile/dashboard
+      onClose()
+      // Use the redirect URL from API
+      if (result.redirect) {
+        window.location.href = result.redirect
+      }
+    }
   }
 
   const handleTabChange = (tab: "reseller" | "vendor") => {
@@ -45,6 +54,12 @@ export function ResellerLoginModal({ isOpen, onClose }: ResellerLoginModalProps)
         <h2 className="mb-2 text-2xl font-bold">Get Started Now!</h2>
         <p className="text-sm text-gray-600">Enter Credentials to access your account.</p>
       </div>
+
+      {error && (
+        <div className="mb-6 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          <span>{error}</span>
+        </div>
+      )}
 
       <AuthTabs activeTab="reseller" onTabChange={handleTabChange} />
 
@@ -74,7 +89,11 @@ export function ResellerLoginModal({ isOpen, onClose }: ResellerLoginModalProps)
           </div>
         </div>
 
-        <PrimaryButton state={buttonState} onClick={handleLogin} disabled={!isFormValid}>
+        <PrimaryButton 
+          state={isLoading ? "loading" : "default"} 
+          onClick={handleLogin} 
+          disabled={!isFormValid || isLoading}
+        >
           LOGIN
         </PrimaryButton>
 

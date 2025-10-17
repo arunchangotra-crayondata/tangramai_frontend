@@ -8,24 +8,48 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { X } from "lucide-react"
+import { X, AlertCircle, CheckCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useAuthStore } from "@/lib/store/auth.store"
+import type { ClientSignupForm } from "@/lib/types/auth.types"
 
 export default function SignupPage() {
   const router = useRouter()
-  const [formData, setFormData] = useState({
+  const { signup, isLoading, error, clearError } = useAuthStore()
+  const [successMessage, setSuccessMessage] = useState("")
+  const [formData, setFormData] = useState<ClientSignupForm>({
     email: "",
     name: "",
     company: "",
-    countryCode: "IND",
     contactNumber: "",
     password: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Mock signup - redirect to login with success message
-    router.push("/auth/login")
+    clearError()
+    setSuccessMessage("")
+    
+    if (!formData.email || !formData.password || !formData.name) {
+      return
+    }
+
+    const result = await signup({
+      email: formData.email,
+      password: formData.password,
+      role: "client",
+      client_name: formData.name,
+      client_company: formData.company,
+      client_mob_no: formData.contactNumber,
+    })
+    
+    if (result.success) {
+      setSuccessMessage(result.message || "Registration successful! Please wait for admin approval.")
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        router.push("/auth/login")
+      }, 3000)
+    }
   }
 
   return (
@@ -42,6 +66,20 @@ export default function SignupPage() {
           <h1 className="mb-2 text-3xl font-bold">Sign Up</h1>
           <p className="text-sm text-muted-foreground">Welcome! Please sign-up to access the platform</p>
         </div>
+
+        {error && (
+          <div className="mb-6 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mb-6 flex items-start gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700">
+            <CheckCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{successMessage}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -85,31 +123,14 @@ export default function SignupPage() {
 
           <div>
             <Label htmlFor="contact">Contact Number</Label>
-            <div className="mt-1 flex gap-2">
-              <Select
-                value={formData.countryCode}
-                onValueChange={(value) => setFormData({ ...formData, countryCode: value })}
-              >
-                <SelectTrigger className="w-24">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="IND">IND</SelectItem>
-                  <SelectItem value="USA">USA</SelectItem>
-                  <SelectItem value="UK">UK</SelectItem>
-                  <SelectItem value="AUS">AUS</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                id="contact"
-                type="tel"
-                placeholder="Enter your contact number"
-                value={formData.contactNumber}
-                onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
-                className="flex-1"
-                required
-              />
-            </div>
+            <Input
+              id="contact"
+              type="tel"
+              placeholder="Enter your contact number"
+              value={formData.contactNumber}
+              onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
+              className="mt-1"
+            />
           </div>
 
           <div>
@@ -125,8 +146,12 @@ export default function SignupPage() {
             />
           </div>
 
-          <Button type="submit" className="w-full bg-gray-200 text-gray-700 hover:bg-gray-300">
-            REGISTER
+          <Button 
+            type="submit" 
+            className="w-full bg-gray-200 text-gray-700 hover:bg-gray-300"
+            disabled={isLoading || !formData.email || !formData.password || !formData.name || !formData.company}
+          >
+            {isLoading ? "REGISTERING..." : "REGISTER"}
           </Button>
         </form>
 

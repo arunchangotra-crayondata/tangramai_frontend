@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
-interface Agent {
+// Keep a minimal shape for display while allowing broader admin Agent type via generics
+interface DisplayAgent {
   id: string
   name: string
   productName?: string
@@ -15,15 +16,21 @@ interface Agent {
   businessValue?: string[]
 }
 
-interface AgentDetailsDrawerProps {
-  agent: Agent
+interface AgentDetailsDrawerProps<TAgent extends DisplayAgent = DisplayAgent> {
+  agent: TAgent
   open: boolean
   onOpenChange: (open: boolean) => void
-  onApprove: (agent: Agent) => void
+  onApprove: (agent: TAgent) => void | Promise<void>
   onReject: () => void
 }
 
-export function AgentDetailsDrawer({ agent, open, onOpenChange, onApprove, onReject }: AgentDetailsDrawerProps) {
+export function AgentDetailsDrawer<TAgent extends DisplayAgent = DisplayAgent>({
+  agent,
+  open,
+  onOpenChange,
+  onApprove,
+  onReject,
+}: AgentDetailsDrawerProps<TAgent>) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">

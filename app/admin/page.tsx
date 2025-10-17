@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +16,6 @@ import { RejectResellerModal } from "@/components/reject-reseller-modal"
 import { EnterpriseDetailsDrawer } from "@/components/enterprise-details-drawer"
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
-import { useAuthStore } from "@/lib/store/auth.store"
 import { adminService } from "@/lib/api/admin.service"
 import type { AgentAPIResponse, ISVAPIResponse, ResellerAPIResponse } from "@/lib/types/admin.types"
 
@@ -320,8 +318,6 @@ const mockEnterpriseUsers: EnterpriseUser[] = [
 ]
 
 export default function AdminPage() {
-  const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
   const [activeTab, setActiveTab] = useState<"Agents" | "ISVs" | "Reseller" | "Enterprise">("Agents")
   const [agents, setAgents] = useState<Agent[]>([])
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
@@ -472,13 +468,6 @@ export default function AdminPage() {
       fetchResellers()
     }
   }, [activeTab])
-
-  // Check authentication
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login')
-    }
-  }, [isAuthenticated, router])
 
   const handleApprove = async (agent: Agent) => {
     try {

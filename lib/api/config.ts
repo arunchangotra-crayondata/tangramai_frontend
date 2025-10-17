@@ -14,6 +14,9 @@ export const endpoints = {
     signup: '/api/auth/signup',
     health: '/api/health',
   },
+  agent: {
+    onboard: '/api/agent/onboard',
+  },
 } as const
 
 // Helper function to create full URL

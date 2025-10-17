@@ -16,6 +16,13 @@ export const endpoints = {
   },
   agent: {
     onboard: '/api/agent/onboard',
+  admin: {
+    agents: '/api/admin/agents',
+    updateAgent: (agentId: string) => `/api/admin/agents/${agentId}`,
+    isvs: '/api/admin/isvs',
+    updateIsv: (isvId: string) => `/api/admin/isvs/${isvId}`,
+    resellers: '/api/admin/resellers',
+    updateReseller: (resellerId: string) => `/api/admin/resellers/${resellerId}`,
   },
 } as const
 

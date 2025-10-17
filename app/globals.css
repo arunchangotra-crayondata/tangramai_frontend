@@ -11,8 +11,9 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.55 0.22 285); /* Purple brand color */
+  --primary: oklch(0.1 0 0); /* Dark gray equivalent to #111827 */
   --primary-foreground: oklch(1 0 0);
+  --ring: oklch(0.1 0 0); /* Focus ring color */
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -143,5 +144,40 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Override any remaining purple focus states */
+  input:focus,
+  textarea:focus,
+  select:focus,
+  [data-radix-select-trigger]:focus,
+  [data-radix-select-trigger][data-state="open"] {
+    border-color: oklch(0.1 0 0) !important;
+    box-shadow: 0 0 0 2px oklch(0.1 0 0 / 0.2) !important;
+    outline: none !important;
+  }
+
+  /* Ensure all focus rings use dark gray */
+  *:focus-visible {
+    outline: 2px solid oklch(0.1 0 0) !important;
+    outline-offset: 2px !important;
+  /* Horizontal marquee for partner logos */
+  @keyframes scroll-horizontal {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-scroll {
+    animation: scroll-horizontal 30s linear infinite;
+    will-change: transform;
+  }
+
+  /* Vertical marquee for cards */
+  @keyframes scroll-vertical {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
+  .animate-scroll-vertical {
+    animation: scroll-vertical 20s linear infinite;
+    will-change: transform;
   }
 }

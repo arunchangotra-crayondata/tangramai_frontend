@@ -9,24 +9,33 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { X, Eye, EyeOff, AlertCircle, Info } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useAuthStore } from "@/lib/store/auth.store"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login, isLoading, error, clearError } = useAuthStore()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Mock validation
-    if (password.length < 8) {
-      setError("Please enter correct password")
-      setSuccess("")
-    } else {
-      setError("")
-      setSuccess("Registered Successfully. Login below to access your account")
+    clearError()
+    setSuccess("")
+    
+    if (!email || !password) {
+      return
+    }
+
+    const result = await login(email, password)
+    
+    if (result.success) {
+      setSuccess("Login successful! Redirecting...")
+      // Use the redirect URL from API or default to agents page
+      setTimeout(() => {
+        router.push(result.redirect || "/agents")
+      }, 1000)
     }
   }
 
@@ -49,6 +58,13 @@ export default function LoginPage() {
           <div className="mb-6 flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
             <Info className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{success}</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
@@ -80,6 +96,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={error ? "border-red-500" : ""}
+              disabled={isLoading}
               />
               <button
                 type="button"
@@ -101,8 +118,12 @@ export default function LoginPage() {
             )}
           </div>
 
-          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90">
-            LOGIN
+          <Button 
+            type="submit" 
+            className="w-full bg-black text-white hover:bg-black/90"
+            disabled={isLoading || !email || !password}
+          >
+            {isLoading ? "LOGGING IN..." : "LOGIN"}
           </Button>
         </form>
 

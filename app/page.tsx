@@ -97,31 +97,15 @@ export default function HomePage() {
 
             <div className="grid gap-8 md:grid-cols-3">
               {/* Labs Card */}
-              <div className="rounded-lg border border-gray-200 shadow-sm bg-gradient-to-br from-pink-300 to-purple-50 p-8">
-
-                <div
-                  style={{
-                    paddingLeft: 16,
-                    paddingRight: 16,
-                    paddingTop: 16,
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div
-                    style={{ position: "relative", width: 288, height: 240 }}
-                  >
-                    <img
-                      src="/card1.png"
-                      alt="Labs preview"
-                      style={{
-                        objectFit: "contain",
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: 8,
-                      }}
-                    />
-                  </div>
+              <div className="rounded-lg border bg-gradient-to-br from-pink-50 to-purple-50 p-8">
+                <div className="mb-6 flex h-48 items-center justify-center">
+                  <Image
+                    src="/card1.png"
+                    alt="Labs - AI experimentation and validation"
+                    width={200}
+                    height={200}
+                    className="object-contain"
+                  />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Labs</h3>
                 <p className="text-sm text-muted-foreground">
@@ -131,30 +115,15 @@ export default function HomePage() {
               </div>
 
               {/* Foundry Card */}
-              <div className="rounded-lg border bg-gradient-to-br from-blue-200 to-cyan-100 p-8">
-                <div
-                  style={{
-                    paddingLeft: 16,
-                    paddingRight: 16,
-                    paddingTop: 16,
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div
-                    style={{ position: "relative", width: 288, height: 240 }}
-                  >
-                    <img
-                      src="/card2.png"
-                      alt="Labs preview"
-                      style={{
-                        objectFit: "contain",
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: 8,
-                      }}
-                    />
-                  </div>
+              <div className="rounded-lg border bg-gradient-to-br from-blue-50 to-cyan-50 p-8">
+                <div className="mb-6 flex h-48 items-center justify-center">
+                  <Image
+                    src="/card2.png"
+                    alt="Foundry - Scale AI pilots with governance"
+                    width={200}
+                    height={200}
+                    className="object-contain"
+                  />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Foundry</h3>
                 <p className="text-sm text-muted-foreground">
@@ -164,30 +133,15 @@ export default function HomePage() {
               </div>
 
               {/* Factory Card */}
-              <div className="rounded-lg border bg-gradient-to-br from-yellow-200 to-orange-50 p-8">
-                <div
-                  style={{
-                    paddingLeft: 16,
-                    paddingRight: 16,
-                    paddingTop: 16,
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div
-                    style={{ position: "relative", width: 288, height: 240 }}
-                  >
-                    <img
-                      src="/card3.png"
-                      alt="Labs preview"
-                      style={{
-                        objectFit: "contain",
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: 20,
-                      }}
-                    />
-                  </div>
+              <div className="rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 p-8">
+                <div className="mb-6 flex h-48 items-center justify-center">
+                  <Image
+                    src="/card3.png"
+                    alt="Factory - Operationalize AI at scale"
+                    width={200}
+                    height={200}
+                    className="object-contain"
+                  />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Factory</h3>
                 <p className="text-sm text-muted-foreground">

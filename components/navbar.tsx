@@ -70,7 +70,7 @@ export function Navbar() {
               <Link href="/isv" className="text-sm font-medium hover:text-primary">
                 ISV
               </Link>
-              <Link href="/partners" className="text-sm font-medium hover:text-primary">
+              <Link href="/reseller" className="text-sm font-medium hover:text-primary">
                 Reseller
               </Link>
               <Link href="/tech-stack" className="text-sm font-medium hover:text-primary">

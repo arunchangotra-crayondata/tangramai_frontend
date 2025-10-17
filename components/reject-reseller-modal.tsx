@@ -5,19 +5,24 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
-interface Reseller {
+interface DisplayReseller {
   id: string
   name: string
 }
 
-interface RejectResellerModalProps {
-  reseller: Reseller
+interface RejectResellerModalProps<TReseller extends DisplayReseller = DisplayReseller> {
+  reseller: TReseller
   open: boolean
   onOpenChange: (open: boolean) => void
-  onReject: (reseller: Reseller, reason: string) => void
+  onReject: (reseller: TReseller, reason: string) => void | Promise<void>
 }
 
-export function RejectResellerModal({ reseller, open, onOpenChange, onReject }: RejectResellerModalProps) {
+export function RejectResellerModal<TReseller extends DisplayReseller = DisplayReseller>({
+  reseller,
+  open,
+  onOpenChange,
+  onReject,
+}: RejectResellerModalProps<TReseller>) {
   const [reason, setReason] = useState("")
 
   const handleSubmit = () => {

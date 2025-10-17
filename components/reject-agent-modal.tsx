@@ -5,19 +5,24 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
-interface Agent {
+interface DisplayAgent {
   id: string
   name: string
 }
 
-interface RejectAgentModalProps {
-  agent: Agent
+interface RejectAgentModalProps<TAgent extends DisplayAgent = DisplayAgent> {
+  agent: TAgent
   open: boolean
   onOpenChange: (open: boolean) => void
-  onReject: (agent: Agent, reason: string) => void
+  onReject: (agent: TAgent, reason: string) => void | Promise<void>
 }
 
-export function RejectAgentModal({ agent, open, onOpenChange, onReject }: RejectAgentModalProps) {
+export function RejectAgentModal<TAgent extends DisplayAgent = DisplayAgent>({
+  agent,
+  open,
+  onOpenChange,
+  onReject,
+}: RejectAgentModalProps<TAgent>) {
   const [reason, setReason] = useState("")
 
   const handleSubmit = () => {

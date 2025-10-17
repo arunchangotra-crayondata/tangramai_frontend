@@ -5,19 +5,24 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
-interface ISV {
+interface DisplayISV {
   id: string
   name: string
 }
 
-interface RejectISVModalProps {
-  isv: ISV
+interface RejectISVModalProps<TISV extends DisplayISV = DisplayISV> {
+  isv: TISV
   open: boolean
   onOpenChange: (open: boolean) => void
-  onReject: (isv: ISV, reason: string) => void
+  onReject: (isv: TISV, reason: string) => void | Promise<void>
 }
 
-export function RejectISVModal({ isv, open, onOpenChange, onReject }: RejectISVModalProps) {
+export function RejectISVModal<TISV extends DisplayISV = DisplayISV>({
+  isv,
+  open,
+  onOpenChange,
+  onReject,
+}: RejectISVModalProps<TISV>) {
   const [reason, setReason] = useState("")
 
   const handleSubmit = () => {

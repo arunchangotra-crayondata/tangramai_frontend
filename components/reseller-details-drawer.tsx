@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImageIcon, Trash2 } from "lucide-react"
 
-interface Reseller {
+interface DisplayReseller {
   id: string
   name: string
   position: string
@@ -24,23 +24,23 @@ interface Reseller {
   }
 }
 
-interface ResellerDetailsDrawerProps {
-  reseller: Reseller
+interface ResellerDetailsDrawerProps<TReseller extends DisplayReseller = DisplayReseller> {
+  reseller: TReseller
   open: boolean
   onOpenChange: (open: boolean) => void
-  onApprove: (reseller: Reseller) => void
+  onApprove: (reseller: TReseller) => void | Promise<void>
   onReject: () => void
-  onUpdate: (reseller: Reseller, newStatus: "Active" | "Inactive") => void
+  onUpdate: (reseller: TReseller, newStatus: "Active" | "Inactive") => void | Promise<void>
 }
 
-export function ResellerDetailsDrawer({
+export function ResellerDetailsDrawer<TReseller extends DisplayReseller = DisplayReseller>({
   reseller,
   open,
   onOpenChange,
   onApprove,
   onReject,
   onUpdate,
-}: ResellerDetailsDrawerProps) {
+}: ResellerDetailsDrawerProps<TReseller>) {
   const [status, setStatus] = useState<"Active" | "Inactive">(reseller.status)
   const isPending = reseller.processingStatus === "Pending"
 

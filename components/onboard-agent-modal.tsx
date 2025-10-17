@@ -17,7 +17,7 @@ export function OnboardAgentModal({ isOpen, onClose }: OnboardAgentModalProps) {
 
   const content = {
     vendor: {
-      title: "Welcome to Vendor Platform",
+      title: "Welcome to ISV Platform",
       subtitle:
         "You haven't onboard any agents yet. Reseller with us to showcase your AI solutions to our enterprise clients.",
     },
@@ -41,17 +41,17 @@ export function OnboardAgentModal({ isOpen, onClose }: OnboardAgentModalProps) {
         {/* Illustration */}
         <div className="mb-8 flex justify-center">
           <Image
-            src="/person-with-laptop-and-ai-robot-high-fiving-illust.jpg"
+            src="/person-with-laptop-and-ai-robot-high-fiving-illust.png"
             alt="Onboard illustration"
-            width={320}
-            height={240}
+            width={300}
+            height={220}
             className="object-contain"
           />
         </div>
 
         <h2 className="mb-4 text-2xl font-bold text-gray-900">{currentContent.title}</h2>
         <p className="mb-8 text-sm leading-relaxed text-gray-600">{currentContent.subtitle}</p>
-
+        <div>
         <Button
           onClick={handleOnboard}
           size="lg"
@@ -60,6 +60,8 @@ export function OnboardAgentModal({ isOpen, onClose }: OnboardAgentModalProps) {
           Onboard Agent
         </Button>
 
+        
+        </div>
         <button onClick={onClose} className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline">
           I'll do it later
         </button>

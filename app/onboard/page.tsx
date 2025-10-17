@@ -39,9 +39,9 @@ export default function OnboardPage() {
           {/* Left Side - Illustration */}
           <div className="flex items-center justify-center">
             <Image
-              src="/person-with-laptop-and-ai-robot-high-fiving-illust.jpg"
+              src="/person-with-laptop-and-ai-robot-high-fiving-illust.png"
               alt="Onboard Your AI Agents"
-              width={400}
+              width={530}
               height={400}
               className="object-contain"
             />

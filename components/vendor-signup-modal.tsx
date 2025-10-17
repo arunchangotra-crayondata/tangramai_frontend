@@ -10,6 +10,8 @@ import { PhoneInput } from "./phone-input"
 import { PrimaryButton } from "./primary-button"
 import { useModal } from "@/hooks/use-modal"
 import { Upload } from "lucide-react"
+import { useAuthStore } from "@/lib/store/auth.store"
+import type { ISVSignupForm } from "@/lib/types/auth.types"
 
 interface VendorSignupModalProps {
   isOpen: boolean
@@ -18,26 +20,44 @@ interface VendorSignupModalProps {
 
 export function VendorSignupModal({ isOpen, onClose }: VendorSignupModalProps) {
   const { swapModal, openModal } = useModal()
-  const [buttonState, setButtonState] = useState<"default" | "loading" | "success">("default")
+  const { signup, isLoading, error, clearError } = useAuthStore()
+  const [successMessage, setSuccessMessage] = useState("")
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ISVSignupForm>({
+    email: "",
+    password: "",
     name: "",
-    position: "",
     registeredName: "",
     registeredAddress: "",
     domain: "",
     contactNumber: "",
+    whitelistedDomain: "",
   })
 
-  const handleRegister = () => {
-    setButtonState("loading")
-    setTimeout(() => {
-      setButtonState("success")
-      // After success, wait a bit then open onboard agent modal
+  const handleRegister = async () => {
+    clearError()
+    setSuccessMessage("")
+    
+    if (!formData.email || !formData.password || !formData.name || !formData.registeredName || !formData.registeredAddress) {
+      return
+    }
+
+    const result = await signup({
+      email: formData.email,
+      password: formData.password,
+      role: "isv", // ISV role (vendor in frontend = isv in backend)
+      isv_name: formData.name,
+      isv_address: formData.registeredAddress,
+      isv_domain: formData.domain,
+      isv_mob_no: formData.contactNumber,
+    })
+    
+    if (result.success) {
+      setSuccessMessage(result.message || "Registration successful! Please wait for admin approval.")
       setTimeout(() => {
-        openModal("onboard-agent", "vendor")
-      }, 800)
-    }, 1500)
+        swapModal("vendor-login")
+      }, 3000)
+    }
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,21 +87,42 @@ export function VendorSignupModal({ isOpen, onClose }: VendorSignupModalProps) {
           <p className="text-sm text-gray-600">Welcome! Please sign-up to access the platform</p>
         </div>
 
+        {error && (
+          <div className="mb-6 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <span>{error}</span>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mb-6 flex items-start gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700">
+            <span>{successMessage}</span>
+          </div>
+        )}
+
         <AuthTabs activeTab="vendor" onTabChange={handleTabChange} />
 
         <div className="space-y-4">
+          <InputField
+            label="Email"
+            type="email"
+            placeholder="Enter your email ID"
+            value={formData.email}
+            onChange={(value) => setFormData({ ...formData, email: value })}
+          />
+
+          <InputField
+            label="Password"
+            type="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={(value) => setFormData({ ...formData, password: value })}
+          />
+
           <InputField
             label="Name"
             placeholder="Enter your full name"
             value={formData.name}
             onChange={(value) => setFormData({ ...formData, name: value })}
-          />
-
-          <InputField
-            label="Position"
-            placeholder="Enter your position at your company"
-            value={formData.position}
-            onChange={(value) => setFormData({ ...formData, position: value })}
           />
 
           <InputField
@@ -155,9 +196,9 @@ export function VendorSignupModal({ isOpen, onClose }: VendorSignupModalProps) {
           </div>
 
           <PrimaryButton
-            state={buttonState}
+            state={isLoading ? "loading" : "default"}
             onClick={handleRegister}
-            disabled={!isFormValid}
+            disabled={!isFormValid || isLoading}
             successText="THANK YOU! REGISTERED SUCCESSFULLY"
           >
             REGISTER

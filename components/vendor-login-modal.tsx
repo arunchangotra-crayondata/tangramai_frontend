@@ -7,6 +7,7 @@ import { InputField } from "./input-field"
 import { PrimaryButton } from "./primary-button"
 import { useModal } from "@/hooks/use-modal"
 import { Eye, EyeOff } from "lucide-react"
+import { useAuthStore } from "@/lib/store/auth.store"
 
 interface VendorLoginModalProps {
   isOpen: boolean
@@ -15,22 +16,28 @@ interface VendorLoginModalProps {
 
 export function VendorLoginModal({ isOpen, onClose }: VendorLoginModalProps) {
   const { swapModal, openModal } = useModal()
-  const [buttonState, setButtonState] = useState<"default" | "loading" | "success">("default")
+  const { login, isLoading, error, clearError } = useAuthStore()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
 
-  const handleLogin = () => {
-    setButtonState("loading")
-    setTimeout(() => {
-      setButtonState("success")
-      // After success, open onboard agent modal
+  const handleLogin = async () => {
+    clearError()
+    
+    if (!formData.email || !formData.password) {
+      return
+    }
+
+    const result = await login(formData.email, formData.password)
+    
+    if (result.success) {
+      // ISV users can onboard agents after login
       setTimeout(() => {
         openModal("onboard-agent", "vendor")
       }, 500)
-    }, 1500)
+    }
   }
 
   const handleTabChange = (tab: "reseller" | "vendor") => {
@@ -47,6 +54,12 @@ export function VendorLoginModal({ isOpen, onClose }: VendorLoginModalProps) {
         <h2 className="mb-2 text-2xl font-bold">Get Started Now!</h2>
         <p className="text-sm text-gray-600">Enter Credentials to access your account.</p>
       </div>
+
+      {error && (
+        <div className="mb-6 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          <span>{error}</span>
+        </div>
+      )}
 
       <AuthTabs activeTab="vendor" onTabChange={handleTabChange} />
 
@@ -81,7 +94,11 @@ export function VendorLoginModal({ isOpen, onClose }: VendorLoginModalProps) {
           </div>
         </div>
 
-        <PrimaryButton state={buttonState} onClick={handleLogin} disabled={!isFormValid}>
+        <PrimaryButton 
+          state={isLoading ? "loading" : "default"} 
+          onClick={handleLogin} 
+          disabled={!isFormValid || isLoading}
+        >
           LOGIN
         </PrimaryButton>
 

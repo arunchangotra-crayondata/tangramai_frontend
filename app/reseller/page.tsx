@@ -244,6 +244,42 @@ export default function ResellerPage() {
                 </div>
             </section>
 
+      {/* Testimonials */}
+      <section className="bg-white py-16 relative">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <h2 className="text-3xl font-bold mb-12 text-center">ISV's Testimonials</h2>
+
+          <div className="bg-white border-2 rounded-lg p-12">
+            <div className="flex items-start gap-8">
+              <div className="flex-shrink-0">
+                <svg width="200" height="60" viewBox="0 0 200 60" fill="none">
+                  <path d="M20 10 L40 50 L30 30 L50 30 L30 10 Z" fill="#E91E63" />
+                  <path d="M50 30 L70 10 L60 30 L80 30 L60 50 Z" fill="#9C27B0" />
+                  <text x="90" y="40" fontFamily="Arial" fontSize="28" fontWeight="bold" fill="#000">
+                    MOZARK
+                  </text>
+                </svg>
+              </div>
+              <div className="flex-1 relative">
+                <h3 className="font-bold text-lg mb-4">Mozark</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  Partnering with Tangram.ai accelerated outcomes beyond expectations. Within months, the collaboration
+                  has become core to every growth mission we run. Our shared customer obsession drives perfect alignment
+                  across teams, higher conversions, and seamless opportunities that power scalable, efficient growth.
+                </p>
+                <p className="text-sm text-gray-600 italic">—Christopher Ramnoruthly</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center gap-2 mt-8">
+            <div className="w-2 h-2 bg-black rounded-full"></div>
+            <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+            <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+          </div>
+        </div>
+      </section>
+
             {/* FAQ Section */}
             <section className="bg-gray-50 py-16 relative">
                 <div className="mx-auto max-w-[1280px] px-6">

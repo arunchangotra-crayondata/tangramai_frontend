@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -9,6 +10,7 @@ import { useAuthStore } from "@/lib/store/auth.store"
 import { useState, useRef, useEffect } from "react"
 
 export function Navbar() {
+  const router = useRouter()
   const { user, isAuthenticated, logout } = useAuthStore()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -62,6 +64,7 @@ export function Navbar() {
   const handleLogout = () => {
     logout()
     setIsDropdownOpen(false)
+    router.push("/")
   }
 
   const getUserInitials = (email: string) => {
@@ -82,8 +85,8 @@ export function Navbar() {
   }
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-6">
-      <div className="mx-auto max-w-[1280px]">
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-50">
+      <div className="mx-auto max-w-[1280px] px-6">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2">
@@ -164,7 +167,7 @@ export function Navbar() {
             
             {isAuthenticated && user ? (
               // Authenticated state - User avatar with dropdown
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative z-[60]" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
@@ -177,7 +180,7 @@ export function Navbar() {
                 </button>
                 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md border bg-white py-1 shadow-lg z-50">
+                  <div className="absolute right-0 mb-2 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-xl z-[60]">
                     <Link
                       href="/dashboard"
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

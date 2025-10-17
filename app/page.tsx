@@ -5,10 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/badge";
 import { Search, Mic, Database, Gauge, Clock, Cloud, Settings } from "lucide-react";
 import { useModal } from "@/hooks/use-modal";
+import { useState } from "react";
+import ChatDialog from "@/components/chat-dialog";
 import Image from "next/image";
 
 export default function HomePage() {
   const { openModal } = useModal();
+  const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <div className="flex flex-col">
@@ -42,7 +45,7 @@ export default function HomePage() {
             </p>
 
             {/* Search Bar */}
-            <div className="mx-auto mb-8 flex max-w-4xl items-center gap-2 rounded-full border bg-white p-1 shadow-sm">
+            <div className="mx-auto mb-8 flex max-w-4xl items-center gap-2 rounded-full border bg-white p-1 shadow-sm cursor-text" onClick={() => setChatOpen(true)}>
               <Search className="ml-2 h-5 w-5 text-muted-foreground" />
               <Input
                 placeholder="Tell us About your Business Needs"
@@ -52,6 +55,7 @@ export default function HomePage() {
                 <Mic className="h-5 w-5" />
               </Button>
             </div>
+            <ChatDialog open={chatOpen} onOpenChange={setChatOpen} />
 
             {/* Category Tags */}
             <div className="mb-6 text-sm text-muted-foreground">

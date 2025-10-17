@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/lib/store/auth.store"
 import { useState, useRef, useEffect } from "react"
 
@@ -13,6 +14,38 @@ export function Navbar() {
   const { user, isAuthenticated, logout } = useAuthStore()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [notifications, setNotifications] = useState([
+    {
+      id: 'n1',
+      title: 'Build finished successfully',
+      description: 'Your agent "Claims Triage" is ready to test.',
+      time: '2m ago',
+      logo: '/crayon_bw.png',
+      read: false,
+    },
+    {
+      id: 'n2',
+      title: 'New deployment available',
+      description: 'AWS us-east-1 rollout passed checks.',
+      time: '1h ago',
+      logo: '/aws.png',
+      read: false,
+    },
+    {
+      id: 'n3',
+      title: 'Partner invite accepted',
+      description: 'Mozark joined your workspace.',
+      time: 'Yesterday',
+      logo: '/mozak_bw.png',
+      read: true,
+    },
+  ])
+
+  const hasUnread = notifications.some((n) => !n.read)
+
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -70,10 +103,10 @@ export function Navbar() {
               <Link href="/agents" className="text-sm font-medium hover:text-primary">
                 Agent Store
               </Link>
-              <Link href="/partners" className="text-sm font-medium hover:text-primary">
+              <Link href="/isv" className="text-sm font-medium hover:text-primary">
                 ISV
               </Link>
-              <Link href="/partners" className="text-sm font-medium hover:text-primary">
+              <Link href="/reseller" className="text-sm font-medium hover:text-primary">
                 Reseller
               </Link>
               <Link href="/tech-stack" className="text-sm font-medium hover:text-primary">
@@ -90,9 +123,47 @@ export function Navbar() {
           </div>
           
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {hasUnread && (
+                    <span className="absolute -right-0.5 -top-0.5 inline-block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={8} className="w-[360px] p-0">
+                <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b">
+                  <span className="text-sm font-medium">Notifications</span>
+                  <Button variant="outline" size="sm" onClick={markAllAsRead}>Mark all as read</Button>
+                </div>
+                <div className="max-h-80 overflow-auto py-2 divide-y divide-gray-100">
+                  {notifications.map((n) => (
+                    <div key={n.id} className="px-4 py-3">
+                      <div className="flex items-start gap-3 rounded-md bg-white p-3 hover:bg-gray-50 transition">
+                        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded">
+                          {/* logo */}
+                          <Image src={n.logo} alt="logo" fill className="object-contain" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-medium truncate">
+                              {n.title}
+                            </p>
+                            {!n.read && <span className="h-2 w-2 rounded-full bg-blue-500" aria-hidden="true" />}
+                          </div>
+                          <p className="text-xs text-gray-600 truncate">{n.description}</p>
+                          <p className="mt-1 text-[10px] text-gray-400">{n.time}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t px-4 py-2">
+                  <Button variant="ghost" className="w-full justify-center">View all notifications</Button>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             {isAuthenticated && user ? (
               // Authenticated state - User avatar with dropdown

@@ -216,12 +216,12 @@ export default function PartnersPage() {
               <Card>
                 <CardContent className="p-8 text-left">
                   <div className="mb-4 text-sm font-semibold uppercase text-muted-foreground">BECOME A VENDOR</div>
-                  <h3 className="mb-4 text-2xl font-bold">Tangram.ai Vendors</h3>
+                  <h3 className="mb-4 text-2xl font-bold">Tangram.ai ISV</h3>
                   <p className="mb-6 text-muted-foreground">
                     Our partner are certified Tangram.ai channel partner, technology partner, or independent software
                     vendor (ISV).
                   </p>
-                  <Button variant="outline">BECOME A VENDOR</Button>
+                  <Button variant="outline">BECOME A ISV</Button>
                 </CardContent>
               </Card>
 

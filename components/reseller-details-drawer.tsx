@@ -10,7 +10,8 @@ import { ImageIcon, Trash2 } from "lucide-react"
 
 interface DisplayReseller {
   id: string
-  name: string
+  name?: string
+  userName?: string
   position: string
   registeredName: string
   registeredAddress?: string
@@ -67,7 +68,7 @@ export function ResellerDetailsDrawer<TReseller extends DisplayReseller = Displa
           {/* Name */}
           <div>
             <label className="text-sm font-medium">Name</label>
-            <Input value={reseller.name} readOnly className="mt-1.5 bg-gray-50" placeholder="Full name" />
+            <Input value={reseller.name ?? reseller.userName ?? ""} readOnly className="mt-1.5 bg-gray-50" placeholder="Full name" />
           </div>
 
           {/* Position */}

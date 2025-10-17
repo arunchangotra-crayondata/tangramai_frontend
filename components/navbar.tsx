@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown } from "lucide-react"
 import { useAuthStore } from "@/lib/store/auth.store"
@@ -48,17 +49,21 @@ export function Navbar() {
   }
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto max-w-[1280px] px-6">
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-6">
+      <div className="mx-auto max-w-[1280px]">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2">
-              <div className="text-xl font-bold">
-                {"tangram.ai "}
-                <span className="text-primary">△</span>
-              </div>
+              <Image
+                src="/tangram_log.png"
+                alt="tangram.ai logo"
+                width={120}
+                height={32}
+                className="object-contain"
+                priority
+              />
             </Link>
-            <div className="hidden items-center gap-6 md:flex">
+            <div className="hidden items-center gap-10 md:flex">
               <Link href="/agents" className="text-sm font-medium hover:text-primary">
                 Agent Store
               </Link>
@@ -69,10 +74,14 @@ export function Navbar() {
                 Reseller
               </Link>
               <Link href="/tech-stack" className="text-sm font-medium hover:text-primary">
-                Tech Stack
+                <span style={{ width: '72px', height: '24px', position: 'relative', left: '16.45px', opacity: 1 }} className="font-inter font-normal text-[14px] leading-[24px] align-middle">
+                  Tech Stack
+                </span>
               </Link>
               <Link href="/contact" className="text-sm font-medium hover:text-primary">
-                Contact us
+                <span style={{ width: '72px', height: '24px', position: 'relative', left: '16.45px', opacity: 1 }} className="font-inter font-normal text-[14px] leading-[24px] align-middle">
+                  Contact us
+                </span>
               </Link>
             </div>
           </div>

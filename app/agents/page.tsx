@@ -1,175 +1,185 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { AgentCard } from "@/components/agent-card"
-import { Search, ChevronDown } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AgentCard } from "@/components/agent-card";
+import { Search, ChevronDown } from "lucide-react";
 
-// Mock data for agents
-const agents = [
+// Fallback mock data (minimal) in case the API fails
+const fallbackAgents = [
   {
     id: "intelligent-image-analyzer",
     title: "Intelligent Image Analyzer",
     description:
       "Simplifies insurance claim assessment with AI during the insurance claims. By analyzing uploaded images, it identifies affected parts, retrieves repair costs from a database, and generates a detailed damage report.",
-    badges: [
-      { label: "Image Processing", variant: "default" as const },
-      { label: "Legal", variant: "outline" as const },
-    ],
-    tags: ["CRM", "Claims", "Insurance", "Customer Support", "+4"],
+    badges: [{ label: "Image Processing", variant: "default" as const }],
+    tags: ["CRM", "Claims", "Insurance"],
   },
-  {
-    id: "automated-claims-processing",
-    title: "Automated Claims Processing System",
-    description:
-      "Streamlines the claims intake by automating the intake, categorization, and assignment of claims to adjusters, reducing processing time and improving efficiency across the board.",
-    badges: [
-      { label: "Workflow Automation", variant: "primary" as const },
-      { label: "Compliance", variant: "outline" as const },
-    ],
-    tags: ["Claims Management", "Adjustments", "Insurance", "+5"],
-  },
-  {
-    id: "predictive-analytics-dashboard",
-    title: "Predictive Analytics Dashboard",
-    description:
-      "Utilize advanced analytics to identify trends and potential fraudulent activities, allowing insurers to make data-driven decisions and improve risk management.",
-    badges: [
-      { label: "Data Analysis", variant: "default" as const },
-      { label: "Risk Management", variant: "secondary" as const },
-    ],
-    tags: ["Analytics", "Risk Assessment", "Fraud Detection", "+3"],
-  },
-  {
-    id: "customer-self-service-portal",
-    title: "Customer Self-Service Portal",
-    description:
-      "Empowers policyholders to submit claims, track claim status, and access policy information through an intuitive interface, enhancing customer satisfaction and reducing call center volume.",
-    badges: [
-      { label: "User Experience", variant: "default" as const },
-      { label: "Support", variant: "outline" as const },
-    ],
-    tags: ["Self Service", "Insurance", "Customer Engagement", "+6"],
-  },
-  {
-    id: "fraud-detection-system",
-    title: "Fraud Detection System",
-    description:
-      "Employs advanced algorithms to analyze patterns in claims data, flagging suspicious activities for further investigation and mitigating financial losses for insurers.",
-    badges: [
-      { label: "Machine Learning", variant: "primary" as const },
-      { label: "Audit", variant: "outline" as const },
-    ],
-    tags: ["Fraud Prevention", "Investigation", "Insurance", "Security", "+7"],
-  },
-  {
-    id: "real-time-claim-status-tracker",
-    title: "Real-Time Claim Status Tracker",
-    description:
-      "Provides both insurers and policyholders with real-time updates on claim status via notifications and dashboards, facilitating transparency and communication throughout the claim process.",
-    badges: [
-      { label: "Notification System", variant: "secondary" as const },
-      { label: "Customer Communication", variant: "outline" as const },
-    ],
-    tags: ["Claims Tracking", "Monitoring", "Information Technology", "+4"],
-  },
-  {
-    id: "virtual-adjuster-assistant",
-    title: "Virtual Adjuster Assistant",
-    description:
-      "Integrates AI to assist adjusters by providing quick access to policy details and claim history, thereby reducing the time spent on each claim and improving accuracy.",
-    badges: [
-      { label: "AI Assistance", variant: "primary" as const },
-      { label: "Efficiency", variant: "outline" as const },
-    ],
-    tags: ["Support Tools", "Insurance", "Claims Management", "+5"],
-  },
-  {
-    id: "mobile-claims-application",
-    title: "Mobile Claims Application",
-    description:
-      "Enables policyholders to file claims on-the-go, upload documents, and communicate with their claims adjusters through a convenient mobile app, enhancing accessibility and user satisfaction.",
-    badges: [
-      { label: "App Development", variant: "default" as const },
-      { label: "Customer Support", variant: "outline" as const },
-    ],
-    tags: ["Mobile Access", "Claims", "Customer Experience", "+8"],
-  },
-  {
-    id: "billing-payment-automation",
-    title: "Billing and Payment Automation",
-    description:
-      "Automates the billing process for insurance claims, ensuring timely payments and reducing administrative overhead while providing customers with flexible payment options.",
-    badges: [
-      { label: "Financial Automation", variant: "secondary" as const },
-      { label: "Customer Service", variant: "outline" as const },
-    ],
-    tags: ["Billing", "Payments", "Insurance", "Finance", "+4"],
-  },
-]
+];
 
-export default function AgentLibraryPage() {
+type ApiAgent = {
+  agent_id: string;
+  agent_name: string;
+  description: string;
+  tags: string | null;
+  by_value?: string | null;
+};
+
+async function fetchAgents() {
+  try {
+    const res = await fetch("https://agents-store.onrender.com/api/agents", {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(`Failed to fetch agents: ${res.status}`);
+    const data = await res.json();
+    // Map API response to AgentCard props
+    const apiAgents: ApiAgent[] = data?.agents || [];
+    return apiAgents.map((a) => ({
+      id: a.agent_id,
+      title: a.agent_name,
+      description: a.description,
+      // API `tags` may be a comma-separated string; convert to array
+      tags: a.tags
+        ? a.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+        : [],
+      badges: [
+        { label: (a as any).by_value || "", variant: "default" as const },
+      ],
+    }));
+  } catch (err) {
+    // On any error return fallback
+    // eslint-disable-next-line no-console
+    console.error(err);
+    return fallbackAgents;
+  }
+}
+
+export default async function AgentLibraryPage() {
+  const agents = await fetchAgents();
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="gradient-bg py-16">
+      <section className="relative py-16">
+        <div aria-hidden="true" className="absolute inset-0 -z-10">
+          <img src="/gradiant%20image%20right.png" alt="" className="h-full w-full object-cover" />
+        </div>
         <div className="mx-auto max-w-[1280px] px-6">
-          <div className="text-center">
-            <h1 className="mb-4 text-5xl font-bold text-balance">
-              <span className="gradient-text">The AI platform accelerating business solutions</span>
+          <div className="text-left">
+            <h1 className="mb-4 font-inter font-extrabold text-[64px] leading-[110%] tracking-[-0.02em] text-balance">
+              <span
+                style={{
+                  background:
+                    "radial-gradient(80.73% 80.73% at 3.12% 25.58%, #7935F4 0%, #9A4681 49.5%, #614BDB 96.87%)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  color: "transparent",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                The AI platform accelerating <br /> business solutions
+              </span>
             </h1>
-            <p className="mb-8 text-lg text-muted-foreground text-balance">
-              Unlock the value of enterprise data and enable customer engagement at an individual level. Our
-              comprehensive suite of AI agents drives business transformation.
+            <p
+              className="mb-8 text-balance text-[18px] font-normal leading-[150%] tracking-[0] text-[background: #374151;
+] rounded-md"
+              style={{
+                fontFamily: "Inter, sans-serif",
+              }}
+            >
+              Unlock the value of enterprise data and enable customer engagement
+              at an individual level. Our comprehensive suite of AI agents
+              drives business transformation.
             </p>
 
-            {/* Partner Logos */}
-            <div className="mb-8 flex items-center justify-center gap-8">
+            {/* Loved by (left-aligned) */}
+            <div className="mb-[266px] flex items-center justify-start gap-6">
               <div className="text-sm text-muted-foreground">Loved by</div>
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded bg-red-500" />
-                  <span className="font-semibold">crayon</span>
+              {/* Overlapping circular company logos */}
+              <div className="flex -space-x-3">
+                <div className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white bg-white flex items-center justify-center shadow-sm">
+                  <img src="/crayon_bw.png" alt="Crayon" className="h-6 w-6 object-contain" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-blue-500" />
-                  <span className="font-semibold">Veehive</span>
+                <div className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white bg-white flex items-center justify-center shadow-sm">
+                  <img src="/veehive_bw.png" alt="Veehive" className="h-6 w-6 object-contain" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded bg-gray-700" />
-                  <span className="font-semibold">MOZARK</span>
+                <div className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white bg-white flex items-center justify-center shadow-sm">
+                  <img src="/mozak_bw.png" alt="Mozark" className="h-6 w-6 object-contain" />
                 </div>
               </div>
-              <div className="text-sm font-semibold">32,000 +</div>
+              <div className="text-sm font-semibold whitespace-nowrap">32,000+</div>
+              {/* Overlapping people avatars (6) */}
+            </div>
+
+            {/* Enterprise Partners Row */}
+            <div className="mt-6 flex flex-col items-start gap-3">
+              <div className="text-sm font-medium">Our Enterprise AI Partners</div>
+              <div className="flex items-center gap-6">
+                <img
+                  src="/crayon_bw.png"
+                  alt="crayon"
+                  width={113}
+                  height={24}
+                  className="bg-transparent object-contain grayscale opacity-80"
+                  style={{ transform: "rotate(0deg)" }}
+                />
+                <img
+                  src="/veehive_bw.png"
+                  alt="veehive"
+                  width={113}
+                  height={24}
+                  className="bg-transparent object-contain grayscale opacity-80"
+                  style={{ transform: "rotate(0deg)" }}
+                />
+                <img
+                  src="/mozak_bw.png"
+                  alt="mozak"
+                  width={113}
+                  height={24}
+                  className="bg-transparent object-contain grayscale opacity-80"
+                  style={{ transform: "rotate(0deg)" }}
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Search and Filters */}
-      <section className="border-b bg-white py-6">
+      {/* Unified Search + Filters Bar */}
+      <section className="bg-white border-y">
         <div className="mx-auto max-w-[1280px] px-6">
-          <div className="mb-4 flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search Agents and Solutions" className="pl-10" />
+          <div className="h-16 flex items-center justify-between gap-4">
+            {/* Search (left 60%) */}
+            <div className="relative w-[60%] max-w-none">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search Agents and Solutions"
+                className="pl-10 border-0 bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
             </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button variant="outline" size="sm">
-              Service Provider <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              Capability <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              Persona <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              Value <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              Category <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
+            {/* Divider */}
+            <div className="mx-4 text-gray-300 select-none" aria-hidden="true">|</div>
+
+            {/* Filters (right 40%, borderless) */}
+            <div className="flex items-center justify-end gap-3 w-[40%]">
+              <Button variant="ghost" size="sm" className="px-2">
+                Service Provider <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="px-2">
+                Capability <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="px-2">
+                Persona <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="px-2">
+                Value <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="px-2">
+                Category <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -191,5 +201,6 @@ export default function AgentLibraryPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }
+

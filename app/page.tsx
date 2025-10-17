@@ -293,7 +293,7 @@ export default function HomePage() {
               {/* Vendors Card */}
               <div className="bg-gray-50 rounded-lg shadow-sm p-6 w-[472px] h-[275px] flex flex-col justify-between text-left">
                 <div>
-                  <span className="inline-block mb-3 px-3 py-1  text-sm font-medium" style={{ backgroundColor: '#E6EDFD', color: '#0f172a' }}>Become an AI Vendor</span>
+                  <span className="inline-block mb-3 px-3 py-1  text-sm font-medium" style={{ backgroundColor: '#E6EDFD', color: '#0f172a' }}>Become an AI ISV</span>
                   <h3 className="mb-2 text-xl font-bold">Tangram.ai ISV</h3>
                   <p className="text-sm text-muted-foreground">Our partners are certified Tangram.ai channel partners, technology partners, or independent software vendors (ISV).</p>
                 </div>

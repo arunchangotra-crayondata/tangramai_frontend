@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 interface DisplayReseller {
   id: string
-  name: string
+  name?: string
+  userName?: string
 }
 
 interface RejectResellerModalProps<TReseller extends DisplayReseller = DisplayReseller> {
@@ -37,7 +38,7 @@ export function RejectResellerModal<TReseller extends DisplayReseller = DisplayR
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">Reject this Reseller</DialogTitle>
-          <p className="text-sm text-muted-foreground">Mention reason for rejecting {reseller.name}</p>
+          <p className="text-sm text-muted-foreground">Mention reason for rejecting {reseller.name ?? reseller.userName}</p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

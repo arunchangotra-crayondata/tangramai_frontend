@@ -55,7 +55,7 @@ export function Navbar() {
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2">
               <Image
-                src="/tangram_log.png"
+                src="/redington.JPG"
                 alt="tangram.ai logo"
                 width={120}
                 height={32}

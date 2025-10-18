@@ -4,26 +4,21 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import type { ResellerAPIResponse } from "@/lib/types/admin.types"
 
-interface DisplayReseller {
-  id: string
-  name?: string
-  userName?: string
-}
-
-interface RejectResellerModalProps<TReseller extends DisplayReseller = DisplayReseller> {
-  reseller: TReseller
+interface RejectResellerModalProps {
+  reseller: ResellerAPIResponse
   open: boolean
   onOpenChange: (open: boolean) => void
-  onReject: (reseller: TReseller, reason: string) => void | Promise<void>
+  onReject: (reseller: ResellerAPIResponse, reason: string) => void | Promise<void>
 }
 
-export function RejectResellerModal<TReseller extends DisplayReseller = DisplayReseller>({
+export function RejectResellerModal({
   reseller,
   open,
   onOpenChange,
   onReject,
-}: RejectResellerModalProps<TReseller>) {
+}: RejectResellerModalProps) {
   const [reason, setReason] = useState("")
 
   const handleSubmit = () => {
@@ -38,7 +33,7 @@ export function RejectResellerModal<TReseller extends DisplayReseller = DisplayR
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">Reject this Reseller</DialogTitle>
-          <p className="text-sm text-muted-foreground">Mention reason for rejecting {reseller.name ?? reseller.userName}</p>
+          <p className="text-sm text-muted-foreground">Mention reason for rejecting {reseller.reseller_name}</p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

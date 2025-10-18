@@ -11,7 +11,7 @@ import Image from "next/image"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Tangram.ai - AI Agent Marketplace",
+  title: "Tangram.ai - AI Agent Store",
   description: "Explore AI-powered agents built to automate workflows",
   generator: "v0.app",
 }

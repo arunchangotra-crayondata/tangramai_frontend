@@ -30,73 +30,12 @@ export default function ResellerPage() {
                 </div>
             </section>
 
-            <section className="bg-white py-12 border-b overflow-hidden">
-                <div className="relative mx-auto max-w-[1280px] px-6">
-                    <div className="flex animate-scroll gap-12 items-center">
-                        {/* First set of logos */}
-                        <div className="flex items-center gap-12 flex-shrink-0">
-                            <div className="text-2xl font-bold text-orange-600 whitespace-nowrap">crayon</div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="w-8 h-8 bg-purple-600 rounded-full"></div>
-                                <span className="font-semibold whitespace-nowrap">Veephive</span>
-                            </div>
-                            <div className="text-blue-600 font-bold text-xl whitespace-nowrap">salesforce</div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="grid grid-cols-2 gap-0.5 w-5 h-5">
-                                    <div className="bg-red-500"></div>
-                                    <div className="bg-green-500"></div>
-                                    <div className="bg-blue-500"></div>
-                                    <div className="bg-yellow-500"></div>
-                                </div>
-                                <span className="font-semibold whitespace-nowrap">Microsoft</span>
-                            </div>
-                            <div className="text-green-600 font-semibold whitespace-nowrap">Redington</div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="w-6 h-6 bg-black rounded"></div>
-                                <span className="font-bold whitespace-nowrap">lyzr</span>
-                            </div>
-                            <div className="font-semibold whitespace-nowrap">accenture</div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                                <span className="font-semibold whitespace-nowrap">Outreach</span>
-                            </div>
-                        </div>
-                        {/* Duplicate set for seamless loop */}
-                        <div className="flex items-center gap-12 flex-shrink-0">
-                            <div className="text-2xl font-bold text-orange-600 whitespace-nowrap">crayon</div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="w-8 h-8 bg-purple-600 rounded-full"></div>
-                                <span className="font-semibold whitespace-nowrap">Veephive</span>
-                            </div>
-                            <div className="text-blue-600 font-bold text-xl whitespace-nowrap">salesforce</div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="grid grid-cols-2 gap-0.5 w-5 h-5">
-                                    <div className="bg-red-500"></div>
-                                    <div className="bg-green-500"></div>
-                                    <div className="bg-blue-500"></div>
-                                    <div className="bg-yellow-500"></div>
-                                </div>
-                                <span className="font-semibold whitespace-nowrap">Microsoft</span>
-                            </div>
-                            <div className="text-green-600 font-semibold whitespace-nowrap">Redington</div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="w-6 h-6 bg-black rounded"></div>
-                                <span className="font-bold whitespace-nowrap">lyzr</span>
-                            </div>
-                            <div className="font-semibold whitespace-nowrap">accenture</div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                                <span className="font-semibold whitespace-nowrap">Outreach</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {/* Removed scrolling banner of icons for a cleaner layout */}
 
             {/* Build the Future Together */}
             <section className="bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 py-16 relative">
                 <div className="mx-auto max-w-[1280px] px-6 text-center pt-12">
-                    <h2 className="text-4xl font-bold mb-4">Are you a Good Fit?</h2>
+                    <h2 className="text-4xl font-bold mb-4">Are You a Good Fit?</h2>
                     <p className="text-gray-700 leading-relaxed">
                         You’re a good fit for the Tangram.ai Reseller Program if you help clients adopt AI-driven solutions and want to expand your portfolio with enterprise-ready intelligence.
                     </p>
@@ -111,7 +50,7 @@ export default function ResellerPage() {
                             <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-6">
                                 <Target className="w-6 h-6 text-white" />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">AI consultants & Solution Providers</h3>
+                            <h3 className="text-xl font-bold mb-3">AI Consultants & Solution Providers</h3>
                             <p className="text-gray-600 leading-relaxed">
                                 Work with our partner ecosystem and
                                 access industry expertise and resources to
@@ -247,7 +186,7 @@ export default function ResellerPage() {
       {/* Testimonials */}
       <section className="bg-white py-16 relative">
         <div className="mx-auto max-w-[1280px] px-6">
-          <h2 className="text-3xl font-bold mb-12 text-center">ISV's Testimonials</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">Reseller Testimonials</h2>
 
           <div className="bg-white border-2 rounded-lg p-12">
             <div className="flex items-start gap-8">
@@ -286,8 +225,8 @@ export default function ResellerPage() {
                     <div className="flex flex-col md:flex-row gap-12 items-start">
                         {/* Left side - Title (50%) */}
                         <div className="flex-1 md:w-1/2">
-                            <h2 className="text-3xl font-bold mb-2">frequently asked questions</h2>
-                            <p className="text-xl">FAQ's</p>
+                            <h2 className="text-3xl font-bold mb-2">Frequently Asked Questions</h2>
+                            <p className="text-xl">FAQs</p>
                         </div>
 
                         {/* Right side - FAQ Accordion (50%) */}

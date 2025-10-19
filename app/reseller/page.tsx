@@ -1,10 +1,15 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Input } from "@/components/ui/input"
 import { ArrowRight, Target, Globe, TrendingUp } from "lucide-react"
+import Image from "next/image"
+import { useModal } from "@/hooks/use-modal"
 
 export default function ResellerPage() {
+    const { openModal } = useModal()
     return (
         <div className="min-h-screen">
             {/* Hero Section with Gradient */}
@@ -13,17 +18,17 @@ export default function ResellerPage() {
                     {/* Decorative A badges */}
 
                     <div className="max-w-2xl">
-                        <h1 className="text-5xl font-bold mb-6 text-balance">Tangram.ai Enterprise Agent Reseller Program</h1>
+                        <h1 className="text-5xl font-bold mb-6 text-balance">Tangram Enterprise Agents Reseller Program</h1>
                         <p className="text-xl mb-4 font-medium">Drive a new revenue with AI offering</p>
                         <p className="text-gray-700 mb-8 leading-relaxed">
                             Start referring or integrating Tangram.ai with your clients today to unlock new revenue opportunities, accelerate growth, and deliver intelligent AI solutions at scale.
                         </p>
                         <div className="flex gap-4">
-                            <Button size="lg" className="bg-black text-white hover:bg-gray-800">
-                                Become a ISV reseller
+                            <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("reseller-signup")}>
+                            Become a tangram reseller
                             </Button>
-                            <Button size="lg" variant="outline">
-                                Login to Ireseller hub
+                            <Button size="lg" variant="outline" onClick={() => openModal("reseller-login")}>
+                                Login to Reseller hub
                             </Button>
                         </div>
                     </div>
@@ -33,7 +38,10 @@ export default function ResellerPage() {
             {/* Removed scrolling banner of icons for a cleaner layout */}
 
             {/* Build the Future Together */}
-            <section className="bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 py-16 relative">
+            <section className="bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100">
+
+           
+            <section className="py-16 relative">
                 <div className="mx-auto max-w-[1280px] px-6 text-center pt-12">
                     <h2 className="text-4xl font-bold mb-4">Are You a Good Fit?</h2>
                     <p className="text-gray-700 leading-relaxed">
@@ -43,7 +51,7 @@ export default function ResellerPage() {
             </section>
 
             {/* Three Feature Cards */}
-            <section className="bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 py-16">
+            <section className="py-16">
                 <div className="mx-auto max-w-[1280px] px-6">
                     <div className="grid md:grid-cols-3 gap-8">
                         <Card className="p-8 border-2 bg-white">
@@ -84,11 +92,12 @@ export default function ResellerPage() {
                     </div>
                 </div>
             </section>
+            </section>
 
             {/* Discover Partnerships */}
             <section className="bg-gray-50 py-16 relative">
                 <div className="mx-auto max-w-[1280px] px-6">
-                    <div className="flex flex-col md:flex-row gap-12 items-start">
+                    <div className="flex flex-col md:flex-row gap-12 items-center">
                         {/* Left side - Text content (50%) */}
                         <div className="flex-1 md:w-1/2">
                             <h2 className="text-3xl font-bold mb-6">Benefits of Reseller Partnership</h2>
@@ -97,86 +106,47 @@ export default function ResellerPage() {
                             </p>
                         </div>
 
-                        {/* Right side - Auto-scrolling cards in 3-column grid (50%) */}
-                        <div className="flex-1 md:w-1/2 h-[400px] overflow-hidden relative px-6">
-                            <div className="animate-scroll-vertical">
-                                {/* First set of cards */}
-                                <div className="grid grid-cols-3 gap-3 mb-3">
-                                    <Card className="p-3 hover:shadow-lg transition-shadow">
-                                        <div className="flex flex-col items-center text-center gap-2">
-                                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                <div className="w-6 h-6 bg-blue-500 rounded"></div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-sm">Notion</div>
-                                                <div className="text-xs text-gray-500">Plan your life</div>
-                                            </div>
+                        {/* Right side - Benefits as interactive cards (50%) */}
+                        <div className="flex-1 md:w-1/2 flex justify-center">
+                            <div className="grid grid-cols-1 gap-4 w-full max-w-[520px]">
+                                <Card className="p-6 hover:shadow-md transition-all border bg-white/90">
+                                    <div className="flex items-start gap-3">
+                                        <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white shrink-0"
+                                             style={{ background: "linear-gradient(270deg, #3B60AF 0%, #0082C0 100%)" }}>
+                                            <Target className="h-5 w-5" />
                                         </div>
-                                    </Card>
+                                        <div>
+                                            <h4 className="text-sm font-bold mb-1 tracking-wide">GAIN MARKET ACCESS</h4>
+                                            <p className="text-sm text-gray-700">Meet the right stakeholders and get their time and attention. Gain streamlined access to key enterprises and sell business value to CEOs and business decision makers directly.</p>
+                                        </div>
+                                    </div>
+                                </Card>
 
-                                    <Card className="p-3 hover:shadow-lg transition-shadow">
-                                        <div className="flex flex-col items-center text-center gap-2">
-                                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                <div className="w-6 h-6 bg-gray-800 rounded-full"></div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-sm">Github</div>
-                                                <div className="text-xs text-gray-500">Code repository</div>
-                                            </div>
+                                <Card className="p-6 hover:shadow-md transition-all border bg-white/90">
+                                    <div className="flex items-start gap-3">
+                                        <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white shrink-0"
+                                             style={{ background: "linear-gradient(270deg, #3B60AF 0%, #0082C0 100%)" }}>
+                                            <TrendingUp className="h-5 w-5" />
                                         </div>
-                                    </Card>
+                                        <div>
+                                            <h4 className="text-sm font-bold mb-1 tracking-wide">DEMONSTRATE RAPID OUTCOMES</h4>
+                                            <p className="text-sm text-gray-700">Get access to their data to show exactly how valuable you can be to their business. Ability to deliver rapid outcomes to enterprises and realize faster ROI on your products by building on top of our foundational components.</p>
+                                        </div>
+                                    </div>
+                                </Card>
 
-                                    <Card className="p-3 hover:shadow-lg transition-shadow">
-                                        <div className="flex flex-col items-center text-center gap-2">
-                                            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-sm">Codepen</div>
-                                                <div className="text-xs text-gray-500">Code repository</div>
-                                            </div>
+                                <Card className="p-6 hover:shadow-md transition-all border bg-white/90">
+                                    <div className="flex items-start gap-3">
+                                        <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white shrink-0"
+                                             style={{ background: "linear-gradient(270deg, #3B60AF 0%, #0082C0 100%)" }}>
+                                            <Globe className="h-5 w-5" />
                                         </div>
-                                    </Card>
-                                </div>
-
-                                {/* Duplicate set for seamless loop */}
-                                <div className="grid grid-cols-3 gap-3">
-                                    <Card className="p-3 hover:shadow-lg transition-shadow">
-                                        <div className="flex flex-col items-center text-center gap-2">
-                                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                <div className="w-6 h-6 bg-blue-500 rounded"></div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-sm">Notion</div>
-                                                <div className="text-xs text-gray-500">Plan your life</div>
-                                            </div>
+                                        <div>
+                                            <h4 className="text-sm font-bold mb-1 tracking-wide">STREAMLINE MULTIPLE PROCESSES</h4>
+                                            <p className="text-sm text-gray-700">Streamline sales, legal and procurement processes and reduce cost of sale and sales cycle. Experience the smoothest commercial processes of vendor registration.</p>
                                         </div>
-                                    </Card>
-
-                                    <Card className="p-3 hover:shadow-lg transition-shadow">
-                                        <div className="flex flex-col items-center text-center gap-2">
-                                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                <div className="w-6 h-6 bg-gray-800 rounded-full"></div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-sm">Github</div>
-                                                <div className="text-xs text-gray-500">Code repository</div>
-                                            </div>
-                                        </div>
-                                    </Card>
-
-                                    <Card className="p-3 hover:shadow-lg transition-shadow">
-                                        <div className="flex flex-col items-center text-center gap-2">
-                                            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-sm">Codepen</div>
-                                                <div className="text-xs text-gray-500">Code repository</div>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                </div>
+                                    </div>
+                                </Card>
                             </div>
                         </div>
                     </div>
@@ -189,24 +159,30 @@ export default function ResellerPage() {
           <h2 className="text-3xl font-bold mb-12 text-center">Reseller Testimonials</h2>
 
           <div className="bg-white border-2 rounded-lg p-12">
-            <div className="flex items-start gap-8">
-              <div className="flex-shrink-0">
-                <svg width="200" height="60" viewBox="0 0 200 60" fill="none">
-                  <path d="M20 10 L40 50 L30 30 L50 30 L30 10 Z" fill="#E91E63" />
-                  <path d="M50 30 L70 10 L60 30 L80 30 L60 50 Z" fill="#9C27B0" />
-                  <text x="90" y="40" fontFamily="Arial" fontSize="28" fontWeight="bold" fill="#000">
-                    MOZARK
-                  </text>
-                </svg>
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+              <div className="w-full md:w-1/2 flex justify-center md:justify-start">
+                <div className="relative w-[320px] h-[120px] md:w-[420px] md:h-[140px]">
+                  <Image src="/mozak_bw.png" alt="Mozark" fill className="object-contain" />
+                </div>
               </div>
-              <div className="flex-1 relative">
+              <div className="w-full md:w-1/2 relative">
                 <h3 className="font-bold text-lg mb-4">Mozark</h3>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  Partnering with Tangram.ai accelerated outcomes beyond expectations. Within months, the collaboration
-                  has become core to every growth mission we run. Our shared customer obsession drives perfect alignment
-                  across teams, higher conversions, and seamless opportunities that power scalable, efficient growth.
+                  Partnering with Tangram.ai has accelerated outcomes beyond expectations. Within months, the collaboration has become core to every growth motion we run. Our shared customer obsession drives perfect alignment across every deal — leading to faster closes, higher conversions, and expanded opportunities that power scalable, efficient growth.”
                 </p>
-                <p className="text-sm text-gray-600 italic">—Christopher Ramnoruthly</p>
+                <p
+                  style={{
+                    fontFamily: 'Arial, sans-serif',
+                    fontWeight: 700,
+                    fontSize: 14,
+                    lineHeight: '20px',
+                    letterSpacing: 0,
+                    verticalAlign: 'middle',
+                    color: '#232B37',
+                  }}
+                >
+                  — Chandrasekar Ramamoorthy, CTO
+                </p>
               </div>
             </div>
           </div>

@@ -12,7 +12,7 @@ interface OnboardAgentModalProps {
 }
 
 export function OnboardAgentModal({ isOpen, onClose }: OnboardAgentModalProps) {
-  const { role } = useModal()
+  const { authRole } = useModal()
   const router = useRouter()
 
   const content = {
@@ -28,7 +28,7 @@ export function OnboardAgentModal({ isOpen, onClose }: OnboardAgentModalProps) {
     },
   }
 
-  const currentContent = role === "vendor" ? content.vendor : content.reseller
+  const currentContent = authRole === "isv" ? content.vendor : content.reseller
 
   const handleOnboard = () => {
     onClose()

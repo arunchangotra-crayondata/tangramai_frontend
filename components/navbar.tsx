@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/lib/store/auth.store"
+import { useModal } from "@/hooks/use-modal"
 import { useState, useRef, useEffect } from "react"
 
 export function Navbar() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuthStore()
+  const { openModal } = useModal()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [notifications, setNotifications] = useState([
@@ -219,11 +221,11 @@ export function Navbar() {
             ) : (
               // Unauthenticated state - Login and Sign Up buttons
               <>
-                <Button variant="ghost" asChild>
-                  <Link href="/auth/login">Login</Link>
+                <Button variant="ghost" onClick={() => openModal("auth", { mode: "login", role: "client" })}>
+                  Login
                 </Button>
-                <Button asChild>
-                  <Link href="/auth/signup">Sign Up</Link>
+                <Button onClick={() => openModal("auth", { mode: "signup", role: "client" })}>
+                  Sign Up
                 </Button>
               </>
             )}

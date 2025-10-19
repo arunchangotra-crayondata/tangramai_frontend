@@ -4,25 +4,21 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import type { ISVAPIResponse } from "@/lib/types/admin.types"
 
-interface DisplayISV {
-  id: string
-  name: string
-}
-
-interface RejectISVModalProps<TISV extends DisplayISV = DisplayISV> {
-  isv: TISV
+interface RejectISVModalProps {
+  isv: ISVAPIResponse
   open: boolean
   onOpenChange: (open: boolean) => void
-  onReject: (isv: TISV, reason: string) => void | Promise<void>
+  onReject: (isv: ISVAPIResponse, reason: string) => void | Promise<void>
 }
 
-export function RejectISVModal<TISV extends DisplayISV = DisplayISV>({
+export function RejectISVModal({
   isv,
   open,
   onOpenChange,
   onReject,
-}: RejectISVModalProps<TISV>) {
+}: RejectISVModalProps) {
   const [reason, setReason] = useState("")
 
   const handleSubmit = () => {
@@ -37,7 +33,7 @@ export function RejectISVModal<TISV extends DisplayISV = DisplayISV>({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">Reject this ISV</DialogTitle>
-          <p className="text-sm text-muted-foreground">Mention the reason for rejecting ISV: {isv.name}</p>
+          <p className="text-sm text-muted-foreground">Mention the reason for rejecting ISV: {isv.isv_name}</p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

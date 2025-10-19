@@ -4,25 +4,21 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import type { AgentAPIResponse } from "@/lib/types/admin.types"
 
-interface DisplayAgent {
-  id: string
-  name: string
-}
-
-interface RejectAgentModalProps<TAgent extends DisplayAgent = DisplayAgent> {
-  agent: TAgent
+interface RejectAgentModalProps {
+  agent: AgentAPIResponse
   open: boolean
   onOpenChange: (open: boolean) => void
-  onReject: (agent: TAgent, reason: string) => void | Promise<void>
+  onReject: (agent: AgentAPIResponse, reason: string) => void | Promise<void>
 }
 
-export function RejectAgentModal<TAgent extends DisplayAgent = DisplayAgent>({
+export function RejectAgentModal({
   agent,
   open,
   onOpenChange,
   onReject,
-}: RejectAgentModalProps<TAgent>) {
+}: RejectAgentModalProps) {
   const [reason, setReason] = useState("")
 
   const handleSubmit = () => {
@@ -37,7 +33,7 @@ export function RejectAgentModal<TAgent extends DisplayAgent = DisplayAgent>({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">Reject this Agent</DialogTitle>
-          <p className="text-sm text-muted-foreground">Mention the reason for rejecting Agent Name: {agent.name}</p>
+          <p className="text-sm text-muted-foreground">Mention the reason for rejecting Agent Name: {agent.agent_name}</p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

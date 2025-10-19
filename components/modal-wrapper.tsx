@@ -34,13 +34,15 @@ export function ModalWrapper({ isOpen, onClose, children }: ModalWrapperProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
-        className="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-[520px] max-h-[90vh] rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <Button variant="ghost" size="icon" className="absolute right-4 top-4 h-8 w-8 rounded-full" onClick={onClose}>
+        <Button variant="ghost" size="icon" className="absolute right-4 top-4 h-8 w-8 rounded-full z-10" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
-        {children}
+        <div className="overflow-y-auto p-8">
+          {children}
+        </div>
       </div>
     </div>
   )

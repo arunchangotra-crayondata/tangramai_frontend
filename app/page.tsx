@@ -18,7 +18,7 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* Hero Section */}
       
-        <section className="relative py-20 min-h-[560px]">
+        <section className="relative min-h-screen py-24 flex items-center">
         {/* Background image with gradient overlay (Next.js Image for optimization) */}
         <div aria-hidden="true" className="absolute inset-0 -z-10 bg-white">
           <div className="relative w-full h-full">
@@ -33,7 +33,7 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/0" />
           </div>
         </div>
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="mx-auto max-w-[1280px] px-6 w-full">
           <div className="text-center">
             <h1 className="mb-20 text-5xl font-bold text-balance md:text-6xl">
               <span className="radial-gradient-text">
@@ -102,41 +102,54 @@ export default function HomePage() {
       <section className="py-20">
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="text-center">
-            <h2 className="mb-2 text-4xl font-bold text-balance">
-              <span className="gradient-text mb-10">Find. Try. Launch.</span>
+            <h2 className="mb-4 text-4xl font-bold text-balance">
+              <span className="gradient-text">Find. Try. Launch.</span>
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 items-stretch mx-auto max-w-5xl">
-              {/* Step 1 */}
-              <div className="group h-full rounded-lg border bg-white/70 backdrop-blur p-4 md:p-5 text-left shadow-sm transition-all hover:shadow-md hover:-translate-y-1 hover:border-blue-200 focus-within:ring-2 focus-within:ring-ring/40 flex flex-col justify-between">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#3B60AF] to-[#0082C0] px-2.5 py-0.5 text-[11px] font-medium text-white shadow-sm">Step 1</span>
-                </div>
-                <div className="text-base md:text-lg font-semibold">Choose your use case</div>
-              </div>
+            <p className="mb-20 text-muted-foreground max-w-2xl mx-auto">Your journey to scaling AI-solutions starts here.</p>
 
-              {/* Step 2 */}
-              <div className="group h-full rounded-lg border bg-white/70 backdrop-blur p-4 md:p-5 text-left shadow-sm transition-all hover:shadow-md hover:-translate-y-1 hover:border-blue-200 focus-within:ring-2 focus-within:ring-ring/40 flex flex-col justify-between">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#3B60AF] to-[#0082C0] px-2.5 py-0.5 text-[11px] font-medium text-white shadow-sm">Step 2</span>
-                </div>
-                <div className="text-base md:text-lg font-semibold">Choose your agent</div>
-              </div>
+            {/* Interactive stepper (non-card) */}
+            <div className="relative mx-auto max-w-5xl">
+              {/* Connector line */}
+              <div className="hidden lg:block absolute top-6 left-0 right-0 h-1 rounded-full" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}} />
 
-              {/* Step 3 */}
-              <div className="group h-full rounded-lg border bg-white/70 backdrop-blur p-4 md:p-5 text-left shadow-sm transition-all hover:shadow-md hover:-translate-y-1 hover:border-blue-200 focus-within:ring-2 focus-within:ring-ring/40 flex flex-col justify-between">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#3B60AF] to-[#0082C0] px-2.5 py-0.5 text-[11px] font-medium text-white shadow-sm">Step 3</span>
-                </div>
-                <div className="text-base md:text-lg font-semibold">Choose your tech stack</div>
-              </div>
-
-              {/* Step 4 */}
-              <div className="group h-full rounded-lg border bg-white/70 backdrop-blur p-4 md:p-5 text-left shadow-sm transition-all hover:shadow-md hover:-translate-y-1 hover:border-blue-200 focus-within:ring-2 focus-within:ring-ring/40 flex flex-col justify-between">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#3B60AF] to-[#0082C0] px-2.5 py-0.5 text-[11px] font-medium text-white shadow-sm">Step 4</span>
-                </div>
-                <div className="text-base md:text-lg font-semibold">Start your trial</div>
-              </div>
+              <ul className="grid grid-cols-1 gap-8 lg:grid-cols-4 lg:gap-6">
+                <li className="relative">
+                  <div className="flex items-start lg:flex-col lg:items-center text-left lg:text-center gap-3">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-sm shrink-0" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>1</span>
+                    <div>
+                      <div className="font-semibold">Find your use case</div>
+                      <div className="text-sm text-muted-foreground">Explore ready-made industry use cases.</div>
+                    </div>
+                  </div>
+                </li>
+                <li className="relative">
+                  <div className="flex items-start lg:flex-col lg:items-center text-left lg:text-center gap-3">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-sm shrink-0" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>2</span>
+                    <div>
+                      <div className="font-semibold">Try an agent</div>
+                      <div className="text-sm text-muted-foreground">Test the right AI copilot for your need.</div>
+                    </div>
+                  </div>
+                </li>
+                <li className="relative">
+                  <div className="flex items-start lg:flex-col lg:items-center text-left lg:text-center gap-3">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-sm shrink-0" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>3</span>
+                    <div>
+                      <div className="font-semibold">Pick your stack</div>
+                      <div className="text-sm text-muted-foreground">Choose your preferred platform or model.</div>
+                    </div>
+                  </div>
+                </li>
+                <li className="relative">
+                  <div className="flex items-start lg:flex-col lg:items-center text-left lg:text-center gap-3">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-sm shrink-0" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>4</span>
+                    <div>
+                      <div className="font-semibold">Launch your trial</div>
+                      <div className="text-sm text-muted-foreground">Experience the future of work in minutes.</div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>

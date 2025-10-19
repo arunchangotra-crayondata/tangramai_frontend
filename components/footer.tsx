@@ -34,7 +34,7 @@ export function Footer() {
                 color: '#B3B3B3',
               }}
             >
-              AI-led revenue acceleration platform <br/>for enterprises
+              Accelerate Enterprise AI success
             </p>
           </div>
 

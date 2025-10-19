@@ -174,7 +174,11 @@ export default function AICatalystPage() {
       {/* Why it works */}
       <section className="py-12">
         <div className="mx-auto max-w-[1100px] px-6">
-          <h3 className="text-2xl font-bold mb-4">Why it works</h3>
+          <div className="text-center mb-8">
+            <h3 className="text-2xl md:text-3xl font-bold">
+              <span className="blue-gradient-text">Why it works</span>
+            </h3>
+          </div>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <li className="rounded-md border bg-white p-4">✔ 100+ Prebuilt Agents: Hit the ground running with ready-to-use AI solutions.</li>
             <li className="rounded-md border bg-white p-4">✔ Tangram Platform: Accelerate deployment and reduce costs with streamlined infrastructure.</li>

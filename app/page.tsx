@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/badge";
-import { Search, Mic, Database, Gauge, Clock, Cloud, Settings } from "lucide-react";
+import { Search, Mic, Database, Gauge, Clock, Cloud, Settings, Shield, Rocket, CheckCircle2 } from "lucide-react";
 import { useModal } from "@/hooks/use-modal";
 import { useState } from "react";
 import ChatDialog from "@/components/chat-dialog";
@@ -158,15 +158,39 @@ export default function HomePage() {
       <section className="py-20">
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="text-center">
-            <h2 className="mb-4 text-4xl font-bold text-balance">
+            <h2 className="mb-14 text-4xl font-bold text-balance">
               <span className="gradient-text">
                 Accelerate Deployment of Your Own Agents using AI Catalyst
               </span>
             </h2>
-            <p className="mb-12 text-lg text-muted-foreground text-balance text-[#111827]">
+            {/* Subheader bullets */}
+            <div className="mx-auto mb-6 grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="flex items-start gap-3 text-left">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
+                  <Shield className="h-5 w-5" />
+                </span>
+                <div className="font-medium">Reduce risks.</div>
+              </div>
+              <div className="flex items-start gap-3 text-left">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
+                  <Rocket className="h-5 w-5" />
+                </span>
+                <div className="font-medium">Accelerate adoption.</div>
+              </div>
+              <div className="flex items-start gap-3 text-left">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
+                  <CheckCircle2 className="h-5 w-5" />
+                </span>
+                <div className="font-medium">Your data, your guardrails, our agents, our models.</div>
+              </div>
+            </div>
+            <div className="mb-12 text-sm text-muted-foreground max-w-3xl mx-auto">
+              Worried about hallucinations? Or data security? Catalyst is designed to address them.
+            </div>
+            {/* <p className="mb-12 text-lg text-muted-foreground text-balance text-[#111827]">
               AI Catalyst is our ideation engine that ensures AI delivery
               memorable impact across the enterprise.
-            </p>
+            </p> */}
 
             <div className="grid gap-8 md:grid-cols-3">
               {/* Labs Card */}

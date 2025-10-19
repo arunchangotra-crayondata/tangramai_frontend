@@ -2,20 +2,28 @@
 
 import { create } from "zustand"
 
-type ModalType = "reseller-signup" | "reseller-login" | "vendor-signup" | "vendor-login" | "onboard-agent" | null
+type ModalType = "auth" | "onboard-agent" | null
 
 interface ModalStore {
   activeModal: ModalType
-  role: "reseller" | "vendor" | null
-  openModal: (type: ModalType, role?: "reseller" | "vendor") => void
+  authMode: "login" | "signup"
+  authRole: "client" | "reseller" | "isv"
+  openModal: (type: ModalType, options?: { mode?: "login" | "signup", role?: "client" | "reseller" | "isv" }) => void
   closeModal: () => void
-  swapModal: (type: ModalType) => void
+  setAuthMode: (mode: "login" | "signup") => void
+  setAuthRole: (role: "client" | "reseller" | "isv") => void
 }
 
 export const useModal = create<ModalStore>((set) => ({
   activeModal: null,
-  role: null,
-  openModal: (type, role) => set({ activeModal: type, role: role || null }),
-  closeModal: () => set({ activeModal: null, role: null }),
-  swapModal: (type) => set({ activeModal: type }),
+  authMode: "login",
+  authRole: "client",
+  openModal: (type, options) => set({ 
+    activeModal: type, 
+    authMode: options?.mode || "login",
+    authRole: options?.role || "client"
+  }),
+  closeModal: () => set({ activeModal: null }),
+  setAuthMode: (mode) => set({ authMode: mode }),
+  setAuthRole: (role) => set({ authRole: role }),
 }))

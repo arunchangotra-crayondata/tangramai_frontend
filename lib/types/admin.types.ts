@@ -9,41 +9,44 @@ export type ResellerStatus = "Active" | "Inactive"
 export interface AgentAPIResponse {
   agent_id: string
   agent_name: string
-  asset_type?: string
-  description?: string
-  status: AgentStatus
-  rejection_reason?: string
-  created_by?: string
-  isv_id?: string
-  last_updated?: string
+  asset_type: string
+  isv_id: string
+  by_persona: string
+  by_value: string
+  demo_link: string
+  demo_preview: string // comma-separated URLs
+  description: string
+  features: string
+  tags: string
+  roi: string
+  admin_approved: "yes" | "no"
+  is_approved: boolean
   [key: string]: any // Allow additional fields
 }
 
 export interface ISVAPIResponse {
   isv_id: string
   isv_name: string
-  isv_email?: string
-  isv_address?: string
-  isv_domain?: string
-  isv_mob_no?: string
-  processing_status: ISVProcessingStatus
-  status: ISVStatus
-  registered_name?: string
-  agent_count?: number
+  isv_email_no: string
+  isv_mob_no: string
+  isv_address: string
+  isv_domain: string
+  mou_file_path: string
+  admin_approved: "yes" | "no"
+  agent_count: number
+  approved_agent_count: number
   [key: string]: any
 }
 
 export interface ResellerAPIResponse {
   reseller_id: string
   reseller_name: string
-  reseller_email?: string
-  reseller_address?: string
-  reseller_domain?: string
-  reseller_mob_no?: string
-  processing_status: ResellerProcessingStatus
-  status: ResellerStatus
-  registered_name?: string
-  rejection_reason?: string
+  reseller_email_no: string
+  reseller_mob_no: string
+  reseller_address: string
+  reseller_domain: string
+  whitelisted_domain: string
+  admin_approved: "yes" | "no"
   [key: string]: any
 }
 
@@ -122,20 +125,26 @@ export interface EnterpriseUser {
 
 // API Request types
 export interface UpdateAgentRequest {
-  status: AgentStatus
-  rejection_reason?: string
+  admin_approved: "yes" | "no"
 }
 
 export interface UpdateISVRequest {
-  processing_status?: ISVProcessingStatus
-  status?: ISVStatus
-  rejection_reason?: string
+  isv_name: string
+  isv_email: string
+  isv_address?: string
+  isv_domain?: string
+  isv_mob_no?: string
+  admin_approved?: "yes" | "no"
 }
 
 export interface UpdateResellerRequest {
-  processing_status?: ResellerProcessingStatus
-  status?: ResellerStatus
-  rejection_reason?: string
+  reseller_name: string
+  reseller_email: string
+  reseller_address?: string
+  reseller_domain?: string
+  reseller_mob_no?: string
+  whitelisted_domain?: string
+  admin_approved?: "yes" | "no"
 }
 
 // API Response types

@@ -1,160 +1,119 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, ArrowRight, Check, ChevronRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, ChevronRight, X, Upload, FileText, Image as ImageIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { DemoAssetInput } from "@/components/demo-asset-input"
-import { DeploymentOptionInput } from "@/components/deployment-option-input"
-import { agentService } from "@/lib/api/agent.service"
+import { MultiSelectInput } from "@/components/multi-select-input"
+import { DropdownWithCustom } from "@/components/dropdown-with-custom"
 import { useAuthStore } from "@/lib/store/auth.store"
-import type { AgentFormData, DemoAsset, DeploymentOption } from "@/lib/types/agent.types"
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6
+type Step = 1 | 2 | 3 | 4 | 5
 
-const capabilities = [
-  { id: "conversational", label: "Conversational AI & Advisory", icon: "💬" },
-  { id: "document", label: "Document Processing & Analysis", icon: "📄" },
-  { id: "image", label: "Image Processing", icon: "🖼️" },
-  { id: "video", label: "Video Processing", icon: "🎥" },
-  { id: "voice", label: "Voice & Meetings", icon: "🎤" },
-  { id: "data", label: "Data Analysis & Insights", icon: "📊" },
-  { id: "content", label: "Content Generation", icon: "✍️" },
-  { id: "automation", label: "Process Automation", icon: "⚙️" },
+// Predefined options for multi-select fields
+const tagOptions = [
+  "AI/ML", "Automation", "Productivity", "Analytics", "Integration", 
+  "Cloud", "Enterprise", "Open Source", "Machine Learning", "Deep Learning",
+  "Natural Language Processing", "Computer Vision", "Robotics", "IoT"
 ]
 
-const targetPersonas = [
-  { id: "developer", label: "Developer", icon: "👨‍💻" },
-  { id: "marketing", label: "Marketing Professional", icon: "📈" },
-  { id: "sales", label: "Sales Professional", icon: "💼" },
-  { id: "hr", label: "HR Professional", icon: "👥" },
-  { id: "finance", label: "Finance Professional", icon: "💰" },
-  { id: "customer-service", label: "Customer Service Representative", icon: "💁" },
-  { id: "data-analyst", label: "Data Analyst", icon: "📊" },
-  { id: "project-manager", label: "Project Manager", icon: "📋" },
-  { id: "executive", label: "Executive", icon: "🏢" },
+const targetPersonaOptions = [
+  "Developer", "Marketing Professional", "Sales Professional", "HR Professional",
+  "Finance Professional", "Customer Service Representative", "Data Analyst",
+  "Project Manager", "Executive", "Product Manager", "Designer", "Researcher"
 ]
 
-const businessValues = [
-  { id: "cost-reduction", label: "Cost Reduction", icon: "💰" },
-  { id: "efficiency", label: "Efficiency Improvement", icon: "⚡" },
-  { id: "revenue", label: "Revenue Generation", icon: "🚀" },
-  { id: "compliance", label: "Compliance & Risk Management", icon: "🛡️" },
-  { id: "customer-experience", label: "Customer Experience Enhancement", icon: "🤝" },
-  { id: "innovation", label: "Innovation & Competitive Advantage", icon: "💡" },
+const keyFeatureOptions = [
+  "Real-time Processing", "Multi-language Support", "API Integration", 
+  "Customizable Workflows", "Advanced Analytics", "Enterprise Security",
+  "Auto-scaling", "Mobile Ready", "Cloud Native", "On-premise Deployment"
 ]
 
-const features = [
-  { id: "real-time-processing", label: "Real-time Processing", icon: "⚡" },
-  { id: "multi-language", label: "Multi-language Support", icon: "🌐" },
-  { id: "api-integration", label: "API Integration", icon: "🔗" },
-  { id: "customizable", label: "Customizable Workflows", icon: "⚙️" },
-  { id: "analytics", label: "Advanced Analytics", icon: "📊" },
-  { id: "security", label: "Enterprise Security", icon: "🔒" },
-  { id: "scalable", label: "Auto-scaling", icon: "📈" },
-  { id: "mobile-ready", label: "Mobile Ready", icon: "📱" },
+
+const capabilityOptions = [
+  "Conversational AI & Advisory", "Document Processing & Analysis", "Image Processing",
+  "Video Processing", "Voice & Meetings", "Data Analysis & Insights", 
+  "Content Generation", "Process Automation", "Predictive Analytics", "Machine Learning"
 ]
 
-const tags = [
-  { id: "ai", label: "AI/ML", icon: "🤖" },
-  { id: "automation", label: "Automation", icon: "⚙️" },
-  { id: "productivity", label: "Productivity", icon: "📈" },
-  { id: "analytics", label: "Analytics", icon: "📊" },
-  { id: "integration", label: "Integration", icon: "🔗" },
-  { id: "cloud", label: "Cloud", icon: "☁️" },
-  { id: "enterprise", label: "Enterprise", icon: "🏢" },
-  { id: "open-source", label: "Open Source", icon: "📦" },
-]
 
-// Dropdown options for forms
-const assetTypeOptions = ["Agent", "Solution"]
+// Dropdown options
+const agentTypeOptions = ["Agent", "Solution", "Platform", "Tool", "Service"]
+const valuePropositionOptions = ["Analytics", "Customer Experience", "Data", "Productivity"]
 
 const serviceProviderOptions = ["AWS", "Azure", "GCP", "Open-Source", "SaaS"]
-
 const serviceNameOptions = [
-  "ABBYY FlexiCapture",
-  "Amazon Athena",
-  "Amazon Chime SDK Amazon Transcribe",
-  "Amazon Comprehend",
-  "Amazon EMR",
-  "Amazon Kendra",
-  "Amazon Kinesis Video Streams",
-  "Amazon Lex",
-  "Amazon Polly",
-  "Amazon Redshift",
-  "Amazon Rekognition Video",
-  "Amazon Textract",
-  "Amazon Transcribe",
-  "Anthropic Claude",
-  "Apache Spark",
-  "AssemblyAI",
-  "Azure AI Bot Service",
-  "Azure AI Document Intelligence",
-  "Azure AI Search",
-  "Azure AI Speech",
-  "Azure AI Video Indexer",
-  "Azure Communication Services",
-  "Azure Databricks",
-  "Azure Media Services",
-  "Azure OpenAI Service",
-  "Azure Synapse Analytics",
-  "BigQuery",
-  "Botpress",
-  "Camelot",
-  "Cloud Speech-to-Text",
-  "Cloud Video Intelligence API",
-  "Coqui STT",
-  "Dask",
-  "Databricks (non-AWS)",
-  "Dataproc",
-  "DeepDoctection",
-  "Deepgram Video API",
-  "Detectron2",
-  "Dialogflow",
-  "Diffbot",
-  "DocMind AI",
-  "DocQuery",
-  "Docling",
-  "Document AI",
-  "Excalibur",
-  "GPT-4 Open-Source Variants",
-  "Google Meet",
-  "Grobid",
-  "Haystack",
-  "Import.io",
-  "LangChain",
-  "LayoutLMv3",
-  "Media CDN",
-  "MediaPipe",
-  "Milvus",
-  "OpenAI GPT APIs",
-  "OpenAI Whisper (open-source variant)",
-  "OpenAssistant",
-  "OpenCV",
-  "OpenSemanticSearch",
-  "Pandas",
-  "Pinecone",
-  "PyTorchVideo",
-  "Qdrant",
-  "Rasa",
-  "Rev.ai",
-  "Rossum",
-  "Snowflake (multi-cloud)",
-  "TableFormer",
-  "Tesseract OCR",
-  "Vaex",
-  "Vertex AI Search and Conversation",
-  "Vosk",
-  "Weaviate",
-  "Zubtitle"
+  "ABBYY FlexiCapture", "Amazon Athena", "Amazon Chime SDK Amazon Transcribe",
+  "Amazon Comprehend", "Amazon EMR", "Amazon Kendra", "Amazon Kinesis Video Streams",
+  "Amazon Lex", "Amazon Polly", "Amazon Redshift", "Amazon Rekognition Video",
+  "Amazon Textract", "Amazon Transcribe", "Anthropic Claude", "Apache Spark",
+  "AssemblyAI", "Azure AI Bot Service", "Azure AI Document Intelligence",
+  "Azure AI Search", "Azure AI Speech", "Azure AI Video Indexer",
+  "Azure Communication Services", "Azure Databricks", "Azure Media Services",
+  "Azure OpenAI Service", "Azure Synapse Analytics", "BigQuery", "Botpress",
+  "Camelot", "Cloud Speech-to-Text", "Cloud Video Intelligence API",
+  "Coqui STT", "Dask", "Databricks (non-AWS)", "Dataproc", "DeepDoctection",
+  "Deepgram Video API", "Detectron2", "Dialogflow", "Diffbot", "DocMind AI",
+  "DocQuery", "Docling", "Document AI", "Excalibur", "GPT-4 Open-Source Variants",
+  "Google Meet", "Grobid", "Haystack", "Import.io", "LangChain", "LayoutLMv3",
+  "Media CDN", "MediaPipe", "Milvus", "OpenAI GPT APIs", "OpenAI Whisper (open-source variant)",
+  "OpenAssistant", "OpenCV", "OpenSemanticSearch", "Pandas", "Pinecone",
+  "PyTorchVideo", "Qdrant", "Rasa", "Rev.ai", "Rossum", "Snowflake (multi-cloud)",
+  "TableFormer", "Tesseract OCR", "Vaex", "Vertex AI Search and Conversation",
+  "Vosk", "Weaviate", "Zubtitle"
 ]
+const deploymentTypeOptions = ["Cloud", "On-Prem", "Hybrid", "Edge", "Serverless"]
 
-const deploymentTypeOptions = ["Cloud", "On-Prem"]
+// Form data interface
+interface FormData {
+  // Tab 1: Agent Details
+  agentName: string
+  agentDescription: string
+  agentType: string
+  tags: string[]
+  targetPersonas: string[]
+  keyFeatures: string[]
+  valueProposition: string
+  roiInformation: string
+  demoLink: string
+  
+  // Tab 2: Capabilities
+  coreCapabilities: string[]
+  
+  // Tab 3: Demo Assets
+  demoLinks: string[]
+  bulkFiles: FileWithPreview[]
+  
+  // Tab 4: Documentation
+  sdkDetails: string
+  apiDocumentation: string
+  sampleInput: string
+  sampleOutput: string
+  securityDetails: string
+  readmeFile: File | null
+  additionalRelatedFiles: string
+  deploymentOptions: DeploymentOption[]
+}
+
+interface FileWithPreview {
+  file: File
+  name: string
+  size: number
+  type: string
+  previewUrl?: string
+}
+
+interface DeploymentOption {
+  serviceProvider: string
+  serviceName: string
+  deploymentType: string
+  cloudRegion: string
+  capability: string
+}
 
 export default function CustomOnboardPage() {
   const router = useRouter()
@@ -162,48 +121,49 @@ export default function CustomOnboardPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [formData, setFormData] = useState<AgentFormData>({
-    // Step 1: Basic Information
-    agent_name: "",
-    asset_type: "",
-    description: "",
-    by_value: "",
-    features: [],
+  const bulkFileInputRef = useRef<HTMLInputElement>(null)
+  const readmeFileInputRef = useRef<HTMLInputElement>(null)
+  
+  const [formData, setFormData] = useState<FormData>({
+    // Tab 1: Agent Details
+    agentName: "",
+    agentDescription: "",
+    agentType: "",
     tags: [],
+    targetPersonas: [],
+    keyFeatures: [],
+    valueProposition: "",
+    roiInformation: "",
+    demoLink: "",
     
-    // Step 2: Capabilities & Target Audience
-    capabilities: [],
-    by_persona: [],
+    // Tab 2: Capabilities
+    coreCapabilities: [],
     
-    // Step 3: Business Value & ROI
-    businessValues: [],
-    roi: "",
+    // Tab 3: Demo Assets
+    demoLinks: [],
+    bulkFiles: [],
     
-    // Step 4: Demo & Documentation
-    demo_link: "",
-    demo_assets: [],
-    sdk_details: "",
-    swagger_details: "",
-    
-    // Step 5: Technical Details
-    sample_input: "",
-    sample_output: "",
-    security_details: "",
-    related_files: "",
-    deployments: [],
+    // Tab 4: Documentation
+    sdkDetails: "",
+    apiDocumentation: "",
+    sampleInput: "",
+    sampleOutput: "",
+    securityDetails: "",
+    readmeFile: null,
+    additionalRelatedFiles: "",
+    deploymentOptions: [],
   })
 
   const steps = [
-    { number: 1, title: "Basic Information", label: "Basic Information" },
-    { number: 2, title: "Capabilities & Audience", label: "Capabilities & Audience" },
-    { number: 3, title: "Business Value", label: "Business Value" },
-    { number: 4, title: "Demo & Documentation", label: "Demo & Documentation" },
-    { number: 5, title: "Technical Details", label: "Technical Details" },
-    { number: 6, title: "Review & Submit", label: "Review & Submit" },
+    { number: 1, title: "Agent Details", label: "Agent Details" },
+    { number: 2, title: "Capabilities", label: "Capabilities" },
+    { number: 3, title: "Demo Assets", label: "Demo Assets" },
+    { number: 4, title: "Documentation", label: "Documentation" },
+    { number: 5, title: "Review & Submit", label: "Review & Submit" },
   ]
 
   const handleNext = async () => {
-    if (currentStep < 6) {
+    if (currentStep < 5) {
       setCurrentStep((currentStep + 1) as Step)
     } else {
       // Submit the form
@@ -221,36 +181,34 @@ export default function CustomOnboardPage() {
     setSubmitError(null)
 
     try {
-      // Convert arrays to comma-separated strings
+      // Convert form data to API format
       const apiData = {
-        agent_name: formData.agent_name,
-        asset_type: formData.asset_type,
-        by_persona: formData.by_persona.join(", "),
-        by_value: formData.by_value,
-        description: formData.description,
-        features: formData.features.join(", "),
-        roi: formData.roi,
+        agent_name: formData.agentName,
+        asset_type: formData.agentType,
+        description: formData.agentDescription,
+        by_value: formData.valueProposition,
         tags: formData.tags.join(", "),
-        demo_link: formData.demo_link,
+        by_persona: formData.targetPersonas.join(", "),
+        features: formData.keyFeatures.join(", "),
+        roi: formData.roiInformation,
+        demo_link: formData.demoLink,
+        capabilities: formData.coreCapabilities.join(", "),
+        demo_links: formData.demoLinks.join(", "),
+        sdk_details: formData.sdkDetails,
+        api_documentation: formData.apiDocumentation,
+        sample_input: formData.sampleInput,
+        sample_output: formData.sampleOutput,
+        security_details: formData.securityDetails,
+        additional_related_files: formData.additionalRelatedFiles,
+        deployments: JSON.stringify(formData.deploymentOptions),
         isv_id: user.user_id,
-        capabilities: formData.capabilities.join(", "),
-        demo_assets: JSON.stringify(formData.demo_assets),
-        sdk_details: formData.sdk_details,
-        swagger_details: formData.swagger_details,
-        sample_input: formData.sample_input,
-        sample_output: formData.sample_output,
-        security_details: formData.security_details,
-        related_files: formData.related_files,
-        deployments: JSON.stringify(formData.deployments),
       }
 
-      const response = await agentService.onboardAgent(apiData)
+      // TODO: Implement API call when agent service is available
+      console.log("Submitting agent data:", apiData)
       
-      if (response.success) {
-        router.push("/onboard/success")
-      } else {
-        setSubmitError(response.message || "Failed to onboard agent")
-      }
+      // For now, just redirect to success page
+      router.push("/onboard/success")
     } catch (error: any) {
       setSubmitError(error.message || "An unexpected error occurred")
     } finally {
@@ -266,10 +224,86 @@ export default function CustomOnboardPage() {
     }
   }
 
-  const toggleSelection = (field: "capabilities" | "by_persona" | "businessValues" | "features" | "tags", value: string) => {
-    setFormData((prev) => ({
+  const handleTabClick = (stepNumber: number) => {
+    setCurrentStep(stepNumber as Step)
+  }
+
+  // File handling functions
+  const handleFileUpload = (file: File, type: 'readme') => {
+    setFormData(prev => ({ ...prev, readmeFile: file }))
+  }
+
+  const handleBulkFileUpload = (files: FileList) => {
+    const newFiles: FileWithPreview[] = Array.from(files).map(file => ({
+      file,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
+    }))
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      bulkFiles: [...prev.bulkFiles, ...newFiles] 
+    }))
+  }
+
+  const removeBulkFile = (index: number) => {
+    setFormData(prev => {
+      const newFiles = [...prev.bulkFiles]
+      const removedFile = newFiles[index]
+      if (removedFile.previewUrl) {
+        URL.revokeObjectURL(removedFile.previewUrl)
+      }
+      newFiles.splice(index, 1)
+      return { ...prev, bulkFiles: newFiles }
+    })
+  }
+
+  const addDemoLink = () => {
+    setFormData(prev => ({ ...prev, demoLinks: [...prev.demoLinks, ""] }))
+  }
+
+  const updateDemoLink = (index: number, value: string) => {
+    setFormData(prev => ({
       ...prev,
-      [field]: prev[field].includes(value) ? prev[field].filter((item) => item !== value) : [...prev[field], value],
+      demoLinks: prev.demoLinks.map((link, i) => i === index ? value : link)
+    }))
+  }
+
+  const removeDemoLink = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      demoLinks: prev.demoLinks.filter((_, i) => i !== index)
+    }))
+  }
+
+  const addDeploymentOption = () => {
+    setFormData(prev => ({
+      ...prev,
+      deploymentOptions: [...prev.deploymentOptions, {
+        serviceProvider: "",
+        serviceName: "",
+        deploymentType: "",
+        cloudRegion: "",
+        capability: ""
+      }]
+    }))
+  }
+
+  const updateDeploymentOption = (index: number, field: keyof DeploymentOption, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      deploymentOptions: prev.deploymentOptions.map((option, i) => 
+        i === index ? { ...option, [field]: value } : option
+      )
+    }))
+  }
+
+  const removeDeploymentOption = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      deploymentOptions: prev.deploymentOptions.filter((_, i) => i !== index)
     }))
   }
 
@@ -302,7 +336,10 @@ export default function CustomOnboardPage() {
           <div className="flex items-center justify-between">
             {steps.map((step, index) => (
               <div key={step.number} className="flex flex-1 items-center">
-                <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleTabClick(step.number)}
+                  className="flex flex-1 items-center gap-3 hover:opacity-80 transition-opacity"
+                >
                   <div
                     className={cn(
                       "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium",
@@ -326,7 +363,7 @@ export default function CustomOnboardPage() {
                       {step.label}
                     </div>
                   </div>
-                </div>
+                </button>
                 {index < steps.length - 1 && (
                   <div className="mx-4 flex items-center">
                     <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -341,10 +378,10 @@ export default function CustomOnboardPage() {
       {/* Form Content */}
       <div className="mx-auto max-w-[1280px] px-6 py-12">
         <div className="mx-auto max-w-3xl">
-          {/* Step 1: Basic Information */}
+          {/* Tab 1: Agent Details */}
           {currentStep === 1 && (
             <div>
-              <h2 className="mb-2 text-3xl font-bold">Basic Information</h2>
+              <h2 className="mb-2 text-3xl font-bold">Agent Details</h2>
               <p className="mb-8 text-muted-foreground">Let's start with the basics about your AI agent</p>
 
               <div className="space-y-6">
@@ -355,380 +392,454 @@ export default function CustomOnboardPage() {
                   <Input
                     id="agentName"
                     placeholder="Enter your agent name"
-                    value={formData.agent_name}
-                    onChange={(e) => setFormData({ ...formData, agent_name: e.target.value })}
+                    value={formData.agentName}
+                    onChange={(e) => setFormData({ ...formData, agentName: e.target.value })}
                     className="mt-2"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="assetType">
-                    Asset Type <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={formData.asset_type}
-                    onValueChange={(value) => setFormData({ ...formData, asset_type: value })}
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select agent asset type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {assetTypeOptions.map((option) => (
-                        <SelectItem key={option} value={option.toLowerCase()}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="byValue">
-                    Value Proposition <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="byValue"
-                    placeholder="Brief value proposition"
-                    value={formData.by_value}
-                    onChange={(e) => setFormData({ ...formData, by_value: e.target.value })}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="description">
+                  <Label htmlFor="agentDescription">
                     Agent Description <span className="text-red-500">*</span>
                   </Label>
                   <Textarea
-                    id="description"
+                    id="agentDescription"
                     placeholder="Detailed description of your agent"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    value={formData.agentDescription}
+                    onChange={(e) => setFormData({ ...formData, agentDescription: e.target.value })}
                     className="mt-2 min-h-[120px]"
                   />
                 </div>
 
-                <div>
-                  <Label>
-                    Key Features <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    {features.map((feature) => (
-                      <button
-                        key={feature.id}
-                        type="button"
-                        onClick={() => toggleSelection("features", feature.id)}
-                        className={cn(
-                          "flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-all",
-                          formData.features.includes(feature.id)
-                            ? "border-primary bg-primary/5"
-                            : "border-border bg-white hover:border-primary/50",
-                        )}
-                      >
-                        <span className="text-lg">{feature.icon}</span>
-                        <span className="flex-1 text-xs font-medium">{feature.label}</span>
-                        <div
-                          className={cn(
-                            "h-4 w-4 shrink-0 rounded border-2",
-                            formData.features.includes(feature.id)
-                              ? "border-primary bg-primary"
-                              : "border-gray-300 bg-white",
-                          )}
-                        >
-                          {formData.features.includes(feature.id) && (
-                            <Check className="h-full w-full text-white" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label>
-                    Tags <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    {tags.map((tag) => (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() => toggleSelection("tags", tag.id)}
-                        className={cn(
-                          "flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-all",
-                          formData.tags.includes(tag.id)
-                            ? "border-primary bg-primary/5"
-                            : "border-border bg-white hover:border-primary/50",
-                        )}
-                      >
-                        <span className="text-lg">{tag.icon}</span>
-                        <span className="flex-1 text-xs font-medium">{tag.label}</span>
-                        <div
-                          className={cn(
-                            "h-4 w-4 shrink-0 rounded border-2",
-                            formData.tags.includes(tag.id)
-                              ? "border-primary bg-primary"
-                              : "border-gray-300 bg-white",
-                          )}
-                        >
-                          {formData.tags.includes(tag.id) && (
-                            <Check className="h-full w-full text-white" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Capabilities & Target Audience */}
-          {currentStep === 2 && (
-            <div>
-              <h2 className="mb-2 text-3xl font-bold">Capabilities & Target Audience</h2>
-              <p className="mb-8 text-muted-foreground">What can your AI agent do and who would benefit from it?</p>
-
-              <div className="space-y-8">
-                <div>
-                  <Label>
-                    Agent Capabilities <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    {capabilities.map((capability) => (
-                      <button
-                        key={capability.id}
-                        type="button"
-                        onClick={() => toggleSelection("capabilities", capability.id)}
-                        className={cn(
-                          "flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-all",
-                          formData.capabilities.includes(capability.id)
-                            ? "border-primary bg-primary/5"
-                            : "border-border bg-white hover:border-primary/50",
-                        )}
-                      >
-                        <span className="text-lg">{capability.icon}</span>
-                        <span className="flex-1 text-xs font-medium">{capability.label}</span>
-                        <div
-                          className={cn(
-                            "h-4 w-4 shrink-0 rounded border-2",
-                            formData.capabilities.includes(capability.id)
-                              ? "border-primary bg-primary"
-                              : "border-gray-300 bg-white",
-                          )}
-                        >
-                          {formData.capabilities.includes(capability.id) && (
-                            <Check className="h-full w-full text-white" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label>
-                    Target Personas <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    {targetPersonas.map((persona) => (
-                      <button
-                        key={persona.id}
-                        type="button"
-                        onClick={() => toggleSelection("by_persona", persona.id)}
-                        className={cn(
-                          "flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-all",
-                          formData.by_persona.includes(persona.id)
-                            ? "border-primary bg-primary/5"
-                            : "border-border bg-white hover:border-primary/50",
-                        )}
-                      >
-                        <span className="text-lg">{persona.icon}</span>
-                        <span className="flex-1 text-xs font-medium">{persona.label}</span>
-                        <div
-                          className={cn(
-                            "h-4 w-4 shrink-0 rounded border-2",
-                            formData.by_persona.includes(persona.id)
-                              ? "border-primary bg-primary"
-                              : "border-gray-300 bg-white",
-                          )}
-                        >
-                          {formData.by_persona.includes(persona.id) && <Check className="h-full w-full text-white" />}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Business Value & ROI */}
-          {currentStep === 3 && (
-            <div>
-              <h2 className="mb-2 text-3xl font-bold">Business Value & ROI</h2>
-              <p className="mb-8 text-muted-foreground">What business value does your AI agent provide?</p>
-
-              <div className="space-y-6">
-                <div>
-                  <Label>
-                    Business Values <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    {businessValues.map((value) => (
-                      <button
-                        key={value.id}
-                        type="button"
-                        onClick={() => toggleSelection("businessValues", value.id)}
-                        className={cn(
-                          "flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-all",
-                          formData.businessValues.includes(value.id)
-                            ? "border-primary bg-primary/5"
-                            : "border-border bg-white hover:border-primary/50",
-                        )}
-                      >
-                        <span className="text-lg">{value.icon}</span>
-                        <span className="flex-1 text-xs font-medium">{value.label}</span>
-                        <div
-                          className={cn(
-                            "h-4 w-4 shrink-0 rounded border-2",
-                            formData.businessValues.includes(value.id)
-                              ? "border-primary bg-primary"
-                              : "border-gray-300 bg-white",
-                          )}
-                        >
-                          {formData.businessValues.includes(value.id) && <Check className="h-full w-full text-white" />}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="roi">
-                    ROI Information <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="roi"
-                    placeholder="Expected ROI or benefits"
-                    value={formData.roi}
-                    onChange={(e) => setFormData({ ...formData, roi: e.target.value })}
-                    className="mt-2 min-h-[120px]"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Demo & Documentation */}
-          {currentStep === 4 && (
-            <div>
-              <h2 className="mb-2 text-3xl font-bold">Demo & Documentation</h2>
-              <p className="mb-8 text-muted-foreground">Provide links to demos, documentation, and SDK details</p>
-
-              <div className="space-y-6">
-                <div>
-                  <Label htmlFor="demoLink">Demo Link</Label>
-                  <Input
-                    id="demoLink"
-                    placeholder="https://your-demo-link.com"
-                    value={formData.demo_link}
-                    onChange={(e) => setFormData({ ...formData, demo_link: e.target.value })}
-                    className="mt-2"
-                  />
-                </div>
-
-                <DemoAssetInput
-                  demoAssets={formData.demo_assets}
-                  onChange={(assets) => setFormData({ ...formData, demo_assets: assets })}
+                <DropdownWithCustom
+                  label="Agent Type"
+                  value={formData.agentType}
+                  onChange={(value) => setFormData({ ...formData, agentType: value })}
+                  options={agentTypeOptions}
+                  placeholder="Select agent type"
+                  required
                 />
 
+                <MultiSelectInput
+                  label="Tags"
+                  value={formData.tags}
+                  onChange={(value) => setFormData({ ...formData, tags: value })}
+                  options={tagOptions}
+                  placeholder="Select or add tags"
+                  required
+                />
+
+                <MultiSelectInput
+                  label="Target Personas"
+                  value={formData.targetPersonas}
+                  onChange={(value) => setFormData({ ...formData, targetPersonas: value })}
+                  options={targetPersonaOptions}
+                  placeholder="Select target personas"
+                  required
+                />
+
+                <MultiSelectInput
+                  label="Key Features"
+                  value={formData.keyFeatures}
+                  onChange={(value) => setFormData({ ...formData, keyFeatures: value })}
+                  options={keyFeatureOptions}
+                  placeholder="Select key features"
+                  required
+                />
+
+                <DropdownWithCustom
+                  label="Value Proposition"
+                  value={formData.valueProposition}
+                  onChange={(value) => setFormData({ ...formData, valueProposition: value })}
+                  options={valuePropositionOptions}
+                  placeholder="Select value proposition"
+                  required
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="roiInformation">
+                      ROI Information
+                    </Label>
+                    <Input
+                      id="roiInformation"
+                      placeholder="Expected ROI or benefits"
+                      value={formData.roiInformation}
+                      onChange={(e) => setFormData({ ...formData, roiInformation: e.target.value })}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="demoLink">
+                      Demo Link
+                    </Label>
+                    <Input
+                      id="demoLink"
+                      placeholder="https://your-demo-link.com"
+                      value={formData.demoLink}
+                      onChange={(e) => setFormData({ ...formData, demoLink: e.target.value })}
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* Tab 2: Capabilities */}
+          {currentStep === 2 && (
+            <div>
+              <h2 className="mb-2 text-3xl font-bold">Capabilities</h2>
+              <p className="mb-8 text-muted-foreground">What can your AI agent do and what technical features does it offer?</p>
+
+              <div className="space-y-6">
+                <MultiSelectInput
+                  label="Core Capabilities"
+                  value={formData.coreCapabilities}
+                  onChange={(value) => setFormData({ ...formData, coreCapabilities: value })}
+                  options={capabilityOptions}
+                  placeholder="Select core capabilities"
+                  required
+                />
+
+              </div>
+            </div>
+          )}
+
+          {/* Tab 3: Demo Assets */}
+          {currentStep === 3 && (
+            <div>
+              <h2 className="mb-2 text-3xl font-bold">Demo Assets</h2>
+              <p className="mb-8 text-muted-foreground">Provide demo links and upload demo files</p>
+
+              <div className="space-y-6">
+                {/* Demo Links */}
                 <div>
-                  <Label htmlFor="sdkDetails">SDK Details</Label>
+                  <Label>Demo Links</Label>
+                  <div className="mt-2 space-y-3">
+                    {formData.demoLinks.map((link, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          placeholder="https://your-demo-link.com"
+                          value={link}
+                          onChange={(e) => updateDemoLink(index, e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeDemoLink(index)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addDemoLink}
+                      className="w-full"
+                    >
+                      + Add Link
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Bulk File Upload */}
+                <div>
+                  <Label>Bulk File Upload</Label>
+                  <div className="mt-2">
+                    <input
+                      ref={bulkFileInputRef}
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        const files = e.target.files
+                        if (files) handleBulkFileUpload(files)
+                      }}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => bulkFileInputRef.current?.click()}
+                      className="w-full rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 transition-colors"
+                    >
+                      <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600">Click to upload multiple files (max 50MB each)</p>
+                    </button>
+                  </div>
+
+                  {/* File Preview */}
+                  {formData.bulkFiles.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <Label className="text-sm font-medium">Uploaded Files</Label>
+                      <div className="grid gap-2">
+                        {formData.bulkFiles.map((fileWithPreview, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-3 rounded-lg border border-gray-200 p-3"
+                          >
+                            {fileWithPreview.previewUrl ? (
+                              <img
+                                src={fileWithPreview.previewUrl}
+                                alt={fileWithPreview.name}
+                                className="h-8 w-8 rounded object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-100">
+                                {fileWithPreview.type.startsWith('image/') ? (
+                                  <ImageIcon className="h-4 w-4 text-gray-600" />
+                                ) : (
+                                  <FileText className="h-4 w-4 text-gray-600" />
+                                )}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {fileWithPreview.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {(fileWithPreview.size / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeBulkFile(index)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 4: Documentation */}
+          {currentStep === 4 && (
+            <div>
+              <h2 className="mb-2 text-3xl font-bold">Documentation</h2>
+              <p className="mb-8 text-muted-foreground">Provide technical documentation and deployment information</p>
+
+              <div className="space-y-6">
+                <div>
+                  <Label htmlFor="sdkDetails">
+                    SDK Details <span className="text-red-500">*</span>
+                  </Label>
                   <Textarea
                     id="sdkDetails"
                     placeholder="SDK installation and usage instructions"
-                    value={formData.sdk_details}
-                    onChange={(e) => setFormData({ ...formData, sdk_details: e.target.value })}
+                    value={formData.sdkDetails}
+                    onChange={(e) => setFormData({ ...formData, sdkDetails: e.target.value })}
                     className="mt-2 min-h-[120px]"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="swaggerDetails">API Documentation (Swagger)</Label>
+                  <Label htmlFor="apiDocumentation">
+                    API Documentation (Swagger) <span className="text-red-500">*</span>
+                  </Label>
                   <Input
-                    id="swaggerDetails"
+                    id="apiDocumentation"
                     placeholder="https://your-swagger-docs.com"
-                    value={formData.swagger_details}
-                    onChange={(e) => setFormData({ ...formData, swagger_details: e.target.value })}
+                    value={formData.apiDocumentation}
+                    onChange={(e) => setFormData({ ...formData, apiDocumentation: e.target.value })}
                     className="mt-2"
                   />
                 </div>
-              </div>
-            </div>
-          )}
 
-          {/* Step 5: Technical Details */}
-          {currentStep === 5 && (
-            <div>
-              <h2 className="mb-2 text-3xl font-bold">Technical Details</h2>
-              <p className="mb-8 text-muted-foreground">Provide technical specifications and deployment information</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="sampleInput">
+                      Sample Input <span className="text-red-500">*</span>
+                    </Label>
+                    <Textarea
+                      id="sampleInput"
+                      placeholder="Example input data"
+                      value={formData.sampleInput}
+                      onChange={(e) => setFormData({ ...formData, sampleInput: e.target.value })}
+                      className="mt-2 min-h-[120px]"
+                    />
+                  </div>
 
-              <div className="space-y-6">
-                <div>
-                  <Label htmlFor="sampleInput">Sample Input</Label>
-                  <Textarea
-                    id="sampleInput"
-                    placeholder="Example input data"
-                    value={formData.sample_input}
-                    onChange={(e) => setFormData({ ...formData, sample_input: e.target.value })}
-                    className="mt-2 min-h-[120px]"
-                  />
+                  <div>
+                    <Label htmlFor="sampleOutput">
+                      Sample Output <span className="text-red-500">*</span>
+                    </Label>
+                    <Textarea
+                      id="sampleOutput"
+                      placeholder="Example output data"
+                      value={formData.sampleOutput}
+                      onChange={(e) => setFormData({ ...formData, sampleOutput: e.target.value })}
+                      className="mt-2 min-h-[120px]"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="sampleOutput">Sample Output</Label>
-                  <Textarea
-                    id="sampleOutput"
-                    placeholder="Example output data"
-                    value={formData.sample_output}
-                    onChange={(e) => setFormData({ ...formData, sample_output: e.target.value })}
-                    className="mt-2 min-h-[120px]"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="securityDetails">Security Details</Label>
+                  <Label htmlFor="securityDetails">
+                    Security Details <span className="text-red-500">*</span>
+                  </Label>
                   <Textarea
                     id="securityDetails"
                     placeholder="Security considerations and best practices"
-                    value={formData.security_details}
-                    onChange={(e) => setFormData({ ...formData, security_details: e.target.value })}
+                    value={formData.securityDetails}
+                    onChange={(e) => setFormData({ ...formData, securityDetails: e.target.value })}
                     className="mt-2 min-h-[120px]"
                   />
+                </div>
+
+                {/* README File Upload */}
+                <div>
+                  <Label>README File Upload</Label>
+                  <div className="mt-2">
+                    <input
+                      ref={readmeFileInputRef}
+                      type="file"
+                      accept=".md,.txt,.pdf,.doc,.docx"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleFileUpload(file, 'readme')
+                      }}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => readmeFileInputRef.current?.click()}
+                      className="w-full rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 transition-colors"
+                    >
+                      <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600">
+                        {formData.readmeFile ? formData.readmeFile.name : "Click to upload README file"}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Markdown, Text, PDF, DOC, DOCX (max 10MB)
+                      </p>
+                    </button>
+                  </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="relatedFiles">Related Files</Label>
+                  <Label htmlFor="additionalRelatedFiles">
+                    Additional Related Files (Links)
+                  </Label>
                   <Textarea
-                    id="relatedFiles"
-                    placeholder="Links to related files, documentation, etc."
-                    value={formData.related_files}
-                    onChange={(e) => setFormData({ ...formData, related_files: e.target.value })}
+                    id="additionalRelatedFiles"
+                    placeholder="Links to additional documentation, guides, or resources (separate from uploaded files)"
+                    value={formData.additionalRelatedFiles}
+                    onChange={(e) => setFormData({ ...formData, additionalRelatedFiles: e.target.value })}
                     className="mt-2 min-h-[120px]"
                   />
                 </div>
 
-                <DeploymentOptionInput
-                  deployments={formData.deployments}
-                  onChange={(deployments) => setFormData({ ...formData, deployments })}
-                />
+                {/* Deployment Options */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <Label>Deployment Options</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addDeploymentOption}
+                      className="text-green-600 border-green-600 hover:bg-green-50"
+                    >
+                      + Add Deployment Option
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {formData.deploymentOptions.map((option, index) => (
+                      <div key={index} className="rounded-lg border border-gray-200 p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="font-medium">Deployment Option {index + 1}</h4>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeDeploymentOption(index)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <DropdownWithCustom
+                            label="Service Provider"
+                            value={option.serviceProvider}
+                            onChange={(value) => updateDeploymentOption(index, 'serviceProvider', value)}
+                            options={serviceProviderOptions}
+                            placeholder="e.g., AWS, Azure, Google Cloud"
+                          />
+
+                          <DropdownWithCustom
+                            label="Service Name"
+                            value={option.serviceName}
+                            onChange={(value) => updateDeploymentOption(index, 'serviceName', value)}
+                            options={serviceNameOptions}
+                            placeholder="Service name"
+                          />
+
+                          <DropdownWithCustom
+                            label="Deployment Type"
+                            value={option.deploymentType}
+                            onChange={(value) => updateDeploymentOption(index, 'deploymentType', value)}
+                            options={deploymentTypeOptions}
+                            placeholder="e.g., Docker, Kubernetes"
+                          />
+
+                          <div>
+                            <Label htmlFor={`cloudRegion-${index}`}>
+                              Cloud Region
+                            </Label>
+                            <Input
+                              id={`cloudRegion-${index}`}
+                              placeholder="e.g., us-east-1, eu-west-1"
+                              value={option.cloudRegion}
+                              onChange={(e) => updateDeploymentOption(index, 'cloudRegion', e.target.value)}
+                              className="mt-2"
+                            />
+                          </div>
+
+                          <div className="md:col-span-2">
+                            <Label htmlFor={`capability-${index}`}>
+                              Capability
+                            </Label>
+                            <Input
+                              id={`capability-${index}`}
+                              placeholder="Related capability"
+                              value={option.capability}
+                              onChange={(e) => updateDeploymentOption(index, 'capability', e.target.value)}
+                              className="mt-2"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {formData.deploymentOptions.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>No deployment options added yet</p>
+                        <p className="text-sm">Click "Add Deployment Option" to get started</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Step 6: Review & Submit */}
-          {currentStep === 6 && (
+          {/* Tab 5: Review & Submit */}
+          {currentStep === 5 && (
             <div>
               <h2 className="mb-2 text-3xl font-bold">Review & Submit</h2>
               <p className="mb-8 text-muted-foreground">Please review your agent details before submitting</p>
@@ -739,184 +850,170 @@ export default function CustomOnboardPage() {
                 </div>
               )}
 
-              <div className="space-y-6">
-                <div>
-                  <h3 className="mb-2 font-semibold">Agent Name</h3>
-                  <div className="rounded-lg border bg-gray-50 px-4 py-3">
-                    <span className="text-sm">{formData.agent_name || "Not provided"}</span>
+              <div className="space-y-8">
+                {/* Agent Details Section */}
+                <div className="rounded-lg border border-gray-200 p-6">
+                  <h3 className="mb-4 text-lg font-semibold">Agent Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Agent Name</Label>
+                      <p className="text-sm">{formData.agentName || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Agent Type</Label>
+                      <p className="text-sm">{formData.agentType || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Value Proposition</Label>
+                      <p className="text-sm">{formData.valueProposition || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Description</Label>
+                      <p className="text-sm">{formData.agentDescription || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">ROI Information</Label>
+                      <p className="text-sm">{formData.roiInformation || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Demo Link</Label>
+                      {formData.demoLink ? (
+                        <a href={formData.demoLink} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                          {formData.demoLink}
+                        </a>
+                      ) : (
+                        <p className="text-sm">Not provided</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Asset Type</h3>
-                  <div className="rounded-lg border bg-gray-50 px-4 py-3">
-                    <span className="text-sm">{formData.asset_type || "Not provided"}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Value Proposition</h3>
-                  <div className="rounded-lg border bg-gray-50 px-4 py-3">
-                    <span className="text-sm">{formData.by_value || "Not provided"}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Description</h3>
-                  <div className="rounded-lg border bg-gray-50 px-4 py-3">
-                    <span className="text-sm">{formData.description || "Not provided"}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Key Features</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.features.length > 0 ? (
-                      formData.features.map((featureId) => {
-                        const feature = features.find((f) => f.id === featureId)
-                        return (
-                          <span
-                            key={featureId}
-                            className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm"
-                          >
-                            <span>{feature?.icon}</span>
-                            <span>{feature?.label}</span>
-                          </span>
-                        )
-                      })
-                    ) : (
-                      <span className="text-sm text-muted-foreground">No features selected</span>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.length > 0 ? (
-                      formData.tags.map((tagId) => {
-                        const tag = tags.find((t) => t.id === tagId)
-                        return (
-                          <span
-                            key={tagId}
-                            className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-sm"
-                          >
-                            <span>{tag?.icon}</span>
-                            <span>{tag?.label}</span>
-                          </span>
-                        )
-                      })
-                    ) : (
-                      <span className="text-sm text-muted-foreground">No tags selected</span>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Capabilities</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.capabilities.length > 0 ? (
-                      formData.capabilities.map((capId) => {
-                        const cap = capabilities.find((c) => c.id === capId)
-                        return (
-                          <span
-                            key={capId}
-                            className="inline-flex items-center gap-1 rounded-full bg-pink-100 px-3 py-1 text-sm"
-                          >
-                            <span>{cap?.icon}</span>
-                            <span>{cap?.label}</span>
-                          </span>
-                        )
-                      })
-                    ) : (
-                      <span className="text-sm text-muted-foreground">No capabilities selected</span>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Target Personas</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.by_persona.length > 0 ? (
-                      formData.by_persona.map((personaId) => {
-                        const persona = targetPersonas.find((p) => p.id === personaId)
-                        return (
-                          <span
-                            key={personaId}
-                            className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm"
-                          >
-                            <span>{persona?.icon}</span>
-                            <span>{persona?.label}</span>
-                          </span>
-                        )
-                      })
-                    ) : (
-                      <span className="text-sm text-muted-foreground">No personas selected</span>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Business Values</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.businessValues.length > 0 ? (
-                      formData.businessValues.map((valueId) => {
-                        const value = businessValues.find((v) => v.id === valueId)
-                        return (
-                          <span
-                            key={valueId}
-                            className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-3 py-1 text-sm"
-                          >
-                            <span>{value?.icon}</span>
-                            <span>{value?.label}</span>
-                          </span>
-                        )
-                      })
-                    ) : (
-                      <span className="text-sm text-muted-foreground">No business values selected</span>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">ROI Information</h3>
-                  <div className="rounded-lg border bg-gray-50 px-4 py-3">
-                    <span className="text-sm">{formData.roi || "Not provided"}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 font-semibold">Demo Assets</h3>
-                  <div className="rounded-lg border bg-gray-50 px-4 py-3">
-                    {formData.demo_assets.length > 0 ? (
-                      <div className="space-y-2">
-                        {formData.demo_assets.map((asset, index) => (
-                          <div key={index} className="text-sm">
-                            <strong>{asset.asset_name}</strong> ({asset.asset_type}) - {asset.link}
-                          </div>
-                        ))}
+                  
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Tags</Label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {formData.tags.length > 0 ? (
+                          formData.tags.map((tag, index) => (
+                            <span key={index} className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm">
+                              {tag}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-500">No tags selected</span>
+                        )}
                       </div>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">No demo assets provided</span>
-                    )}
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Target Personas</Label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {formData.targetPersonas.length > 0 ? (
+                          formData.targetPersonas.map((persona, index) => (
+                            <span key={index} className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm">
+                              {persona}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-500">No personas selected</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="mb-2 font-semibold">Deployment Options</h3>
-                  <div className="rounded-lg border bg-gray-50 px-4 py-3">
-                    {formData.deployments.length > 0 ? (
-                      <div className="space-y-2">
-                        {formData.deployments.map((deployment, index) => (
-                          <div key={index} className="text-sm">
-                            <strong>{deployment.service_name}</strong> on {deployment.service_provider} 
-                            ({deployment.deployment_type}, {deployment.cloud_region}) - {deployment.capability}
-                          </div>
-                        ))}
+                {/* Capabilities Section */}
+                <div className="rounded-lg border border-gray-200 p-6">
+                  <h3 className="mb-4 text-lg font-semibold">Capabilities</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Core Capabilities</Label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {formData.coreCapabilities.length > 0 ? (
+                          formData.coreCapabilities.map((capability, index) => (
+                            <span key={index} className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm">
+                              {capability}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-500">No capabilities selected</span>
+                        )}
                       </div>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">No deployment options provided</span>
-                    )}
+                    </div>
+                    
+                  </div>
+                </div>
+
+                {/* Demo Assets Section */}
+                <div className="rounded-lg border border-gray-200 p-6">
+                  <h3 className="mb-4 text-lg font-semibold">Demo Assets</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Demo Links</Label>
+                      <div className="mt-1">
+                        {formData.demoLinks.length > 0 ? (
+                          formData.demoLinks.map((link, index) => (
+                            <p key={index} className="text-sm text-blue-600 hover:underline">
+                              <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                            </p>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-500">No demo links provided</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Uploaded Files</Label>
+                      <div className="mt-1">
+                        {formData.bulkFiles.length > 0 ? (
+                          formData.bulkFiles.map((file, index) => (
+                            <p key={index} className="text-sm">{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</p>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-500">No files uploaded</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Documentation Section */}
+                <div className="rounded-lg border border-gray-200 p-6">
+                  <h3 className="mb-4 text-lg font-semibold">Documentation</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">SDK Details</Label>
+                      <p className="text-sm">{formData.sdkDetails || "Not provided"}</p>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">API Documentation</Label>
+                      <p className="text-sm">
+                        {formData.apiDocumentation ? (
+                          <a href={formData.apiDocumentation} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            {formData.apiDocumentation}
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Deployment Options</Label>
+                      <div className="mt-1">
+                        {formData.deploymentOptions.length > 0 ? (
+                          formData.deploymentOptions.map((option, index) => (
+                            <div key={index} className="text-sm border-l-2 border-gray-200 pl-3 mb-2">
+                              <p><strong>{option.serviceName}</strong> on {option.serviceProvider}</p>
+                              <p className="text-gray-600">{option.deploymentType}, {option.cloudRegion}</p>
+                              <p className="text-gray-600">Capability: {option.capability}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-500">No deployment options provided</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -924,14 +1021,23 @@ export default function CustomOnboardPage() {
           )}
 
           {/* Navigation Buttons */}
-          <div className="mt-12">
+          <div className="mt-12 flex justify-between">
+            <Button 
+              onClick={handleBack} 
+              variant="outline"
+              size="lg"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            
             <Button 
               onClick={handleNext} 
               size="lg" 
               className="bg-black text-white hover:bg-black/90"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Submitting..." : currentStep === 6 ? "Submit Agent" : "Next"}
+              {isSubmitting ? "Submitting..." : currentStep === 5 ? "Submit Agent" : "Next"}
               {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </div>

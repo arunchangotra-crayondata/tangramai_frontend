@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import ChatDialog from "@/components/chat-dialog";
-import { Gauge, Settings, TrendingUp } from "lucide-react";
+import { Gauge, Settings, TrendingUp, CheckCircle2 } from "lucide-react";
 
 export default function AICatalystPage() {
   const [chatOpen, setChatOpen] = useState(false);
@@ -129,6 +129,43 @@ export default function AICatalystPage() {
                 <li>Ongoing support + updates</li>
               </ul>
               <div className="mt-4 text-xs text-muted-foreground">~6–10 weeks | Built for scale</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Who is it for? */}
+      <section className="py-16">
+        <div className="mx-auto max-w-[1100px] px-6">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl md:text-3xl font-bold">
+              <span className="blue-gradient-text">Who is it for?</span>
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-lg border bg-white p-4 flex items-start gap-3">
+              <div className="mt-0.5 text-[#3B60AF]">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div className="text-sm text-gray-800">Enterprises with big AI goals, but no clear roadmap</div>
+            </div>
+            <div className="rounded-lg border bg-white p-4 flex items-start gap-3">
+              <div className="mt-0.5 text-[#3B60AF]">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div className="text-sm text-gray-800">Leaders who need proof of value before going all-in</div>
+            </div>
+            <div className="rounded-lg border bg-white p-4 flex items-start gap-3">
+              <div className="mt-0.5 text-[#3B60AF]">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div className="text-sm text-gray-800">Teams stuck at POC purgatory</div>
+            </div>
+            <div className="rounded-lg border bg-white p-4 flex items-start gap-3">
+              <div className="mt-0.5 text-[#3B60AF]">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div className="text-sm text-gray-800">Anyone who wants GenAI that works inside your real world</div>
             </div>
           </div>
         </div>

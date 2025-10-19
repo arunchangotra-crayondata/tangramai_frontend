@@ -103,7 +103,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="text-center">
             <h2 className="mb-2 text-4xl font-bold text-balance">
-              <span className="blue-gradient-text mb-10">Find. Try. Launch.</span>
+              <span className="gradient-text mb-10">Find. Try. Launch.</span>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 items-stretch mx-auto max-w-5xl">
               {/* Step 1 */}

@@ -1,10 +1,15 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Input } from "@/components/ui/input"
+import Image from "next/image"
+import { useModal } from "@/hooks/use-modal"
 import { ArrowRight, Target, Globe, TrendingUp } from "lucide-react"
 
 export default function ISVPage() {
+  const { openModal } = useModal()
   return (
     <div className="min-h-screen">
       {/* Hero Section with Gradient */}
@@ -20,10 +25,10 @@ export default function ISVPage() {
               customers and grow your business through one of the world's largest commercial cloud marketplaces.
             </p>
             <div className="flex gap-4">
-              <Button size="lg" className="bg-black text-white hover:bg-gray-800">
+              <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("vendor-signup")}>
                 BECOME A ISV PARTNER
               </Button>
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" onClick={() => openModal("vendor-login")}>
                 LOGIN TO ISV HUB
               </Button>
             </div>
@@ -31,73 +36,14 @@ export default function ISVPage() {
         </div>
       </section>
 
-      <section className="bg-white py-12 border-b overflow-hidden">
-        <div className="relative mx-auto max-w-[1280px] px-6">
-          <div className="flex animate-scroll gap-12 items-center">
-            {/* First set of logos */}
-            <div className="flex items-center gap-12 flex-shrink-0">
-              <div className="text-2xl font-bold text-orange-600 whitespace-nowrap">crayon</div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="w-8 h-8 bg-purple-600 rounded-full"></div>
-                <span className="font-semibold whitespace-nowrap">Veephive</span>
-              </div>
-              <div className="text-blue-600 font-bold text-xl whitespace-nowrap">salesforce</div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="grid grid-cols-2 gap-0.5 w-5 h-5">
-                  <div className="bg-red-500"></div>
-                  <div className="bg-green-500"></div>
-                  <div className="bg-blue-500"></div>
-                  <div className="bg-yellow-500"></div>
-                </div>
-                <span className="font-semibold whitespace-nowrap">Microsoft</span>
-              </div>
-              <div className="text-green-600 font-semibold whitespace-nowrap">Redington</div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="w-6 h-6 bg-black rounded"></div>
-                <span className="font-bold whitespace-nowrap">lyzr</span>
-              </div>
-              <div className="font-semibold whitespace-nowrap">accenture</div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                <span className="font-semibold whitespace-nowrap">Outreach</span>
-              </div>
-            </div>
-            {/* Duplicate set for seamless loop */}
-            <div className="flex items-center gap-12 flex-shrink-0">
-              <div className="text-2xl font-bold text-orange-600 whitespace-nowrap">crayon</div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="w-8 h-8 bg-purple-600 rounded-full"></div>
-                <span className="font-semibold whitespace-nowrap">Veephive</span>
-              </div>
-              <div className="text-blue-600 font-bold text-xl whitespace-nowrap">salesforce</div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="grid grid-cols-2 gap-0.5 w-5 h-5">
-                  <div className="bg-red-500"></div>
-                  <div className="bg-green-500"></div>
-                  <div className="bg-blue-500"></div>
-                  <div className="bg-yellow-500"></div>
-                </div>
-                <span className="font-semibold whitespace-nowrap">Microsoft</span>
-              </div>
-              <div className="text-green-600 font-semibold whitespace-nowrap">Redington</div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="w-6 h-6 bg-black rounded"></div>
-                <span className="font-bold whitespace-nowrap">lyzr</span>
-              </div>
-              <div className="font-semibold whitespace-nowrap">accenture</div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                <span className="font-semibold whitespace-nowrap">Outreach</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Removed scrolling banner of icons for a cleaner layout */}
+<section className="bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100">
+
 
       {/* Build the Future Together */}
-      <section className="bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 py-16 relative">
+      <section className=" py-16 relative">
         <div className="mx-auto max-w-[1280px] px-6 text-center pt-12">
-          <h2 className="text-4xl font-bold mb-4">build the future together</h2>
+          <h2 className="text-4xl font-bold mb-4">Build the Future Together</h2>
           <p className="text-gray-700 leading-relaxed">
             The Tangram.ai ISV Program empowers Independent Software Vendors to build, integrate, and scale on the
             Tangram.ai platform. Partners gain co-sell support, marketplace visibility, and go-to-market alignment —
@@ -107,14 +53,14 @@ export default function ISVPage() {
       </section>
 
       {/* Three Feature Cards */}
-      <section className="bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 py-16">
+      <section className=" py-16">
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="p-8 border-2 bg-white">
               <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-6">
                 <Target className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-3">Accelerate project successes</h3>
+              <h3 className="text-xl font-bold mb-3">Accelerate Project Successes</h3>
               <p className="text-gray-600 leading-relaxed">
                 Work with our sales ecosystem and access industry expertise and resources to help you achieve
                 exceptional results.
@@ -125,7 +71,7 @@ export default function ISVPage() {
               <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-6">
                 <Globe className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-3">Scale your operations globally</h3>
+              <h3 className="text-xl font-bold mb-3">Scale Your Operations Globally</h3>
               <p className="text-gray-600 leading-relaxed">
                 Enter new markets while accelerating your business's international reach with global partners or local
                 experts.
@@ -136,7 +82,7 @@ export default function ISVPage() {
               <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-6">
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-3">Get faster business results</h3>
+              <h3 className="text-xl font-bold mb-3">Get Faster Business Results</h3>
               <p className="text-gray-600 leading-relaxed">
                 Reduce time-to-deployment and accelerate projects with pre-configured, industry specific solutions.
               </p>
@@ -144,345 +90,38 @@ export default function ISVPage() {
           </div>
         </div>
       </section>
-
-      {/* Discover Partnerships */}
-      <section className="bg-gray-50 py-16 relative">
-        <div className="mx-auto max-w-[1280px] px-6">
-          <div className="flex flex-col md:flex-row gap-12 items-start">
-            {/* Left side - Text content (50%) */}
-            <div className="flex-1 md:w-1/2">
-              <h2 className="text-3xl font-bold mb-6">Discover our recent AI ISV Partnerships</h2>
-              <p className="text-gray-600 leading-relaxed">
-                Check out some of the partners across the world who have recently onboarded to ISV hub.
-              </p>
-            </div>
-
-            {/* Right side - Auto-scrolling cards in 3-column grid (50%) */}
-            <div className="flex-1 md:w-1/2 h-[400px] overflow-hidden relative px-6">
-              <div className="animate-scroll-vertical">
-                {/* First set of cards */}
-                <div className="grid grid-cols-3 gap-3 mb-3">
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-blue-500 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Notion</div>
-                        <div className="text-xs text-gray-500">Plan your life</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-gray-800 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Github</div>
-                        <div className="text-xs text-gray-500">Code repository</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Codepen</div>
-                        <div className="text-xs text-gray-500">Code repository</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-blue-400 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Loom</div>
-                        <div className="text-xs text-gray-500">Record a breeze</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-blue-600 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Confluence</div>
-                        <div className="text-xs text-gray-500">Productivity boosted</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-yellow-400 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">11x.ai</div>
-                        <div className="text-xs text-gray-500">AI assistant</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-purple-500 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Intercom</div>
-                        <div className="text-xs text-gray-500">Customer care</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-yellow-500 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Mailchimp</div>
-                        <div className="text-xs text-gray-500">Smart newsletter</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-purple-600 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Slack</div>
-                        <div className="text-xs text-gray-500">Team messaging</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-gray-700 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Things</div>
-                        <div className="text-xs text-gray-500">Handy to-do list</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-green-600 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Dropbox</div>
-                        <div className="text-xs text-gray-500">File storage</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-red-500 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Asana</div>
-                        <div className="text-xs text-gray-500">Project management</div>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-
-                {/* Duplicate set for seamless loop */}
-                <div className="grid grid-cols-3 gap-3">
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-blue-500 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Notion</div>
-                        <div className="text-xs text-gray-500">Plan your life</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-gray-800 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Github</div>
-                        <div className="text-xs text-gray-500">Code repository</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Codepen</div>
-                        <div className="text-xs text-gray-500">Code repository</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-blue-400 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Loom</div>
-                        <div className="text-xs text-gray-500">Record a breeze</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-blue-600 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Confluence</div>
-                        <div className="text-xs text-gray-500">Productivity boosted</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-yellow-400 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">11x.ai</div>
-                        <div className="text-xs text-gray-500">AI assistant</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-purple-500 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Intercom</div>
-                        <div className="text-xs text-gray-500">Customer care</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items=center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-yellow-500 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Mailchimp</div>
-                        <div className="text-xs text-gray-500">Smart newsletter</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-purple-600 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Slack</div>
-                        <div className="text-xs text-gray-500">Team messaging</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-gray-700 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Things</div>
-                        <div className="text-xs text-gray-500">Handy to-do list</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-green-600 rounded-full"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Dropbox</div>
-                        <div className="text-xs text-gray-500">File storage</div>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-3 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <div className="w-6 h-6 bg-red-500 rounded"></div>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Asana</div>
-                        <div className="text-xs text-gray-500">Project management</div>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* Testimonials */}
       <section className="bg-white py-16 relative">
         <div className="mx-auto max-w-[1280px] px-6">
-          <h2 className="text-3xl font-bold mb-12 text-center">ISV's Testimonials</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">ISV Testimonials</h2>
 
           <div className="bg-white border-2 rounded-lg p-12">
-            <div className="flex items-start gap-8">
-              <div className="flex-shrink-0">
-                <svg width="200" height="60" viewBox="0 0 200 60" fill="none">
-                  <path d="M20 10 L40 50 L30 30 L50 30 L30 10 Z" fill="#E91E63" />
-                  <path d="M50 30 L70 10 L60 30 L80 30 L60 50 Z" fill="#9C27B0" />
-                  <text x="90" y="40" fontFamily="Arial" fontSize="28" fontWeight="bold" fill="#000">
-                    MOZARK
-                  </text>
-                </svg>
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+              <div className="w-full md:w-1/2 flex justify-center md:justify-start">
+                <div className="relative w-[320px] h-[120px] md:w-[420px] md:h-[140px]">
+                  <Image src="/mozak_bw.png" alt="Mozark" fill className="object-contain" />
+                </div>
               </div>
-              <div className="flex-1 relative">
+              <div className="w-full md:w-1/2 relative">
                 <h3 className="font-bold text-lg mb-4">Mozark</h3>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  Partnering with Tangram.ai accelerated outcomes beyond expectations. Within months, the collaboration
-                  has become core to every growth mission we run. Our shared customer obsession drives perfect alignment
-                  across teams, higher conversions, and seamless opportunities that power scalable, efficient growth.
+                Partnering with Tangram.ai has accelerated outcomes beyond expectations. Within months, the collaboration has become core to every growth motion we run. Our shared customer obsession drives perfect alignment across every deal — leading to faster closes, higher conversions, and expanded opportunities that power scalable, efficient growth.”
                 </p>
-                <p className="text-sm text-gray-600 italic">—Christopher Ramnoruthly</p>
+                <p
+                  style={{
+                    fontFamily: 'Arial, sans-serif',
+                    fontWeight: 700,
+                    fontSize: 14,
+                    lineHeight: '20px',
+                    letterSpacing: 0,
+                    verticalAlign: 'middle',
+                    color: '#232B37',
+                  }}
+                >
+                  — Chandrasekar Ramamoorthy, CTO
+                </p>
               </div>
             </div>
           </div>
@@ -501,8 +140,8 @@ export default function ISVPage() {
           <div className="flex flex-col md:flex-row gap-12 items-start">
             {/* Left side - Title (50%) */}
             <div className="flex-1 md:w-1/2">
-              <h2 className="text-3xl font-bold mb-2">frequently asked questions</h2>
-              <p className="text-xl">FAQ's</p>
+              <h2 className="text-3xl font-bold mb-2">Frequently Asked Questions</h2>
+              <p className="text-xl">FAQs</p>
             </div>
 
             {/* Right side - FAQ Accordion (50%) */}

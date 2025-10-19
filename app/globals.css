@@ -146,6 +146,24 @@
     background-clip: text;
   }
 
+  .blue-gradient-text {
+    background: linear-gradient(270deg, #3B60AF 0%, #0082C0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+  }
+
+  .radial-gradient-text {
+    background: radial-gradient(80.73% 80.73% at 3.12% 25.58%, #7935F4 0%, #9A4681 49.5%, #614BDB 96.87%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+  }
+
   /* Override any remaining purple focus states */
   input:focus,
   textarea:focus,

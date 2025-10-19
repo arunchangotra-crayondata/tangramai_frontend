@@ -8,6 +8,7 @@ import { useModal } from "@/hooks/use-modal";
 import { useState } from "react";
 import ChatDialog from "@/components/chat-dialog";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function HomePage() {
   const { openModal } = useModal();
@@ -17,7 +18,7 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* Hero Section */}
       
-        <section className="relative py-20 min-h-[560px]">
+        <section className="relative min-h-screen py-24 flex items-center">
         {/* Background image with gradient overlay (Next.js Image for optimization) */}
         <div aria-hidden="true" className="absolute inset-0 -z-10 bg-white">
           <div className="relative w-full h-full">
@@ -25,62 +26,134 @@ export default function HomePage() {
               src="/gradiant_image.png"
               alt=""
               fill
-              className="object-cover"
+              className="object-cover object-right"
               priority
             />
             {/* Light overlay so image remains visible while keeping contrast */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white/40 via-transparent to-white/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/0" />
           </div>
         </div>
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="mx-auto max-w-[1280px] px-6 w-full">
           <div className="text-center">
-            <h1 className="mb-4 text-5xl font-bold text-balance md:text-6xl">
-              <span className="gradient-text">
+            <h1 className="mb-20 text-5xl font-bold text-balance md:text-6xl">
+              <span className="radial-gradient-text">
                 Explore Our AI Agent Store
               </span>
             </h1>
-            <p className="mb-8 text-lg text-muted-foreground text-balance text-[#374151]  ">
+            {/* <p className="mb-8 text-lg text-muted-foreground text-balance text-[#374151]  ">
               Explore AI-powered agents built to automate workflows — helping
               your team work <br /> smarter and faster every day.
-            </p>
+            </p> */}
 
             {/* Search Bar */}
             <div className="mx-auto mb-8 flex max-w-4xl items-center gap-2 rounded-full border bg-white p-1 shadow-sm cursor-text" onClick={() => setChatOpen(true)}>
               <Search className="ml-2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Tell us About your Business Needs"
+                placeholder="I want an agent to review NDAs"
                 className="border-0 focus-visible:ring-0"
               />
               <Button size="icon" variant="ghost">
                 <Mic className="h-5 w-5" />
               </Button>
             </div>
-            <ChatDialog open={chatOpen} onOpenChange={setChatOpen} />
+            <ChatDialog open={chatOpen} onOpenChange={setChatOpen} initialMode="explore" />
 
             {/* Category Tags */}
             <div className="mb-6 text-sm text-muted-foreground">
               150+ AI agents & Solutions Available
             </div>
-            <div className="mb-8 flex flex-wrap items-center justify-center gap-2">
-              <Badge variant="default">Conversational AI & Advisory</Badge>
-              <Badge variant="default">Document Planning & Analysis</Badge>
-              <Badge variant="primary">Image processing</Badge>
-              <Badge variant="secondary">Audio Processing</Badge>
-              <Badge variant="default">Lead and Meeting</Badge>
-              <Badge variant="default">Data Analysis and Insights</Badge>
-              <Badge variant="default">Content generation</Badge>
-              <Badge variant="secondary">Process Automation</Badge>
-              <Badge variant="default">Data Transformation</Badge>
+            <div className="mb-8 relative overflow-hidden">
+              <div className="flex animate-scroll">
+                {/* Frame 1 */}
+                <div className="min-w-full flex flex-wrap items-center justify-center gap-2">
+                  <Badge dotColorClassName="bg-blue-500">Conversational AI & Advisory</Badge>
+                  <Badge dotColorClassName="bg-purple-500">Document Planning & Analysis</Badge>
+                  <Badge dotColorClassName="bg-emerald-500">Image processing</Badge>
+                  <Badge dotColorClassName="bg-amber-500">Audio Processing</Badge>
+                  <Badge dotColorClassName="bg-rose-500">Lead and Meeting</Badge>
+                  <Badge dotColorClassName="bg-indigo-500">Data Analysis and Insights</Badge>
+                  <Badge dotColorClassName="bg-pink-500">Content generation</Badge>
+                  <Badge dotColorClassName="bg-teal-500">Process Automation</Badge>
+                  <Badge dotColorClassName="bg-sky-500">Data Transformation</Badge>
+                </div>
+                {/* Frame 2 duplicate for seamless loop */}
+                <div className="min-w-full flex flex-wrap items-center justify-center gap-2">
+                  <Badge dotColorClassName="bg-blue-500">Conversational AI & Advisory</Badge>
+                  <Badge dotColorClassName="bg-purple-500">Document Planning & Analysis</Badge>
+                  <Badge dotColorClassName="bg-emerald-500">Image processing</Badge>
+                  <Badge dotColorClassName="bg-amber-500">Audio Processing</Badge>
+                  <Badge dotColorClassName="bg-rose-500">Lead and Meeting</Badge>
+                  <Badge dotColorClassName="bg-indigo-500">Data Analysis and Insights</Badge>
+                  <Badge dotColorClassName="bg-pink-500">Content generation</Badge>
+                  <Badge dotColorClassName="bg-teal-500">Process Automation</Badge>
+                  <Badge dotColorClassName="bg-sky-500">Data Transformation</Badge>
+                </div>
+              </div>
             </div>
 
-            <Button size="lg" className="bg-black text-white hover:bg-black/90">
-              EXPLORE OUR AGENTS
+            <Button asChild size="lg" className="bg-black text-white hover:bg-black/90">
+              <Link href="/agents">EXPLORE OUR AGENTS</Link>
             </Button>
           </div>
         </div>
       </section>
       
+      {/* Stop Searching Section */}
+      <section className="py-20">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <div className="text-center">
+            <h2 className="mb-4 text-4xl font-bold text-balance">
+              <span className="gradient-text">Find. Try. Launch.</span>
+            </h2>
+            <p className="mb-20 text-muted-foreground max-w-2xl mx-auto">Your journey to scaling AI-solutions starts here.</p>
 
+            {/* Interactive stepper (non-card) */}
+            <div className="relative mx-auto max-w-5xl">
+              {/* Connector line */}
+              <div className="hidden lg:block absolute top-6 left-0 right-0 h-1 rounded-full" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}} />
+
+              <ul className="grid grid-cols-1 gap-8 lg:grid-cols-4 lg:gap-6">
+                <li className="relative">
+                  <div className="flex items-start lg:flex-col lg:items-center text-left lg:text-center gap-3">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-sm shrink-0" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>1</span>
+                    <div>
+                      <div className="font-semibold">Find your use case</div>
+                      <div className="text-sm text-muted-foreground">Explore ready-made industry use cases.</div>
+                    </div>
+                  </div>
+                </li>
+                <li className="relative">
+                  <div className="flex items-start lg:flex-col lg:items-center text-left lg:text-center gap-3">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-sm shrink-0" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>2</span>
+                    <div>
+                      <div className="font-semibold">Try an agent</div>
+                      <div className="text-sm text-muted-foreground">Test the right AI copilot for your need.</div>
+                    </div>
+                  </div>
+                </li>
+                <li className="relative">
+                  <div className="flex items-start lg:flex-col lg:items-center text-left lg:text-center gap-3">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-sm shrink-0" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>3</span>
+                    <div>
+                      <div className="font-semibold">Pick your stack</div>
+                      <div className="text-sm text-muted-foreground">Choose your preferred platform or model.</div>
+                    </div>
+                  </div>
+                </li>
+                <li className="relative">
+                  <div className="flex items-start lg:flex-col lg:items-center text-left lg:text-center gap-3">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-sm shrink-0" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>4</span>
+                    <div>
+                      <div className="font-semibold">Launch your trial</div>
+                      <div className="text-sm text-muted-foreground">Experience the future of work in minutes.</div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* AI Catalyst Section */}
       <section className="py-20">
         <div className="mx-auto max-w-[1280px] px-6">
@@ -154,16 +227,19 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="bg-black text-white hover:bg-black/90"
+                onClick={() => setChatOpen(true)}
               >
                 START BUILDING YOUR AGENT
               </Button>
-              <Button size="lg" variant="outline">
-                SEE AI CATALYST IN ACTION
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/ai-catalyst">SEE AI CATALYST IN ACTION</Link>
               </Button>
             </div>
           </div>
         </div>
       </section>
+
+
 
       {/* Tech Stack Section */}
       <section className="bg-gradient-to-b from-white to-gray-50 py-20">

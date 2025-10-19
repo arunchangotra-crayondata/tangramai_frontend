@@ -16,10 +16,11 @@ type Message = {
 type ChatDialogProps = {
   open: boolean
   onOpenChange: (v: boolean) => void
+  initialMode?: "create" | "explore"
 }
 
-export default function ChatDialog({ open, onOpenChange }: ChatDialogProps) {
-  const [mode, setMode] = useState<"create" | "explore">("explore")
+export default function ChatDialog({ open, onOpenChange, initialMode = "explore" }: ChatDialogProps) {
+  const [mode, setMode] = useState<"create" | "explore">(initialMode)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "m1",
@@ -38,6 +39,13 @@ export default function ChatDialog({ open, onOpenChange }: ChatDialogProps) {
       setSessionId(sid)
     }
   }, [sessionId])
+
+  // Ensure mode resets to the requested initialMode whenever dialog opens
+  useEffect(() => {
+    if (open) {
+      setMode(initialMode)
+    }
+  }, [open, initialMode])
 
   async function handleSend() {
     if (!input.trim()) return

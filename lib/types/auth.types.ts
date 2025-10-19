@@ -19,20 +19,25 @@ export interface SignupRequest {
   role: 'isv' | 'reseller' | 'client'
   // ISV fields
   isv_name?: string
+  isv_registered_name?: string
   isv_address?: string
   isv_domain?: string
   isv_mob_no?: string
+  isv_country_code?: string
+  isv_mou?: string // base64 or file data
   // Reseller fields
   reseller_name?: string
+  reseller_registered_name?: string
   reseller_address?: string
   reseller_domain?: string
   reseller_mob_no?: string
+  reseller_country_code?: string
+  reseller_whitelisted_domain?: string
+  reseller_logo?: string // base64 or file data
   // Client fields
   client_name?: string
   client_company?: string
   client_mob_no?: string
-  // Additional fields
-  whitelisted_domain?: string
 }
 
 // API Response Types

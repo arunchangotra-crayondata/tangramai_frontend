@@ -36,7 +36,7 @@ export default function HomePage() {
           <div className="text-center">
             <h1 className="mb-4 text-5xl font-bold text-balance md:text-6xl">
               <span className="gradient-text">
-                Explore Our AI Agent Marketplace
+                Explore Our AI Agent Store
               </span>
             </h1>
             <p className="mb-8 text-lg text-muted-foreground text-balance text-[#374151]  ">
@@ -298,7 +298,7 @@ export default function HomePage() {
                   <p className="text-sm text-muted-foreground">Our partners are certified Tangram.ai channel partners, technology partners, or independent software vendors (ISV).</p>
                 </div>
                 <div className="flex justify-start">
-                  <Button variant="outline" onClick={() => openModal("vendor-login")} className="px-4 py-2">BECOME A ISV</Button>
+                  <Button variant="outline" onClick={() => openModal("auth", { mode: "signup", role: "isv" })} className="px-4 py-2">BECOME A ISV</Button>
                 </div>
               </div>
 
@@ -310,7 +310,7 @@ export default function HomePage() {
                   <p className="text-sm text-muted-foreground">Our Reseller program allows you to access Tangram.ai resources, support and professional services for your projects.</p>
                 </div>
                 <div className="flex justify-start">
-                  <Button variant="outline" onClick={() => openModal("reseller-login")} className="px-4 py-2">BECOME A RESELLER</Button>
+                  <Button variant="outline" onClick={() => openModal("auth", { mode: "signup", role: "reseller" })} className="px-4 py-2">BECOME A RESELLER</Button>
                 </div>
               </div>
             </div>

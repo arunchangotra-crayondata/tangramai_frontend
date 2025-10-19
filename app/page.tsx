@@ -158,33 +158,33 @@ export default function HomePage() {
       <section className="py-20">
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="text-center">
-            <h2 className="mb-14 text-4xl font-bold text-balance">
+            <h2 className="mb-6 text-4xl font-bold text-balance">
               <span className="gradient-text">
                 Accelerate Deployment of Your Own Agents using AI Catalyst
               </span>
             </h2>
-            {/* Subheader bullets */}
-            <div className="mx-auto mb-6 grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="flex items-start gap-3 text-left">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
-                  <Shield className="h-5 w-5" />
+            {/* Subheader bullets (pill chips) */}
+            <div className="mx-auto mb-6 grid max-w-5xl grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+              <div className="flex items-center gap-3 rounded-full border bg-white/80 backdrop-blur px-4 py-2 shadow-sm">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
+                  <Shield className="h-4 w-4" />
                 </span>
-                <div className="font-medium">Reduce risks.</div>
+                <div className="text-sm font-medium">Reduce risks.</div>
               </div>
-              <div className="flex items-start gap-3 text-left">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
-                  <Rocket className="h-5 w-5" />
+              <div className="flex items-center gap-3 rounded-full border bg-white/80 backdrop-blur px-4 py-2 shadow-sm">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
+                  <Rocket className="h-4 w-4" />
                 </span>
-                <div className="font-medium">Accelerate adoption.</div>
+                <div className="text-sm font-medium">Accelerate adoption.</div>
               </div>
-              <div className="flex items-start gap-3 text-left">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
-                  <CheckCircle2 className="h-5 w-5" />
+              <div className="flex items-center gap-3 rounded-full border bg-white/80 backdrop-blur px-4 py-2 shadow-sm">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
+                  <CheckCircle2 className="h-4 w-4" />
                 </span>
-                <div className="font-medium">Your data, your guardrails, our agents, our models.</div>
+                <div className="text-sm font-medium">Your data, your guardrails, our agents, our models.</div>
               </div>
             </div>
-            <div className="mb-12 text-sm text-muted-foreground max-w-3xl mx-auto">
+            <div className="mb-8 text-xs md:text-sm text-muted-foreground max-w-3xl mx-auto">
               Worried about hallucinations? Or data security? Catalyst is designed to address them.
             </div>
             {/* <p className="mb-12 text-lg text-muted-foreground text-balance text-[#111827]">

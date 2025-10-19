@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -17,15 +18,19 @@ import { EditResellerModal } from "@/components/edit-reseller-modal"
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 import { adminService } from "@/lib/api/admin.service"
+import { useAuthStore } from "@/lib/store/auth.store"
 import type { AgentAPIResponse, ISVAPIResponse, ResellerAPIResponse } from "@/lib/types/admin.types"
 
 type TabType = "agents" | "isvs" | "resellers"
 
 export default function AdminPage() {
   const { toast } = useToast()
+  const router = useRouter()
+  const { user, isAuthenticated } = useAuthStore()
   const [activeTab, setActiveTab] = useState<TabType>("agents")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
   // API Data
   const [agents, setAgents] = useState<AgentAPIResponse[]>([])
@@ -36,6 +41,42 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<"all" | "approved" | "pending">("all")
   const [assetTypeFilter, setAssetTypeFilter] = useState<string>("all")
+
+  // Authentication and Role Check
+  useEffect(() => {
+    const checkAuthAndRole = () => {
+      console.log('Auth check - isAuthenticated:', isAuthenticated)
+      console.log('Auth check - user:', user)
+      console.log('Auth check - user role:', user?.role)
+      
+      if (!isAuthenticated || !user) {
+        console.log('User not authenticated, redirecting to login')
+        // User is not authenticated, redirect to login
+        router.push('/auth/login')
+        return
+      }
+
+      if (user.role !== 'admin') {
+        console.log('User is not admin, redirecting to home')
+        // User is authenticated but not an admin, redirect to home
+        toast({
+          description: "Access denied. Admin privileges required.",
+          variant: "destructive",
+        })
+        router.push('/')
+        return
+      }
+
+      console.log('User is admin, allowing access')
+      // User is authenticated and is an admin, allow access
+      setIsCheckingAuth(false)
+    }
+
+    // Add a small delay to ensure Zustand store is hydrated from localStorage
+    const timer = setTimeout(checkAuthAndRole, 100)
+    
+    return () => clearTimeout(timer)
+  }, [isAuthenticated, user, router, toast])
 
   // Modal States
   const [selectedAgent, setSelectedAgent] = useState<AgentAPIResponse | null>(null)
@@ -346,6 +387,18 @@ export default function AdminPage() {
         <XCircle className="h-3 w-3 mr-1" />
         Pending
       </Badge>
+    )
+  }
+
+  // Show loading screen while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying access...</p>
+        </div>
+      </div>
     )
   }
 

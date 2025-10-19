@@ -25,10 +25,10 @@ export default function ISVPage() {
               customers and grow your business through one of the world's largest commercial cloud marketplaces.
             </p>
             <div className="flex gap-4">
-              <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("vendor-signup")}>
+              <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("auth", { mode: "signup", role: "isv" })}>
                 BECOME A ISV PARTNER
               </Button>
-              <Button size="lg" variant="outline" onClick={() => openModal("vendor-login")}>
+              <Button size="lg" variant="outline" onClick={() => openModal("auth", { mode: "login", role: "isv" })}>
                 LOGIN TO ISV HUB
               </Button>
             </div>

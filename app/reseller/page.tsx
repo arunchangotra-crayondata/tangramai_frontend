@@ -24,11 +24,11 @@ export default function ResellerPage() {
                             Start referring or integrating Tangram.ai with your clients today to unlock new revenue opportunities, accelerate growth, and deliver intelligent AI solutions at scale.
                         </p>
                         <div className="flex gap-4">
-                            <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("auth", { mode: "signup", role: "reseller" })}>
+                            {/* <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("auth", { mode: "signup", role: "reseller" })}>
                             Become a tangram reseller
-                            </Button>
-                            <Button size="lg" variant="outline" onClick={() => openModal("auth", { mode: "login", role: "reseller" })}>
-                                Login to Reseller hub
+                            </Button> */}
+                            <Button size="lg"  onClick={() => openModal("auth", { mode: "login", role: "reseller" })}>
+                                LOGIN TO RESELLER HUB
                             </Button>
                         </div>
                     </div>

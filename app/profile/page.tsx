@@ -1,26 +1,85 @@
+"use client"
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/lib/store/auth.store'
+import { useToast } from '@/hooks/use-toast'
+import { ClientProfileComponent } from '@/components/profile/client-profile'
+import { ISVProfileComponent } from '@/components/profile/isv-profile'
+import { ResellerProfileComponent } from '@/components/profile/reseller-profile'
+
 export default function ProfilePage() {
-  return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Profile</h1>
-      <div className="max-w-2xl">
-        <div className="p-6 border rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">User Information</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <p className="mt-1 text-sm text-gray-900">user@example.com</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Role</label>
-              <p className="mt-1 text-sm text-gray-900">Client</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Member Since</label>
-              <p className="mt-1 text-sm text-gray-900">January 2024</p>
-            </div>
-          </div>
+  const router = useRouter()
+  const { user, isAuthenticated } = useAuthStore()
+  const { toast } = useToast()
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  useEffect(() => {
+    const checkAuthAndRole = () => {
+      if (!isAuthenticated || !user) {
+        router.push('/auth/login')
+        return
+      }
+
+      // Admin users don't have a profile page - redirect to home
+      if (user.role === 'admin') {
+        toast({
+          description: "Admin users don't have a profile page.",
+          variant: "destructive",
+        })
+        router.push('/')
+        return
+      }
+
+      // Allow Client, ISV, and Reseller users to access profile
+      setIsCheckingAuth(false)
+    }
+
+    // Add a small delay to ensure Zustand store is hydrated
+    const timer = setTimeout(checkAuthAndRole, 100)
+    return () => clearTimeout(timer)
+  }, [isAuthenticated, user, router, toast])
+
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying access...</p>
         </div>
       </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">User not found</p>
+      </div>
+    )
+  }
+
+  // Render appropriate profile component based on user role
+  const renderProfileComponent = () => {
+    switch (user.role) {
+      case 'client':
+        return <ClientProfileComponent clientId={user.user_id} />
+      case 'isv':
+        return <ISVProfileComponent isvId={user.user_id} />
+      case 'reseller':
+        return <ResellerProfileComponent resellerId={user.user_id} />
+      default:
+        return (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Invalid user role</p>
+          </div>
+        )
+    }
+  }
+
+  return (
+    <div className="container mx-auto py-8">
+      {renderProfileComponent()}
     </div>
   )
 }

@@ -151,11 +151,14 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
       )}
 
       <Dialog open={open && !isMinimized} onOpenChange={onOpenChange}>
-        <DialogContent className={`p-0 overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 ease-out ${
-          isExpanded 
-            ? "sm:max-w-[900px] md:max-w-[960px] animate-in slide-in-from-bottom-4" 
-            : "sm:max-w-[420px] md:max-w-[420px] fixed bottom-6 right-6 left-auto top-auto translate-x-0 translate-y-0 animate-in slide-in-from-bottom-4"
-        }`}>
+        <DialogContent 
+          className={`p-0 overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 ease-out ${
+            isExpanded 
+              ? "sm:max-w-[900px] md:max-w-[960px] animate-in slide-in-from-bottom-4" 
+              : "sm:max-w-[420px] md:max-w-[420px] fixed bottom-6 right-6 left-auto top-auto translate-x-0 translate-y-0 animate-in slide-in-from-bottom-4"
+          }`}
+          showCloseButton={false}
+        >
           <div className={isExpanded ? "flex h-[640px] flex-col bg-white" : "flex h-[520px] flex-col bg-white"}>
             <div className="flex items-center justify-between border-b px-4 py-3 bg-gradient-to-r from-white to-gray-50">
             <div className="flex items-center gap-3">

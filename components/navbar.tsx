@@ -9,11 +9,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import { useAuthStore } from "@/lib/store/auth.store"
 import { useModal } from "@/hooks/use-modal"
 import { useState, useRef, useEffect } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 export function Navbar() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuthStore()
   const { openModal } = useModal()
+  const { toast } = useToast()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [notifications, setNotifications] = useState([
@@ -69,6 +71,33 @@ export function Navbar() {
     router.push("/")
   }
 
+  const handleDashboardClick = () => {
+    if (!user) return
+    
+    setIsDropdownOpen(false)
+    
+    switch (user.role) {
+      case 'admin':
+        router.push('/admin')
+        break
+      case 'isv':
+        router.push('/dashboard')
+        break
+      case 'reseller':
+        toast({
+          description: "Dashboard is not available for resellers.",
+          variant: "destructive",
+        })
+        router.push('/')
+        break
+      case 'client':
+        router.push('/dashboard')
+        break
+      default:
+        router.push('/dashboard')
+    }
+  }
+
   const getUserInitials = (email: string) => {
     // Try to get initials from email username part
     const username = email.split('@')[0]
@@ -87,7 +116,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-50">
+    <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 relative z-50">
       <div className="mx-auto max-w-[1280px] px-6">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
@@ -194,15 +223,14 @@ export function Navbar() {
                 </button>
                 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mb-2 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-xl z-[60]">
-                    <Link
-                      href="/dashboard"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsDropdownOpen(false)}
+                  <div className="absolute right-0 mb-2 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-xl z-60">
+                    <button
+                      onClick={handleDashboardClick}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       <LayoutDashboard className="h-4 w-4" />
                       Dashboard
-                    </Link>
+                    </button>
                     <Link
                       href="/profile"
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

@@ -8,6 +8,8 @@ import DemoAssetsViewer from "../../../components/demo-assets-viewer"
 import ReadMore from "../../../components/read-more"
 import CollapsibleList from "../../../components/collapsible-list"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { readFileSync } from "fs"
+import { join } from "path"
 
 type AgentDetailApiResponse = {
   agent?: {
@@ -20,7 +22,10 @@ type AgentDetailApiResponse = {
     demo_link?: string
     demo_preview?: string
     features?: string
+    roi?: string
     tags?: string
+    by_capability?: string
+    service_provider?: string
   }
   capabilities?: Array<{ serial_id?: string; by_capability?: string }>
   deployments?: Array<{
@@ -35,8 +40,26 @@ type AgentDetailApiResponse = {
     capability_name?: string
   }>
   demo_assets?: Array<{ demo_asset_link?: string; demo_link?: string }>
-  documentation?: Array<{ sdk_details?: string; swagger_details?: string; sample_input?: string; sample_output?: string }>
-  isv_info?: { isv_name?: string; isv_email_no?: string }
+  documentation?: Array<{ 
+    agent_id?: string
+    sdk_details?: string
+    swagger_details?: string
+    sample_input?: string
+    sample_output?: string
+    security_details?: string
+    related_files?: string
+    doc_id?: string
+  }>
+  isv_info?: { 
+    isv_id?: string
+    isv_name?: string
+    isv_address?: string
+    isv_domain?: string
+    isv_mob_no?: string
+    isv_email_no?: string
+    mou_file_path?: string
+    admin_approved?: string
+  }
 }
 
 async function fetchAgentDetail(agentId: string) {
@@ -52,10 +75,48 @@ async function fetchAgentDetail(agentId: string) {
   }
 }
 
+function readReadmeFile(): string {
+  try {
+    const readmePath = join(process.cwd(), 'README.md')
+    return readFileSync(readmePath, 'utf8')
+  } catch (err) {
+    console.error('Error reading README.md:', err)
+    return '# Documentation\n\nDocumentation content is not available at this time.'
+  }
+}
+
+function formatCodeBlock(content: string): string {
+  // Enhanced markdown formatter
+  return content
+    // Headers
+    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-6 mb-3">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mt-6 mb-3">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-4">$1</h1>')
+    // Code blocks
+    .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+      const language = lang || 'text'
+      return `<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto border"><code class="language-${language}">${code.trim()}</code></pre>`
+    })
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">$1</code>')
+    // Bold text
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+    // Italic text
+    .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+    // Lists
+    .replace(/^\* (.*$)/gim, '<li class="ml-4">• $1</li>')
+    .replace(/^- (.*$)/gim, '<li class="ml-4">• $1</li>')
+    // Line breaks
+    .replace(/\n\n/g, '</p><p class="mb-4">')
+    .replace(/^(?!<[h|l])/gm, '<p class="mb-4">')
+    .replace(/(?<!>)$/gm, '</p>')
+}
+
 export default async function AgentDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const data = await fetchAgentDetail(id)
   const agent = data?.agent
+  const readmeContent = readReadmeFile()
 
   const title = agent?.agent_name || "Business Representative"
   const description = agent?.description ||
@@ -87,7 +148,7 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                 <h1 className="mb-2 text-4xl font-bold">{title}</h1>
                 <div className="mt-1 flex items-center gap-2" style={{ fontFamily: 'Inter, sans-serif' }}>
                   <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]">Agent</span>
-                  <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]">Build by: <span style={{ color: '#155EEF' }}>{data?.isv_info?.isv_name || 'Crayon Data India Pvt Ltd'}</span></span>
+                  <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]">Built by: <span style={{ color: '#155EEF' }}>{data?.isv_info?.isv_name || 'Crayon Data India Pvt Ltd'}</span></span>
                 </div>
               </div>
 
@@ -124,80 +185,42 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                     </Badge>
                   ))}
                 </div>
-                <div>
+                {/* <div>
                   <span className="font-semibold">Works with : </span>
                   {worksWith.map((w, i) => (
                     <Badge key={i} variant="outline" className="ml-2">
                       {w}
                     </Badge>
                   ))}
-                </div>
+                </div> */}
               </div>
 
               {/* Tabs */}
-              <Tabs defaultValue="definition" className="w-full mt-[100px]">
+              <Tabs defaultValue="features" className="w-full mt-[100px]">
                 <TabsList className="w-full justify-start bg-transparent p-0 gap-6 h-12 rounded-none border-0">
-                  <TabsTrigger value="definition">Agent Definition</TabsTrigger>
-                  <TabsTrigger value="tools">Tools</TabsTrigger>
+                  <TabsTrigger value="features">Features</TabsTrigger>
+                  <TabsTrigger value="roi">ROI</TabsTrigger>
                   <TabsTrigger value="deployment">Deployment</TabsTrigger>
-                  <TabsTrigger value="usecase">Use Case</TabsTrigger>
+                  <TabsTrigger value="docs">Docs</TabsTrigger>
                 </TabsList>
                 <div className="h-px bg-gray-200 -mx-6" />
-                <TabsContent value="definition" className="mt-6">
-                  <h3
-                    className="mb-2"
-                    style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontWeight: 600,
-                      fontSize: '14px',
-                      lineHeight: '100%',
-                      letterSpacing: 0,
-                      color: '#101828',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    Scope
-                  </h3>
-                  <CollapsibleList
-                    items={[
-                      "You are an automated email responder.",
-                      "Your task is to process and respond to HubSpot CRM inbox replies.",
-                      "Fetch all customer replies using the provided CRM object ID.",
-                      "Extract and analyze all customer messages from the email thread",
-                      "Extract relevant context from customer replies for customized marketing",
-                    ]}
-                    ordered={false}
-                    previewCount={5}
-                  />
-
-                  
-
-                  <h3
-                    className="mb-2 mt-6"
-                    style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontWeight: 600,
-                      fontSize: '14px',
-                      lineHeight: '100%',
-                      letterSpacing: 0,
-                      color: '#101828',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    Instructions
-                  </h3>
-                  <CollapsibleList
-                    items={[
-                      "Make sure to look search for answers every time a question is asked in the replies do not ask to schedule meeting unless the reply say so",
-                      "Do not assume anything, Just provide the responses from context.",
-                      "Tone: In case of any urgent emails but polite. Highlight deadlines in bold.",
-                    ]}
-                    ordered={true}
-                    previewCount={5}
-                  />
+                <TabsContent value="features" className="mt-6">
+                  {agent?.features && agent.features !== "na" ? (
+                    <div className="prose max-w-none">
+                      <div dangerouslySetInnerHTML={{ __html: formatCodeBlock(agent.features) }} />
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">Features information is not available for this agent.</p>
+                  )}
                 </TabsContent>
-                <TabsContent value="tools" className="mt-6">
-                      <p className="text-muted-foreground">Tools configuration will be displayed here.</p>
+                <TabsContent value="roi" className="mt-6">
+                  {agent?.roi && agent.roi !== "na" ? (
+                    <div className="prose max-w-none">
+                      <div dangerouslySetInnerHTML={{ __html: formatCodeBlock(agent.roi) }} />
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">ROI information is not available for this agent.</p>
+                  )}
                 </TabsContent>
                 <TabsContent value="deployment" className="mt-6">
                   {(!data?.deployments || data.deployments.length === 0) ? (
@@ -245,8 +268,12 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                     </div>
                   )}
                 </TabsContent>
-                <TabsContent value="usecase" className="mt-6">
-                      <p className="text-muted-foreground">Use case examples will be displayed here.</p>
+                <TabsContent value="docs" className="mt-6">
+                  <div className="max-h-[600px] overflow-y-auto border rounded-lg p-6 bg-gray-50">
+                    <div className="prose max-w-none">
+                      <div dangerouslySetInnerHTML={{ __html: formatCodeBlock(readmeContent) }} />
+                    </div>
+                  </div>
                 </TabsContent>
               </Tabs>
 
@@ -274,16 +301,12 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
               
 
               {/* Developer Info */}
-              {/* <Card>
+              <Card>
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div>
                       <div className="text-sm text-muted-foreground">Developer</div>
-                      <div className="font-semibold">{data?.isv_info?.isv_name || 'Crayon Data Team'}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Contact</div>
-                      <div className="font-semibold">{data?.isv_info?.isv_email_no || 'na'}</div>
+                      <div className="font-semibold">{data?.isv_info?.isv_name || 'na'}</div>
                     </div>
                     <div>
                       <div className="text-sm text-muted-foreground">Last Updated</div>
@@ -293,9 +316,17 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                       <div className="text-sm text-muted-foreground">Language</div>
                       <div className="font-semibold">English</div>
                     </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Installs</div>
+                      <div className="font-semibold">6</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Enterprise users</div>
+                      <div className="font-semibold">{data?.isv_info?.isv_email_no || 'na'}</div>
+                    </div>
                   </div>
                 </CardContent>
-              </Card> */}
+              </Card>
 
               {/* Document & ROI Links */}
               {/* <div className="flex gap-2">

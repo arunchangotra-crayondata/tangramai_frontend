@@ -114,39 +114,39 @@ export default function ResellerPage() {
                                         <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white shrink-0"
                                              style={{ background: "linear-gradient(270deg, #3B60AF 0%, #0082C0 100%)" }}>
                                             <Target className="h-5 w-5" />
-                                        </div>
-                                        <div>
+                                            </div>
+                                            <div>
                                             <h4 className="text-sm font-bold mb-1 tracking-wide">GAIN MARKET ACCESS</h4>
                                             <p className="text-sm text-gray-700">Meet the right stakeholders and get their time and attention. Gain streamlined access to key enterprises and sell business value to CEOs and business decision makers directly.</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
+                                    </Card>
 
                                 <Card className="p-6 hover:shadow-md transition-all border bg-white/90">
                                     <div className="flex items-start gap-3">
                                         <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white shrink-0"
                                              style={{ background: "linear-gradient(270deg, #3B60AF 0%, #0082C0 100%)" }}>
                                             <TrendingUp className="h-5 w-5" />
-                                        </div>
-                                        <div>
+                                            </div>
+                                            <div>
                                             <h4 className="text-sm font-bold mb-1 tracking-wide">DEMONSTRATE RAPID OUTCOMES</h4>
                                             <p className="text-sm text-gray-700">Get access to their data to show exactly how valuable you can be to their business. Ability to deliver rapid outcomes to enterprises and realize faster ROI on your products by building on top of our foundational components.</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
+                                    </Card>
 
                                 <Card className="p-6 hover:shadow-md transition-all border bg-white/90">
                                     <div className="flex items-start gap-3">
                                         <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white shrink-0"
                                              style={{ background: "linear-gradient(270deg, #3B60AF 0%, #0082C0 100%)" }}>
                                             <Globe className="h-5 w-5" />
-                                        </div>
-                                        <div>
+                                            </div>
+                                            <div>
                                             <h4 className="text-sm font-bold mb-1 tracking-wide">STREAMLINE MULTIPLE PROCESSES</h4>
                                             <p className="text-sm text-gray-700">Streamline sales, legal and procurement processes and reduce cost of sale and sales cycle. Experience the smoothest commercial processes of vendor registration.</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
+                                    </Card>
                             </div>
                         </div>
                     </div>

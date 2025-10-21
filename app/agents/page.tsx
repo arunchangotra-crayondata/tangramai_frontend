@@ -7,6 +7,7 @@ import { AgentCard } from "@/components/agent-card";
 import ChatDialog from "@/components/chat-dialog";
 import { Search, ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 // Fallback mock data (minimal) in case the API fails
 const fallbackAgents = [
@@ -90,6 +91,9 @@ export default function AgentLibraryPage() {
   const [deploymentFilter, setDeploymentFilter] = useState<string>("All");
   const [personaFilter, setPersonaFilter] = useState<string>("All");
   const [createChatOpen, setCreateChatOpen] = useState(false);
+  
+  const searchParams = useSearchParams();
+  const agentIdFromUrl = searchParams.get('agentId');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -172,6 +176,12 @@ export default function AgentLibraryPage() {
   const filteredAgents = useMemo(() => {
     let filtered = agents;
     
+    // Filter by agent ID from URL parameter (highest priority)
+    if (agentIdFromUrl) {
+      filtered = filtered.filter(agent => agent.id === agentIdFromUrl);
+      return filtered;
+    }
+    
     if (search) {
       const q = search.toLowerCase();
       filtered = filtered.filter(agent => 
@@ -208,7 +218,7 @@ export default function AgentLibraryPage() {
     }
     
     return filtered;
-  }, [agents, search, providerFilter, capabilityFilter, deploymentFilter, personaFilter]);
+  }, [agents, search, providerFilter, capabilityFilter, deploymentFilter, personaFilter, agentIdFromUrl]);
 
   return (
     <div className="flex flex-col">
@@ -348,6 +358,22 @@ export default function AgentLibraryPage() {
                   <option key={persona} value={persona}>{persona}</option>
                 ))}
               </select>
+              
+              {/* Clear All Filters Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setProviderFilter("All");
+                  setCapabilityFilter("All");
+                  setDeploymentFilter("All");
+                  setPersonaFilter("All");
+                  setSearch("");
+                }}
+                className="text-xs px-3 py-2 border-gray-300 hover:bg-gray-50"
+              >
+                Clear All
+              </Button>
             </div>
           </div>
         </div>

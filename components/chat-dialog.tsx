@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Minus, X, Maximize2, Minimize2 } from "lucide-react"
+import { Minus, X, Maximize2, Minimize2, ExternalLink } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 
@@ -18,6 +20,17 @@ type Message = {
   role: "user" | "assistant"
   text: string
   time: string
+  filteredAgentIds?: string[]
+  filteredAgents?: {
+    agent_id: string
+    agent_name: string
+    description: string
+    by_value?: string
+    by_capability?: string
+    service_provider?: string
+    asset_type?: string
+    by_persona?: string
+  }[]
 }
 
 type ChatDialogProps = {
@@ -25,6 +38,71 @@ type ChatDialogProps = {
   onOpenChange: (v: boolean) => void
   initialMode?: "create" | "explore"
   initialMessage?: string
+}
+
+// Agent Card Component for Chat
+function ChatAgentCard({ agent }: { agent: NonNullable<Message['filteredAgents']>[0] }) {
+  return (
+    <Card className="mt-3 border border-blue-200 bg-blue-50/50">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            <h4 className="font-semibold text-gray-900 mb-1">{agent.agent_name}</h4>
+            <p className="text-sm text-gray-600 overflow-hidden" style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical'
+            }}>
+              {agent.description}
+            </p>
+          </div>
+          <Link href={`/agents/${agent.agent_id}`}>
+            <Button size="sm" variant="outline" className="ml-2 flex-shrink-0">
+              <ExternalLink className="h-3 w-3 mr-1" />
+              View Details
+            </Button>
+          </Link>
+        </div>
+        
+        <div className="flex flex-wrap gap-1 mb-2">
+          {agent.by_capability && (
+            <Badge variant="default" className="text-xs">
+              {agent.by_capability}
+            </Badge>
+          )}
+          {agent.service_provider && (
+            <Badge variant="outline" className="text-xs">
+              {agent.service_provider}
+            </Badge>
+          )}
+          {agent.by_persona && (
+            <Badge variant="secondary" className="text-xs">
+              {agent.by_persona}
+            </Badge>
+          )}
+        </div>
+        
+        {agent.by_value && (
+          <p className="text-xs text-gray-500 italic">"{agent.by_value}"</p>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// Function to fetch agent details by ID
+async function fetchAgentDetails(agentId: string) {
+  try {
+    const res = await fetch(`https://agents-store.onrender.com/api/agents/${agentId}`, {
+      cache: "no-store"
+    })
+    if (!res.ok) throw new Error(`Failed to fetch agent ${agentId}: ${res.status}`)
+    const data = await res.json()
+    return data?.agent || null
+  } catch (err) {
+    console.error(`Error fetching agent ${agentId}:`, err)
+    return null
+  }
 }
 
 export default function ChatDialog({ open, onOpenChange, initialMode = "explore", initialMessage }: ChatDialogProps) {
@@ -91,6 +169,18 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
       })
       const json = await res.json().catch(() => null)
       const reply = json?.data?.response || "Sorry, something went wrong. Please try again later."
+      
+      // Check if the API response has filtered_agents data (array of agent IDs)
+      let filteredAgentIds = null
+      if (json?.data?.filtered_agents && Array.isArray(json.data.filtered_agents) && json.data.filtered_agents.length > 0) {
+        filteredAgentIds = json.data.filtered_agents
+      }
+      
+      // Log for debugging (remove in production)
+      if (filteredAgentIds) {
+        console.log("Found filtered agent IDs:", filteredAgentIds)
+      }
+      
       const replyTs = json?.data?.timestamp
         ? new Date(json.data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
         : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -108,10 +198,32 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
       setMessages((prev) => 
         prev.map(msg => 
           msg.text === "AI thinking..." 
-            ? { ...msg, text: reply }
+            ? { ...msg, text: reply, filteredAgentIds }
             : msg
         )
       )
+      
+      // If we have agent IDs, fetch their details
+      if (filteredAgentIds && filteredAgentIds.length > 0) {
+        try {
+          const agentDetailsPromises = filteredAgentIds.map((id: string) => fetchAgentDetails(id))
+          const agentDetails = await Promise.all(agentDetailsPromises)
+          const validAgents = agentDetails.filter(agent => agent !== null)
+          
+          if (validAgents.length > 0) {
+            // Update the message with agent details
+            setMessages((prev) => 
+              prev.map(msg => 
+                msg.text === reply && msg.filteredAgentIds === filteredAgentIds
+                  ? { ...msg, filteredAgents: validAgents }
+                  : msg
+              )
+            )
+          }
+        } catch (err) {
+          console.error("Error fetching agent details:", err)
+        }
+      }
     } catch (e) {
       const errTs = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       setMessages((prev) => [
@@ -238,6 +350,15 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                                 Contact Us to Build Your Agent
                               </Button>
                             </Link>
+                          </div>
+                        )}
+                        
+                        {/* Show Agent Cards if filteredAgents are present */}
+                        {m.filteredAgents && m.filteredAgents.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            {m.filteredAgents.map((agent, index) => (
+                              <ChatAgentCard key={`${agent.agent_id}-${index}`} agent={agent} />
+                            ))}
                           </div>
                         )}
                       </div>

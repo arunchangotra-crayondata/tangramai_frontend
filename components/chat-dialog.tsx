@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Minus, X, Maximize2, Minimize2, ExternalLink } from "lucide-react"
+import { Minus, X, Maximize2, Minimize2, ExternalLink, Brain, Zap, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -45,16 +45,10 @@ function ChatAgentCard({ agent }: { agent: NonNullable<Message['filteredAgents']
   return (
     <Card className="mt-3 border border-blue-200 bg-blue-50/50">
       <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between">
           <div className="flex-1">
             <h4 className="font-semibold text-gray-900 mb-1">{agent.agent_name}</h4>
-            <p className="text-sm text-gray-600 overflow-hidden" style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical'
-            }}>
-              {agent.description}
-            </p>
+            <p className="text-sm text-gray-600 line-clamp-2">{agent.description}</p>
           </div>
           <Link href={`/agents/${agent.agent_id}`}>
             <Button size="sm" variant="outline" className="ml-2 flex-shrink-0">
@@ -63,30 +57,76 @@ function ChatAgentCard({ agent }: { agent: NonNullable<Message['filteredAgents']
             </Button>
           </Link>
         </div>
-        
-        <div className="flex flex-wrap gap-1 mb-2">
-          {agent.by_capability && (
-            <Badge variant="default" className="text-xs">
-              {agent.by_capability}
-            </Badge>
-          )}
-          {agent.service_provider && (
-            <Badge variant="outline" className="text-xs">
-              {agent.service_provider}
-            </Badge>
-          )}
-          {agent.by_persona && (
-            <Badge variant="secondary" className="text-xs">
-              {agent.by_persona}
-            </Badge>
-          )}
-        </div>
-        
-        {agent.by_value && (
-          <p className="text-xs text-gray-500 italic">"{agent.by_value}"</p>
-        )}
       </CardContent>
     </Card>
+  )
+}
+
+// Typing Effect Component
+function TypingEffect({ text }: { text: string }) {
+  const [displayedText, setDisplayedText] = useState("")
+  const [currentIndex, setCurrentIndex] = useState(0)
+  
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex])
+        setCurrentIndex(prev => prev + 1)
+      }, 20) // Adjust speed as needed
+      
+      return () => clearTimeout(timeout)
+    }
+  }, [currentIndex, text])
+  
+  return (
+    <span>
+      {displayedText}
+      {currentIndex < text.length && <span className="animate-pulse">|</span>}
+    </span>
+  )
+}
+
+// Enhanced Thinking Component
+function ThinkingIndicator() {
+  const [thinkingStage, setThinkingStage] = useState(0)
+  
+  const thinkingMessages = [
+    "Analyzing your request...",
+    "Processing information...",
+    "Generating response...",
+    "Almost ready..."
+  ]
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setThinkingStage(prev => (prev + 1) % thinkingMessages.length)
+    }, 800)
+    
+    return () => clearInterval(interval)
+  }, [])
+  
+  return (
+    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+      <div className="relative">
+        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+          <Brain className="h-4 w-4 text-white animate-pulse" />
+        </div>
+        <div className="absolute -top-1 -right-1">
+          <Sparkles className="h-3 w-3 text-yellow-500 animate-bounce" />
+        </div>
+      </div>
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-sm font-medium text-gray-700">AI Assistant</span>
+          <div className="flex gap-1">
+            <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
+            <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+          </div>
+        </div>
+        <p className="text-sm text-gray-600">{thinkingMessages[thinkingStage]}</p>
+      </div>
+    </div>
   )
 }
 
@@ -158,6 +198,11 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
     setIsSending(true)
     setIsThinking(true)
     
+    // Debug logging
+    console.log("Sending message with mode:", mode)
+    console.log("Message text:", userText)
+    console.log("Session ID:", sessionId)
+    
     try {
       const res = await fetch("https://agents-store.onrender.com/api/chat", {
         method: "POST",
@@ -191,8 +236,8 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
         { id: crypto.randomUUID(), role: "assistant", text: "AI thinking...", time: replyTs },
       ])
       
-      // Simulate thinking delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Simulate thinking delay for better UX (increased for more engaging experience)
+      await new Promise(resolve => setTimeout(resolve, 2000))
       
       // Replace thinking message with actual response
       setMessages((prev) => 
@@ -277,20 +322,26 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
               <div className="relative h-6 w-6">
                 <Image src="/chat_icon.png" alt="chat" fill className="object-contain" />
               </div>
-                <div className="text-sm font-medium">AI Assistant</div>
+              <div className="text-sm font-medium">AI Assistant</div>
             </div>
               <div className="flex items-center gap-2">
                 <div className="rounded-full border bg-white p-1 text-xs hidden sm:block">
                   <button
                     aria-label="Switch to Create"
-                    onClick={() => setMode("create")}
+                    onClick={() => {
+                      console.log("Switching to create mode")
+                      setMode("create")
+                    }}
                     className={`${mode === "create" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
                   >
                     Create
                   </button>
                   <button
                     aria-label="Switch to Explore"
-                    onClick={() => setMode("explore")}
+                    onClick={() => {
+                      console.log("Switching to explore mode")
+                      setMode("explore")
+                    }}
                     className={`${mode === "explore" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
                   >
                     Explore
@@ -365,10 +416,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                     ) : (
                       <span className="text-sm leading-relaxed">
                         {m.text === "AI thinking..." ? (
-                          <span className="flex items-center gap-1">
-                            <span>AI thinking</span>
-                            <span className="animate-pulse">...</span>
-                          </span>
+                          <ThinkingIndicator />
                         ) : (
                           m.text
                         )}

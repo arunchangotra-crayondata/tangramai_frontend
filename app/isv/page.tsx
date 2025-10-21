@@ -6,10 +6,24 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import { useModal } from "@/hooks/use-modal"
+import { useAuthStore } from "@/lib/store/auth.store"
+import { useRouter } from "next/navigation"
 import { ArrowRight, Target, Globe, TrendingUp } from "lucide-react"
 
 export default function ISVPage() {
   const { openModal } = useModal()
+  const { user, isAuthenticated } = useAuthStore()
+  const router = useRouter()
+
+  const handleOnboardAgent = () => {
+    if (isAuthenticated && user?.role === 'isv') {
+      // User is logged in as ISV, redirect to onboard page
+      router.push('/onboard')
+    } else {
+      // User is not logged in as ISV, show ISV login modal
+      openModal("auth", { mode: "login", role: "isv" })
+    }
+  }
   return (
     <div className="min-h-screen">
       {/* Hero Section with Gradient */}
@@ -18,17 +32,17 @@ export default function ISVPage() {
           {/* Decorative A badges */}
 
           <div className="max-w-2xl">
-            <h1 className="text-5xl font-bold mb-6 text-balance">Independent Software ISV (ISV) Program</h1>
+            <h1 className="text-5xl font-bold mb-6 text-balance">Independent Software Vendor (ISV) Program</h1>
             <p className="text-xl mb-4 font-medium">Build innovative Agents & AI solutions and reach more customers</p>
             <p className="text-gray-700 mb-8 leading-relaxed">
               ISV Success gives you access to the AI tools and IT support you need to build intelligent apps. Reach new
               customers and grow your business through one of the world's largest commercial cloud marketplaces.
             </p>
             <div className="flex gap-4">
-              <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("auth", { mode: "signup", role: "isv" })}>
-                BECOME A ISV PARTNER
+              <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={handleOnboardAgent}>
+                ON BOARD AGENT
               </Button>
-              <Button size="lg" variant="outline" onClick={() => openModal("auth", { mode: "login", role: "isv" })}>
+              <Button size="lg"   onClick={() => openModal("auth", { mode: "login", role: "isv" })}>
                 LOGIN TO ISV HUB
               </Button>
             </div>

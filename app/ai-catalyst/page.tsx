@@ -6,12 +6,18 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import ChatDialog from "@/components/chat-dialog";
 import { Gauge, Settings, TrendingUp, CheckCircle2 } from "lucide-react";
+import Head from "next/head";
 
 export default function AICatalystPage() {
   const [chatOpen, setChatOpen] = useState(false);
 
   return (
-    <div className="flex flex-col">
+    <>
+      <Head>
+        <title>Deployment Service - Tangram AI</title>
+        <meta name="description" content="AI Catalyst deployment service for accelerating AI agent development" />
+      </Head>
+      <div className="flex flex-col">
       {/* Hero */}
       <section className="relative py-20">
         {/* Decorative gradient blobs */}
@@ -214,6 +220,7 @@ export default function AICatalystPage() {
 
       <ChatDialog open={chatOpen} onOpenChange={setChatOpen} initialMode="create" />
     </div>
+    </>
   );
 }
 

@@ -1,7 +1,12 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AgentSearchChat } from "@/components/agent-search-chat";
 import { AgentCard } from "@/components/agent-card";
+import ChatDialog from "@/components/chat-dialog";
 import { Search, ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 // Fallback mock data (minimal) in case the API fails
 const fallbackAgents = [
@@ -12,8 +17,24 @@ const fallbackAgents = [
       "Simplifies insurance claim assessment with AI during the insurance claims. By analyzing uploaded images, it identifies affected parts, retrieves repair costs from a database, and generates a detailed damage report.",
     badges: [{ label: "Image Processing", variant: "default" as const }],
     tags: ["CRM", "Claims", "Insurance"],
+    capabilities: ["Document Intelligence"],
+    providers: ["AWS"],
+    deploymentType: "Solution",
+    persona: "Operations Teams",
   },
 ];
+
+type Agent = {
+  id: string;
+  title: string;
+  description: string;
+  badges: { label: string; variant: "default" }[];
+  tags: string[];
+  capabilities: string[];
+  providers: string[];
+  deploymentType: string;
+  persona: string;
+};
 
 type ApiAgent = {
   agent_id: string;
@@ -21,6 +42,10 @@ type ApiAgent = {
   description: string;
   tags: string | null;
   by_value?: string | null;
+  by_capability?: string | null;
+  service_provider?: string | null;
+  asset_type?: string | null;
+  by_persona?: string | null;
 };
 
 async function fetchAgents() {
@@ -55,8 +80,135 @@ async function fetchAgents() {
   }
 }
 
-export default async function AgentLibraryPage() {
-  const agents = await fetchAgents();
+export default function AgentLibraryPage() {
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [providerFilter, setProviderFilter] = useState<string>("All");
+  const [capabilityFilter, setCapabilityFilter] = useState<string>("All");
+  const [deploymentFilter, setDeploymentFilter] = useState<string>("All");
+  const [personaFilter, setPersonaFilter] = useState<string>("All");
+  const [createChatOpen, setCreateChatOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch("https://agents-store.onrender.com/api/agents", {
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`Failed to fetch agents: ${res.status}`);
+        const data = await res.json();
+        
+        const apiAgents: ApiAgent[] = data?.agents || [];
+        const mappedAgents = apiAgents.map((a) => ({
+          id: a.agent_id,
+          title: a.agent_name,
+          description: a.description,
+          tags: a.tags
+            ? a.tags
+                .split(",")
+                .map((t) => t.trim())
+                .filter(Boolean)
+            : [],
+          badges: [
+            { label: (a as any).by_value || "", variant: "default" as const },
+          ],
+          // Add new fields for filtering
+          capabilities: a.by_capability ? a.by_capability.split(",").map(c => c.trim()).filter(Boolean) : [],
+          providers: a.service_provider ? a.service_provider.split(",").map(p => p.trim()).filter(Boolean) : [],
+          deploymentType: a.asset_type || "",
+          persona: a.by_persona || "",
+        }));
+        
+        setAgents(mappedAgents.length > 0 ? mappedAgents : fallbackAgents);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load agents");
+        setAgents(fallbackAgents);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+
+  const allCapabilities = useMemo(() => {
+    const capabilities = new Set<string>();
+    agents.forEach(agent => {
+      agent.capabilities.forEach(capability => capabilities.add(capability));
+    });
+    return Array.from(capabilities).sort();
+  }, [agents]);
+
+  const allProviders = useMemo(() => {
+    const providers = new Set<string>();
+    agents.forEach(agent => {
+      agent.providers.forEach(provider => providers.add(provider));
+    });
+    return Array.from(providers).sort();
+  }, [agents]);
+
+  const allDeploymentTypes = useMemo(() => {
+    const types = new Set<string>();
+    agents.forEach(agent => {
+      if (agent.deploymentType) types.add(agent.deploymentType);
+    });
+    return Array.from(types).sort();
+  }, [agents]);
+
+  const allPersonas = useMemo(() => {
+    const personas = new Set<string>();
+    agents.forEach(agent => {
+      if (agent.persona) personas.add(agent.persona);
+    });
+    return Array.from(personas).sort();
+  }, [agents]);
+
+  const filteredAgents = useMemo(() => {
+    let filtered = agents;
+    
+    if (search) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter(agent => 
+        agent.title.toLowerCase().includes(q) ||
+        agent.description.toLowerCase().includes(q) ||
+        agent.tags.some(tag => tag.toLowerCase().includes(q)) ||
+        agent.capabilities.some(cap => cap.toLowerCase().includes(q)) ||
+        agent.providers.some(prov => prov.toLowerCase().includes(q))
+      );
+    }
+    
+    if (providerFilter !== "All") {
+      filtered = filtered.filter(agent => 
+        agent.providers.includes(providerFilter)
+      );
+    }
+    
+    if (capabilityFilter !== "All") {
+      filtered = filtered.filter(agent => 
+        agent.capabilities.includes(capabilityFilter)
+      );
+    }
+    
+    if (deploymentFilter !== "All") {
+      filtered = filtered.filter(agent => 
+        agent.deploymentType === deploymentFilter
+      );
+    }
+    
+    if (personaFilter !== "All") {
+      filtered = filtered.filter(agent => 
+        agent.persona === personaFilter
+      );
+    }
+    
+    return filtered;
+  }, [agents, search, providerFilter, capabilityFilter, deploymentFilter, personaFilter]);
 
   return (
     <div className="flex flex-col">
@@ -66,7 +218,7 @@ export default async function AgentLibraryPage() {
           <img src="/gradiant%20image%20right.png" alt="" className="h-full w-full object-cover" />
         </div>
         <div className="mx-auto max-w-[1280px] px-6">
-          <div className="text-left">
+          <div className="text-center">
             <h1 className="mb-4 font-inter font-extrabold text-[64px] leading-[110%] tracking-[-0.02em] text-balance">
               <span
                 style={{
@@ -78,23 +230,26 @@ export default async function AgentLibraryPage() {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                The AI platform accelerating <br /> business solutions
+                The One-Stop Store.   
               </span>
             </h1>
             <p
-              className="mb-8 text-balance text-[18px] font-normal leading-[150%] tracking-[0] text-[background: #374151;
-] rounded-md"
-              style={{
-                fontFamily: "Inter, sans-serif",
-              }}
+              className="mb-25 text-balance text-[18px] font-normal leading-[150%] tracking-[0]"
+              style={{ color: "#374151", fontFamily: "Inter, sans-serif" }}
             >
-              Unlock the value of enterprise data and enable customer engagement
-              at an individual level. Our comprehensive suite of AI agents
-              drives business transformation.
+              Discover.Try. Deploy.
             </p>
 
+            {/* Centered search bar under subheader */}
+            <div className="flex w-full justify-center mb-16">
+              <div className="w-full max-w-5xl">
+                {/* reuse same search-chat as home */}
+                <AgentSearchChat />
+              </div>
+            </div>
+
             {/* Loved by (left-aligned) */}
-            <div className="mb-[266px] flex items-center justify-start gap-6">
+            <div className="mb-[120px] flex items-center justify-center gap-6">
               <div className="text-sm text-muted-foreground">Loved by</div>
               {/* Overlapping circular company logos */}
               <div className="flex -space-x-3">
@@ -113,7 +268,7 @@ export default async function AgentLibraryPage() {
             </div>
 
             {/* Enterprise Partners Row */}
-            <div className="mt-6 flex flex-col items-start gap-3">
+            <div className="mt-6 flex flex-col items-center gap-3">
               <div className="text-sm font-medium">Our Enterprise AI Partners</div>
               <div className="flex items-center gap-6">
                 <img
@@ -146,39 +301,53 @@ export default async function AgentLibraryPage() {
         </div>
       </section>
 
-      {/* Unified Search + Filters Bar */}
-      <section className="bg-white border-y">
-        <div className="mx-auto max-w-[1280px] px-6">
-          <div className="h-16 flex items-center justify-between gap-4">
-            {/* Search (left 60%) */}
-            <div className="relative w-[60%] max-w-none">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search Agents and Solutions"
-                className="pl-10 border-0 bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-            </div>
-
-            {/* Divider */}
-            <div className="mx-4 text-gray-300 select-none" aria-hidden="true">|</div>
-
-            {/* Filters (right 40%, borderless) */}
-            <div className="flex items-center justify-end gap-3 w-[40%]">
-              <Button variant="ghost" size="sm" className="px-2">
-                Service Provider <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="px-2">
-                Capability <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="px-2">
-                Persona <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="px-2">
-                Value <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="px-2">
-                Category <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
+      {/* Unified Search + Filters Bar with Home search chat */}
+      <section className="bg-white border-b shadow-sm">
+        {/* Additional Filters */}
+        <div className="mx-auto max-w-[1280px] px-6 py-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3 ml-auto">
+              <select
+                className="border rounded-lg px-3 py-2 text-sm bg-white min-w-[120px]"
+                value={providerFilter}
+                onChange={(e) => setProviderFilter(e.target.value)}
+              >
+                <option value="All">By Provider</option>
+                {allProviders.map(provider => (
+                  <option key={provider} value={provider}>{provider}</option>
+                ))}
+              </select>
+              <select
+                className="border rounded-lg px-3 py-2 text-sm bg-white min-w-[120px]"
+                value={capabilityFilter}
+                onChange={(e) => setCapabilityFilter(e.target.value)}
+              >
+                <option value="All">By Capability</option>
+                {allCapabilities.map(capability => (
+                  <option key={capability} value={capability}>{capability}</option>
+                ))}
+              </select>
+              <select
+                className="border rounded-lg px-3 py-2 text-sm bg-white min-w-[120px]"
+                value={deploymentFilter}
+                onChange={(e) => setDeploymentFilter(e.target.value)}
+              >
+                <option value="All">By Deployment Type</option>
+                {allDeploymentTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+              <select
+                className="border rounded-lg px-3 py-2 text-sm bg-white min-w-[120px]"
+                value={personaFilter}
+                onChange={(e) => setPersonaFilter(e.target.value)}
+              >
+                <option value="All">By Persona</option>
+                {allPersonas.map(persona => (
+                  <option key={persona} value={persona}>{persona}</option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -187,19 +356,70 @@ export default async function AgentLibraryPage() {
       {/* Agent Grid */}
       <section className="py-12">
         <div className="mx-auto max-w-[1280px] px-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {agents.map((agent) => (
-              <AgentCard key={agent.id} {...agent} />
-            ))}
-          </div>
+          {loading && (
+            <div className="text-center py-12">
+              <div className="text-muted-foreground">Loading agents...</div>
+            </div>
+          )}
+          
+          {error && (
+            <div className="text-center py-12">
+              <div className="text-red-600">{error}</div>
+            </div>
+          )}
+          
+          {!loading && !error && (
+            <>
+              <div className="mb-6 text-sm text-muted-foreground">
+                Showing {filteredAgents.length} of {agents.length} agents
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredAgents.map((agent) => (
+                  <AgentCard key={agent.id} {...agent} />
+                ))}
+              </div>
 
-          <div className="mt-12 text-center">
-            <Button variant="outline" size="lg">
-              Load More
-            </Button>
-          </div>
+              {filteredAgents.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground">No agents found matching your criteria.</div>
+                </div>
+              )}
+
+              <div className="mt-12 text-center">
+                <Button variant="outline" size="lg">
+                  Load More
+                </Button>
+              </div>
+              
+              {/* Customization prompt */}
+              <div className="mt-16 text-center bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-100">
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">
+                  Can't find your agent?
+                </h3>
+                <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                  Don't see exactly what you need? Our team can create a custom AI agent tailored to your specific requirements and use cases.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    onClick={() => setCreateChatOpen(true)}
+                  >
+                    Create Your Own Agent
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
+
+      {/* Create Agent Chat Dialog */}
+      <ChatDialog 
+        open={createChatOpen} 
+        onOpenChange={setCreateChatOpen} 
+        initialMode="create"
+      />
     </div>
   );
 }

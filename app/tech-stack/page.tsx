@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { DeploymentCard } from "@/components/deployment-card"
 import Image from "next/image"
 import { Search, ChevronDown, Cloud as CloudIcon } from "lucide-react"
+import Head from "next/head"
 
 type Capability = {
   by_capability_id: string
@@ -84,152 +85,165 @@ export default function TechStackPage() {
   }, [grouped, providerFilter, capabilityFilter, search])
 
   return (
-    <div className="flex flex-col">
+    <>
+      <Head>
+        <title>Deployment Option - Tangram AI</title>
+        <meta name="description" content="Choose your preferred platform and deployment model for AI agents" />
+      </Head>
+      <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="gradient-bg py-20">
+      <section className="gradient-bg py-16">
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="text-center">
-            <h1 className="mb-4 text-5xl font-bold text-balance">
-              <span className="gradient-text">Deploy AI agents anywhere your business operates</span>
+            <h1 className="mb-4 text-4xl font-bold text-balance">
+              <span className="gradient-text">Deployment Options</span>
             </h1>
             <p className="mb-8 text-lg text-muted-foreground text-balance">
-              Choose from industry-leading cloud service providers and deployment options. Deploy on platforms your
-              organization is already engaged with for seamless integration.
+              Choose your preferred platform and deployment model for AI agents
             </p>
-
-            {/* Partner Logos */}
-            <div className="mb-8 flex items-center justify-center gap-8">
-              <div className="text-sm text-muted-foreground">Our Enterprise AI Partners</div>
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="relative h-8 w-8">
-                    <Image src="/aws.png" alt="AWS" fill className="object-contain" />
-                  </div>
-                  <span className="font-semibold">AWS</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="relative h-8 w-8">
-                    <Image src="/azur.png" alt="Azure" fill className="object-contain" />
-                  </div>
-                  <span className="font-semibold">Azure</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 flex items-center justify-center text-gray-700">
-                    <CloudIcon className="h-6 w-6" />
-                  </div>
-                  <span className="font-semibold">Google Cloud</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Search and Filters */}
-      <section className="border-b bg-white py-6">
-        <div className="mx-auto max-w-[1280px] px-6">
-          <div className="mb-4 flex items-center gap-2">
-            <div className="relative flex-1">
+      {/* Interactive Filter Panel */}
+      <section className="bg-white border-b shadow-sm">
+        <div className="mx-auto max-w-[1280px] px-6 py-6">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search deployment options"
+                placeholder="Search deployment options..."
                 className="pl-10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              className="border rounded-md px-3 py-2 text-sm"
-              value={providerFilter}
-              onChange={(e) => setProviderFilter(e.target.value)}
-            >
-              <option value="All">All Providers</option>
-              {providers.map(p => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
-            <select
-              className="border rounded-md px-3 py-2 text-sm"
-              value={capabilityFilter}
-              onChange={(e) => setCapabilityFilter(e.target.value)}
-            >
-              <option value="All">All Capabilities</option>
-              {capabilityOptions.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            {/* Filters */}
+            <div className="flex gap-3">
+              <select
+                className="border rounded-lg px-3 py-2 text-sm bg-white"
+                value={providerFilter}
+                onChange={(e) => setProviderFilter(e.target.value)}
+              >
+                <option value="All">All Providers</option>
+                {providers.map(p => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+              <select
+                className="border rounded-lg px-3 py-2 text-sm bg-white"
+                value={capabilityFilter}
+                onChange={(e) => setCapabilityFilter(e.target.value)}
+              >
+                <option value="All">All Capabilities</option>
+                {capabilityOptions.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Dynamic Providers & Deployments */}
-      {loading && (
-        <section className="py-12">
-          <div className="mx-auto max-w-[1280px] px-6">
-            <div className="text-muted-foreground">Loading deployment options…</div>
-          </div>
-        </section>
-      )}
-      {error && (
-        <section className="py-12">
-          <div className="mx-auto max-w-[1280px] px-6">
-            <div className="text-rose-600">{error}</div>
-          </div>
-        </section>
-      )}
-      {!loading && !error && filtered.length > 0 && (
-        filtered
-          .reduce((acc: { provider: string; items: GroupedDeployment[] }[], item) => {
-            const found = acc.find(a => a.provider === item.service_provider)
-            if (found) found.items.push(item)
-            else acc.push({ provider: item.service_provider, items: [item] })
-            return acc
-          }, [])
-          .map((group, gi) => (
-            <section key={group.provider + gi} className={gi % 2 === 1 ? "bg-gray-50 py-12" : "py-12"}>
-              <div className="mx-auto max-w-[1280px] px-6">
-          <div className="mb-8 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {(() => {
-                const logo = providerLogo(group.provider)
-                return logo.type === "img" ? (
-                  <div className="relative h-8 w-8">
-                    <Image src={logo.src} alt={group.provider} fill className="object-contain" />
-                  </div>
-                ) : (
-                  <div className="h-8 w-8 flex items-center justify-center text-gray-700">
-                    <CloudIcon className="h-6 w-6" />
-                  </div>
-                )
-              })()}
-              <div>
-                <h2 className="mb-1 text-3xl font-bold">{group.provider}</h2>
-                <p className="text-muted-foreground">{group.items.reduce((sum, g) => sum + g.services.length, 0)} deployment options available</p>
-              </div>
+      {/* Results */}
+      <section className="flex-1 py-8">
+        <div className="mx-auto max-w-[1280px] px-6">
+          {loading && (
+            <div className="text-center py-12">
+              <div className="text-muted-foreground">Loading deployment options...</div>
             </div>
+          )}
+          
+          {error && (
+            <div className="text-center py-12">
+              <div className="text-red-600">{error}</div>
+            </div>
+          )}
+          
+          {!loading && !error && filtered.length > 0 && (
+            <div className="space-y-8">
+              {filtered
+                .reduce((acc: { provider: string; items: GroupedDeployment[] }[], item) => {
+                  const found = acc.find(a => a.provider === item.service_provider)
+                  if (found) found.items.push(item)
+                  else acc.push({ provider: item.service_provider, items: [item] })
+                  return acc
+                }, [])
+                .map((group, gi) => (
+                  <div key={group.provider + gi} className="bg-white rounded-xl border shadow-sm overflow-hidden">
+                    {/* Provider Header */}
+                    <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b">
+                      <div className="flex items-center gap-3">
+                        {(() => {
+                          const logo = providerLogo(group.provider)
+                          return logo.type === "img" ? (
+                            <div className="relative h-8 w-8">
+                              <Image src={logo.src} alt={group.provider} fill className="object-contain" />
+                            </div>
+                          ) : (
+                            <div className="h-8 w-8 flex items-center justify-center text-gray-700">
+                              <CloudIcon className="h-6 w-6" />
+                            </div>
+                          )
+                        })()}
+            <div>
+                          <h3 className="text-xl font-semibold">{group.provider}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {group.items.reduce((sum, g) => sum + g.services.length, 0)} deployment options
+                          </p>
           </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {group.items.flatMap((g) =>
-                    g.services.map((s, idx) => (
-                      <DeploymentCard
-                        key={`${g.service_provider}-${g.by_capability}-${s.service_name}-${idx}`}
-                        title={s.service_name}
-                        description={`${g.by_capability} on ${g.service_provider}`}
-                        provider={g.service_provider}
-                        deploymentType={s.deployment}
-                        regions={g.cloud_regions?.length ? g.cloud_regions : (s.cloud_region ? s.cloud_region.split(", ") : [])}
-                        capabilities={[g.by_capability]}
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-            </section>
-          ))
-      )}
+          </div>
+        </div>
+                    
+                    {/* Services Grid */}
+                    <div className="p-6">
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {group.items.flatMap((g) =>
+                          g.services.map((s, idx) => (
+                            <div
+                              key={`${g.service_provider}-${g.by_capability}-${s.service_name}-${idx}`}
+                              className="p-4 border rounded-lg hover:shadow-md transition-shadow bg-white"
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <h4 className="font-medium text-sm">{s.service_name}</h4>
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                  {s.deployment}
+                                </span>
+            </div>
+                              <p className="text-xs text-muted-foreground mb-2">{g.by_capability}</p>
+                              <div className="flex flex-wrap gap-1">
+                                {(g.cloud_regions?.length ? g.cloud_regions : (s.cloud_region ? s.cloud_region.split(", ") : [])).slice(0, 3).map((region, i) => (
+                                  <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                                    {region}
+                                  </span>
+                                ))}
+                                {(g.cloud_regions?.length ? g.cloud_regions : (s.cloud_region ? s.cloud_region.split(", ") : [])).length > 3 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    +{(g.cloud_regions?.length ? g.cloud_regions : (s.cloud_region ? s.cloud_region.split(", ") : [])).length - 3} more
+                                  </span>
+                                )}
+          </div>
+        </div>
+                          ))
+                        )}
+          </div>
+          </div>
+                  </div>
+                ))
+              }
+            </div>
+          )}
+          
+          {!loading && !error && filtered.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-muted-foreground">No deployment options found matching your criteria.</div>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
+    </>
   )
 }

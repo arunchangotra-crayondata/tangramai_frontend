@@ -111,11 +111,23 @@ export function Navbar() {
               <Link href="/reseller" className="text-sm font-medium hover:text-primary">
                 Reseller
               </Link>
-              <Link href="/tech-stack" className="text-sm font-medium hover:text-primary">
-                <span style={{ width: '72px', height: '24px', position: 'relative', left: '16.45px', opacity: 1 }} className="font-inter font-normal text-[14px] leading-[24px] align-middle">
-                  Tech Stack
-                </span>
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="text-sm font-medium hover:text-primary">
+                    <span style={{ width: '72px', height: '24px', position: 'relative', left: '16.45px', opacity: 1 }} className="font-inter font-normal text-[14px] leading-[24px] align-middle">
+                      Deployment 
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" sideOffset={8} className="w-[200px]">
+                  <Link href="/tech-stack" className="block px-3 py-2 text-sm hover:bg-gray-100">
+                    Deployment Options
+                  </Link>
+                  <Link href="/ai-catalyst" className="block px-3 py-2 text-sm hover:bg-gray-100">
+                    Deployment Services
+                  </Link>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Link href="/contact" className="text-sm font-medium hover:text-primary">
                 <span style={{ width: '72px', height: '24px', position: 'relative', left: '16.45px', opacity: 1 }} className="font-inter font-normal text-[14px] leading-[24px] align-middle">
                   Contact us

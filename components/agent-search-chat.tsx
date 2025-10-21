@@ -41,7 +41,10 @@ export function AgentSearchChat() {
         {/* Mode Toggle */}
         <div className="flex rounded-full border bg-gray-50 p-1 mr-2">
           <button
-            onClick={() => setMode("explore")}
+            onClick={() => {
+              console.log("Search: Switching to explore mode")
+              setMode("explore")
+            }}
             className={`px-4 py-2 text-sm rounded-full transition-colors ${
               mode === "explore" 
                 ? "bg-white text-gray-900 shadow-sm" 
@@ -51,7 +54,10 @@ export function AgentSearchChat() {
             Explore
           </button>
           <button
-            onClick={() => setMode("create")}
+            onClick={() => {
+              console.log("Search: Switching to create mode")
+              setMode("create")
+            }}
             className={`px-4 py-2 text-sm rounded-full transition-colors ${
               mode === "create" 
                 ? "bg-white text-gray-900 shadow-sm" 

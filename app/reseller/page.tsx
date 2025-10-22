@@ -18,10 +18,10 @@ export default function ResellerPage() {
                     {/* Decorative A badges */}
 
                     <div className="max-w-2xl">
-                        <h1 className="text-5xl font-bold mb-6 text-balance">Tangram Enterprise Agents Reseller Program</h1>
-                        <p className="text-xl mb-4 font-medium">Drive a new revenue with AI offering</p>
+                        <h1 className="text-5xl font-bold mb-6 text-balance">Drive new revenue with AI offerings from 1000+ ISVs </h1>
+                        <p className="text-xl mb-4 font-medium"> Join Tangram.ai Enterprise Agents Reseller Program Accelerator. </p>
                         <p className="text-gray-700 mb-8 leading-relaxed">
-                            Start referring or integrating Tangram.ai with your clients today to unlock new revenue opportunities, accelerate growth, and deliver intelligent AI solutions at scale.
+                            Start referring or integrating agents from Tangram.ai store with your clients today to unlock new revenue opportunities, accelerate growth, and deliver intelligent AI solutions at scale.
                         </p>
                         <div className="flex gap-4">
                             {/* <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("auth", { mode: "signup", role: "reseller" })}>

@@ -151,7 +151,7 @@ function MarketNeedSection() {
             <span className="gradient-text">Gen AI is the next platform shift</span>
           </h2>
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto text-balance leading-relaxed">
-            - but enterprise adoption is still fragmented, slow, and hard to scale.
+          Thousands of AI agents emerging globally, but no trusted channel for discovery, trial, and safe deployment.
           </p>
         </div>
 
@@ -176,9 +176,7 @@ function MarketNeedSection() {
         </div>
 
         <div className="mb-10 animate-on-scroll">
-          <p className="text-sm md:text-base text-foreground/80 max-w-3xl mx-auto text-center leading-relaxed">
-            Thousands of AI agents emerging globally, but no trusted channel for discovery, trial, and safe deployment.
-          </p>
+          
         </div>
 
         <div className="grid md:grid-cols-3 gap-4">

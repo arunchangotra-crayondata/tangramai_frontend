@@ -45,7 +45,7 @@ export default function AICatalystPage() {
             <span className="gradient-text">AI CATALYST</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-            From Idea to Impact - Fast. Built for enterprise teams who are ready to stop experimenting and start executing.
+            From Idea to Impact - Fast. <br/> Built for enterprise teams who are ready to stop experimenting and start executing.
           </p>
           <div className="mt-8 flex justify-center gap-3">
             <Button className="bg-black text-white hover:bg-black/90" onClick={() => setChatOpen(true)}>

@@ -76,9 +76,9 @@ export function UnifiedAuthModal({
     
     if (result.success) {
       onClose()
-      // if (result.redirect) {
-      //   window.location.href = result.redirect
-      // }
+      if (result.redirect) {
+        window.location.href = result.redirect
+      }
     }
   }
 
@@ -149,9 +149,9 @@ export function UnifiedAuthModal({
     
     if (result.success) {
       onClose()
-      // if (result.redirect) {
-      //   window.location.href = result.redirect
-      // }
+      if (result.redirect) {
+        window.location.href = result.redirect
+      }
     }
   }
 

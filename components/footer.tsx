@@ -99,7 +99,8 @@ export function Footer() {
 
         {/* Copyright text */}
         <div className="text-center">
-          <p className="text-xs text-gray-500">© 2025 Crayon Data Pvt Ltd & Tangram.ai. All Rights Reserved</p>
+          <p className="text-xs text-gray-500">Powered by Tangram.ai © 2025 Crayon Data Pvt Ltd. All Rights Reserved
+          </p>
         </div>
       </div>
 

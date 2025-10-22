@@ -137,10 +137,10 @@ function formatChatText(text: string): string {
     .replace(/\n\n/g, '\n\n')
     // Convert single \n to line breaks (for better spacing)
     .replace(/\n/g, '\n\n')
-    // Convert bullet points that start with - or * to markdown lists
-    .replace(/^[\s]*[-*]\s+(.+)$/gm, '- $1')
-    // Convert numbered lists
-    .replace(/^[\s]*(\d+)[.)]\s+(.+)$/gm, '$1. $2')
+    // Remove bullet points and convert to simple text lines
+    .replace(/^[\s]*[-*]\s+(.+)$/gm, '$1')
+    // Remove numbered lists and convert to simple text lines
+    .replace(/^[\s]*(\d+)[.)]\s+(.+)$/gm, '$2')
     // Convert text that looks like headers (all caps or title case) to markdown headers
     .replace(/^([A-Z][A-Z\s]+)$/gm, '## $1')
     .replace(/^([A-Z][a-z\s]+):$/gm, '### $1')

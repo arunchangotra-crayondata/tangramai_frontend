@@ -32,11 +32,10 @@ export default function ISVPage() {
           {/* Decorative A badges */}
 
           <div className="max-w-2xl">
-            <h1 className="text-5xl font-bold mb-6 text-balance">Independent Software Vendor (ISV) Program</h1>
-            <p className="text-xl mb-4 font-medium">Build innovative Agents & AI solutions and reach more customers</p>
-            <p className="text-gray-700 mb-8 leading-relaxed">
-              ISV Success gives you access to the AI tools and IT support you need to build intelligent apps. Reach new
-              customers and grow your business through one of the world's largest commercial cloud marketplaces.
+            <h1 className="text-5xl font-bold mb-6 text-balance"> Do You Have An Innovative AI Solution? </h1>
+            <p className="text-xl mb-4 font-medium">Build and Scale AI Agents That Reach Global Customers</p>
+            <p className="text-gray-700 mb-20 leading-relaxed">
+            Independent Software Vendor (ISV) Accelerator gives you acess to 1000+ new customers to grow your business through one of the world's largest commercial marketplaces.
             </p>
             <div className="flex gap-4">
               <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={handleOnboardAgent}>

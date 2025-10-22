@@ -1,4 +1,6 @@
-const API_BASE_URL = process.env.NODE_ENV === 'development' ? '' : ''
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://agents-store.onrender.com' 
+  : ''
 
 export const apiConfig = {
   baseURL: API_BASE_URL,
@@ -28,7 +30,13 @@ export const endpoints = {
 } as const
 
 // Helper function to create full URL
-export const createApiUrl = (endpoint: string) => `${API_BASE_URL}${endpoint}`
+export const createApiUrl = (endpoint: string) => {
+  if (API_BASE_URL) {
+    return `${API_BASE_URL}${endpoint}`
+  }
+  // In development, use the Next.js proxy
+  return endpoint
+}
 
 // Helper function to create form data from object
 export const createFormData = (data: Record<string, any>) => {

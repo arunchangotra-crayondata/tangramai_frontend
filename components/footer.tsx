@@ -1,7 +1,13 @@
+"use client"
+
 import Image from "next/image"
 import { ArrowUpRight } from "lucide-react"
+import { BrandLogo } from "@/components/brand-logo"
+import { getBrandConfig } from "@/lib/brand"
 
 export function Footer() {
+  const brandConfig = getBrandConfig()
+  
   return (
     <footer className="relative bg-black text-white overflow-hidden rounded-3xl m-6">
       <div className="absolute top-4 left-4 w-20 h-20 pointer-events-none">
@@ -20,7 +26,7 @@ export function Footer() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-8">
               <Image src="/crayon Logo White.png" alt="Crayon" width={130} height={40} className="h-7 w-auto" />
-              <Image src="/tangram_log.png" alt="Tangram.ai" width={150} height={40} className="h-7 w-auto" />
+              <BrandLogo width={150} height={40} className="h-7 w-auto" />
             </div>
             <p
               style={{
@@ -99,7 +105,7 @@ export function Footer() {
 
         {/* Copyright text */}
         <div className="text-center">
-          <p className="text-xs text-gray-500">Powered by Tangram.ai © 2025 Crayon Data Pvt Ltd. All Rights Reserved
+          <p className="text-xs text-gray-500">Powered by {brandConfig.name} © 2025 Crayon Data Pvt Ltd. All Rights Reserved
           </p>
         </div>
       </div>

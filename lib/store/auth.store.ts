@@ -24,25 +24,24 @@ export const useAuthStore = create<AuthStore>()(
           
           if (response.success && response.user) {
             // Determine redirect URL based on user role
-            let redirectUrl = response.redirect || null
+            let redirectUrl = null
             
-            if (!redirectUrl) {
-              switch (response.user.role) {
-                case 'admin':
-                  redirectUrl = '/admin'
-                  break
-                case 'isv':
-                  redirectUrl = '/dashboard'
-                  break
-                case 'reseller':
-                  redirectUrl = '/'
-                  break
-                case 'client':
-                  redirectUrl = '/dashboard'
-                  break
-                default:
-                  redirectUrl = '/'
-              }
+            // Always use role-based redirect, ignore API redirect URLs
+            switch (response.user.role) {
+              case 'admin':
+                redirectUrl = '/admin'
+                break
+              case 'isv':
+                redirectUrl = '/agents'
+                break
+              case 'reseller':
+                redirectUrl = '/agents'
+                break
+              case 'client':
+                redirectUrl = '/agents'
+                break
+              default:
+                redirectUrl = '/'
             }
             
             set({

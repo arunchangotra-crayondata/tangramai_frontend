@@ -65,6 +65,9 @@ export interface AgentOnboardRequest {
   security_details: string
   related_files: string
   deployments: string
+  // File upload fields (will be handled as FormData)
+  demo_files?: File[]
+  readme_file?: File
 }
 
 export interface AgentOnboardResponse {

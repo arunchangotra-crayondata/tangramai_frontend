@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { Search, SlidersHorizontal, MoreVertical, Eye, Edit, CheckCircle, XCircle, Trash2, ExternalLink, MessageSquare, Users, User } from "lucide-react"
-import { AgentDetailsDrawer } from "@/components/agent-details-drawer"
+import { AgentPreviewModal } from "@/components/agent-preview-modal"
 import { RejectAgentModal } from "@/components/reject-agent-modal"
 import { ISVDetailsDrawer } from "@/components/isv-details-drawer"
 import { RejectISVModal } from "@/components/reject-isv-modal"
@@ -834,7 +834,7 @@ export default function AdminPage() {
       {/* Modals and Drawers */}
       {selectedAgent && (
         <>
-          <AgentDetailsDrawer
+          <AgentPreviewModal
             agent={selectedAgent}
             open={agentDetailsOpen}
             onOpenChange={setAgentDetailsOpen}

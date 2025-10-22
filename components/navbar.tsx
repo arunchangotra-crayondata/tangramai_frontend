@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown, Menu, X } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { BrandLogo } from "@/components/brand-logo"
 import { useAuthStore } from "@/lib/store/auth.store"
 import { useModal } from "@/hooks/use-modal"
 import { useState, useRef, useEffect } from "react"
@@ -153,14 +154,7 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2">
-              <Image
-                src="/redington.JPG"
-                alt="tangram.ai logo"
-                width={120}
-                height={32}
-                className="object-contain"
-                priority
-              />
+              <BrandLogo width={120} height={32} priority />
             </Link>
             {/* Desktop Navigation */}
             <div className="hidden items-center gap-10 md:flex">

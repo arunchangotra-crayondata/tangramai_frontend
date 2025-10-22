@@ -161,7 +161,12 @@ export default function DashboardPage() {
               </p>
             </div>
             <div>
-              <Button className="bg-black text-white hover:bg-black/90">Create Agent</Button>
+              <Button 
+                className="bg-black text-white hover:bg-black/90"
+                onClick={() => router.push('/onboard')}
+              >
+                Onboard Agent
+              </Button>
             </div>
           </div>
 

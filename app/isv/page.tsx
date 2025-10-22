@@ -39,7 +39,7 @@ export default function ISVPage() {
             </p>
             <div className="flex gap-4">
               <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={handleOnboardAgent}>
-                ON BOARD AGENT
+                ONBOARD AGENT
               </Button>
               <Button size="lg"   onClick={() => openModal("auth", { mode: "login", role: "isv" })}>
                 LOGIN TO ISV HUB

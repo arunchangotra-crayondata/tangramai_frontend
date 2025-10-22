@@ -27,8 +27,9 @@ import {
 } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Link from "next/link"
 
-export default function DemoPage() {
+export default function OverviewPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -99,10 +100,10 @@ function HeroSection() {
               className="text-sm px-6 py-5 rounded-full bg-gradient-to-r from-[#7935F4] to-[#614BDB] text-white hover:opacity-90 transition-all hover:scale-105 hover:shadow-2xl animate-pulse-subtle"
               asChild
             >
-              <a href="#cta">
+              <Link href="/">
                 Visit the Store
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </a>
+              </Link>
             </Button>
           </div>
         </div>
@@ -851,9 +852,12 @@ function CTASection() {
         <Button
           size="default"
           className="text-sm px-6 py-5 rounded-full bg-white text-foreground hover:bg-white/90 transition-all hover:scale-110 hover:shadow-2xl animate-pulse-subtle"
+          asChild
         >
-          Visit the Store
-          <ArrowRight className="ml-2 h-4 w-4" />
+          <Link href="/">
+            Visit the Store
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </Button>
       </div>
     </section>

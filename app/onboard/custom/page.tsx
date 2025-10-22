@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { MultiSelectInput } from "@/components/multi-select-input"
 import { DropdownWithCustom } from "@/components/dropdown-with-custom"
 import { useAuthStore } from "@/lib/store/auth.store"
+import { OnboardAgentPreview } from "@/components/onboard-agent-preview"
 
 type Step = 1 | 2 | 3 | 4 | 5
 
@@ -159,7 +160,7 @@ export default function CustomOnboardPage() {
     { number: 2, title: "Capabilities", label: "Capabilities" },
     { number: 3, title: "Demo Assets", label: "Demo Assets" },
     { number: 4, title: "Documentation", label: "Documentation" },
-    { number: 5, title: "Review & Submit", label: "Review & Submit" },
+    { number: 5, title: "Preview & Submit", label: "Preview & Submit" },
   ]
 
   const handleNext = async () => {
@@ -171,9 +172,72 @@ export default function CustomOnboardPage() {
     }
   }
 
+  // Form validation function
+  const validateForm = (): string[] => {
+    const errors: string[] = []
+
+    // Required fields validation
+    if (!formData.agentName.trim()) {
+      errors.push("Agent name is required")
+    }
+    if (!formData.agentDescription.trim()) {
+      errors.push("Agent description is required")
+    }
+    if (!formData.agentType) {
+      errors.push("Agent type is required")
+    }
+    if (!formData.sdkDetails.trim()) {
+      errors.push("SDK details are required")
+    }
+    if (!formData.apiDocumentation.trim()) {
+      errors.push("API documentation URL is required")
+    }
+    if (!formData.sampleInput.trim()) {
+      errors.push("Sample input is required")
+    }
+    if (!formData.sampleOutput.trim()) {
+      errors.push("Sample output is required")
+    }
+    if (!formData.securityDetails.trim()) {
+      errors.push("Security details are required")
+    }
+
+    // Array validation
+    if (formData.tags.length === 0) {
+      errors.push("At least one tag is required")
+    }
+    if (formData.targetPersonas.length === 0) {
+      errors.push("At least one target persona is required")
+    }
+    if (formData.keyFeatures.length === 0) {
+      errors.push("At least one key feature is required")
+    }
+    if (formData.coreCapabilities.length === 0) {
+      errors.push("At least one core capability is required")
+    }
+
+    // URL validation
+    const urlRegex = /^https?:\/\/.+\..+/
+    if (formData.apiDocumentation && !urlRegex.test(formData.apiDocumentation)) {
+      errors.push("API documentation must be a valid URL")
+    }
+    if (formData.demoLink && !urlRegex.test(formData.demoLink)) {
+      errors.push("Demo link must be a valid URL")
+    }
+
+    return errors
+  }
+
   const handleSubmit = async () => {
     if (!user?.user_id) {
       setSubmitError("You must be logged in to onboard an agent")
+      return
+    }
+
+    // Validate form before submission
+    const validationErrors = validateForm()
+    if (validationErrors.length > 0) {
+      setSubmitError(validationErrors.join(". "))
       return
     }
 
@@ -187,30 +251,37 @@ export default function CustomOnboardPage() {
         asset_type: formData.agentType,
         description: formData.agentDescription,
         by_value: formData.valueProposition,
-        tags: formData.tags.join(", "),
-        by_persona: formData.targetPersonas.join(", "),
-        features: formData.keyFeatures.join(", "),
+        tags: formData.tags.length > 0 ? formData.tags.join(", ") : "",
+        by_persona: formData.targetPersonas.length > 0 ? formData.targetPersonas.join(", ") : "",
+        features: formData.keyFeatures.length > 0 ? formData.keyFeatures.join(", ") : "",
         roi: formData.roiInformation,
         demo_link: formData.demoLink,
-        capabilities: formData.coreCapabilities.join(", "),
-        demo_links: formData.demoLinks.join(", "),
+        capabilities: formData.coreCapabilities.length > 0 ? formData.coreCapabilities.join(", ") : "",
+        demo_assets: formData.demoLinks.length > 0 ? formData.demoLinks.join(", ") : "",
         sdk_details: formData.sdkDetails,
-        api_documentation: formData.apiDocumentation,
+        swagger_details: formData.apiDocumentation,
         sample_input: formData.sampleInput,
         sample_output: formData.sampleOutput,
         security_details: formData.securityDetails,
-        additional_related_files: formData.additionalRelatedFiles,
+        related_files: formData.additionalRelatedFiles,
         deployments: JSON.stringify(formData.deploymentOptions),
         isv_id: user.user_id,
+        // Add file uploads
+        demo_files: formData.bulkFiles.length > 0 ? formData.bulkFiles.map(f => f.file) : undefined,
+        readme_file: formData.readmeFile ?? undefined,
       }
 
-      // TODO: Implement API call when agent service is available
-      console.log("Submitting agent data:", apiData)
+      // Import agent service and make API call
+      const { agentService } = await import("@/lib/api/agent.service")
+      const response = await agentService.onboardAgent(apiData)
       
-      // For now, just redirect to success page
+      console.log("Agent onboarded successfully:", response)
+      
+      // Redirect to success page
       router.push("/onboard/success")
     } catch (error: any) {
-      setSubmitError(error.message || "An unexpected error occurred")
+      console.error("Error submitting agent:", error)
+      setSubmitError(error.message || "An unexpected error occurred while submitting the agent")
     } finally {
       setIsSubmitting(false)
     }
@@ -377,7 +448,7 @@ export default function CustomOnboardPage() {
 
       {/* Form Content */}
       <div className="mx-auto max-w-[1280px] px-6 py-12">
-        <div className="mx-auto max-w-3xl">
+        <div className={`mx-auto ${currentStep === 5 ? 'max-w-none' : 'max-w-3xl'}`}>
           {/* Tab 1: Agent Details */}
           {currentStep === 1 && (
             <div>
@@ -841,8 +912,8 @@ export default function CustomOnboardPage() {
           {/* Tab 5: Review & Submit */}
           {currentStep === 5 && (
             <div>
-              <h2 className="mb-2 text-3xl font-bold">Review & Submit</h2>
-              <p className="mb-8 text-muted-foreground">Please review your agent details before submitting</p>
+              <h2 className="mb-2 text-3xl font-bold">Preview & Submit</h2>
+              <p className="mb-8 text-muted-foreground">Preview your agent before submitting</p>
 
               {submitError && (
                 <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
@@ -850,173 +921,7 @@ export default function CustomOnboardPage() {
                 </div>
               )}
 
-              <div className="space-y-8">
-                {/* Agent Details Section */}
-                <div className="rounded-lg border border-gray-200 p-6">
-                  <h3 className="mb-4 text-lg font-semibold">Agent Details</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Agent Name</Label>
-                      <p className="text-sm">{formData.agentName || "Not provided"}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Agent Type</Label>
-                      <p className="text-sm">{formData.agentType || "Not provided"}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Value Proposition</Label>
-                      <p className="text-sm">{formData.valueProposition || "Not provided"}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Description</Label>
-                      <p className="text-sm">{formData.agentDescription || "Not provided"}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">ROI Information</Label>
-                      <p className="text-sm">{formData.roiInformation || "Not provided"}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Demo Link</Label>
-                      {formData.demoLink ? (
-                        <a href={formData.demoLink} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
-                          {formData.demoLink}
-                        </a>
-                      ) : (
-                        <p className="text-sm">Not provided</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 space-y-3">
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Tags</Label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {formData.tags.length > 0 ? (
-                          formData.tags.map((tag, index) => (
-                            <span key={index} className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm">
-                              {tag}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-sm text-gray-500">No tags selected</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Target Personas</Label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {formData.targetPersonas.length > 0 ? (
-                          formData.targetPersonas.map((persona, index) => (
-                            <span key={index} className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm">
-                              {persona}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-sm text-gray-500">No personas selected</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Capabilities Section */}
-                <div className="rounded-lg border border-gray-200 p-6">
-                  <h3 className="mb-4 text-lg font-semibold">Capabilities</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Core Capabilities</Label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {formData.coreCapabilities.length > 0 ? (
-                          formData.coreCapabilities.map((capability, index) => (
-                            <span key={index} className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm">
-                              {capability}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-sm text-gray-500">No capabilities selected</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                  </div>
-                </div>
-
-                {/* Demo Assets Section */}
-                <div className="rounded-lg border border-gray-200 p-6">
-                  <h3 className="mb-4 text-lg font-semibold">Demo Assets</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Demo Links</Label>
-                      <div className="mt-1">
-                        {formData.demoLinks.length > 0 ? (
-                          formData.demoLinks.map((link, index) => (
-                            <p key={index} className="text-sm text-blue-600 hover:underline">
-                              <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
-                            </p>
-                          ))
-                        ) : (
-                          <span className="text-sm text-gray-500">No demo links provided</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Uploaded Files</Label>
-                      <div className="mt-1">
-                        {formData.bulkFiles.length > 0 ? (
-                          formData.bulkFiles.map((file, index) => (
-                            <p key={index} className="text-sm">{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</p>
-                          ))
-                        ) : (
-                          <span className="text-sm text-gray-500">No files uploaded</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Documentation Section */}
-                <div className="rounded-lg border border-gray-200 p-6">
-                  <h3 className="mb-4 text-lg font-semibold">Documentation</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">SDK Details</Label>
-                      <p className="text-sm">{formData.sdkDetails || "Not provided"}</p>
-                    </div>
-                    
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">API Documentation</Label>
-                      <p className="text-sm">
-                        {formData.apiDocumentation ? (
-                          <a href={formData.apiDocumentation} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                            {formData.apiDocumentation}
-                          </a>
-                        ) : (
-                          "Not provided"
-                        )}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Deployment Options</Label>
-                      <div className="mt-1">
-                        {formData.deploymentOptions.length > 0 ? (
-                          formData.deploymentOptions.map((option, index) => (
-                            <div key={index} className="text-sm border-l-2 border-gray-200 pl-3 mb-2">
-                              <p><strong>{option.serviceName}</strong> on {option.serviceProvider}</p>
-                              <p className="text-gray-600">{option.deploymentType}, {option.cloudRegion}</p>
-                              <p className="text-gray-600">Capability: {option.capability}</p>
-                            </div>
-                          ))
-                        ) : (
-                          <span className="text-sm text-gray-500">No deployment options provided</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <OnboardAgentPreview formData={formData} />
             </div>
           )}
 

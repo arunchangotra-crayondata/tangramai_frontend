@@ -3,7 +3,7 @@
 import { useState } from "react"
 
 // Expandable Address Component
-export default function ExpandableAddress({ address }: { address: string }) {
+export default function ExpandableAddress({ address, showLabel = true }: { address: string; showLabel?: boolean }) {
   const [isExpanded, setIsExpanded] = useState(false)
   
   // Split address into words and limit to 8 words
@@ -15,7 +15,9 @@ export default function ExpandableAddress({ address }: { address: string }) {
   
   return (
     <div className="flex items-start gap-2">
-      <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]" style={{ fontFamily: 'Inter, sans-serif' }}>Address:</span>
+      {showLabel && (
+        <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]" style={{ fontFamily: 'Inter, sans-serif' }}>Address:</span>
+      )}
       <div className="flex-1">
         <span 
           className={`font-medium text-[14px] leading-[100%] tracking-[0] align-middle cursor-pointer hover:text-gray-500 transition-colors ${isExpanded ? '' : 'truncate block'}`}

@@ -38,6 +38,7 @@ type ChatDialogProps = {
   onOpenChange: (v: boolean) => void
   initialMode?: "create" | "explore"
   initialMessage?: string
+  onFilteredAgents?: (agentIds: string[]) => void
 }
 
 // Agent Card Component for Chat
@@ -145,7 +146,7 @@ async function fetchAgentDetails(agentId: string) {
   }
 }
 
-export default function ChatDialog({ open, onOpenChange, initialMode = "explore", initialMessage }: ChatDialogProps) {
+export default function ChatDialog({ open, onOpenChange, initialMode = "explore", initialMessage, onFilteredAgents }: ChatDialogProps) {
   const [mode, setMode] = useState<"create" | "explore">(initialMode)
   const [isMinimized, setIsMinimized] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -219,6 +220,10 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
       let filteredAgentIds = null
       if (json?.data?.filtered_agents && Array.isArray(json.data.filtered_agents) && json.data.filtered_agents.length > 0) {
         filteredAgentIds = json.data.filtered_agents
+        // Call the callback to pass agent IDs to parent component
+        if (onFilteredAgents) {
+          onFilteredAgents(filteredAgentIds)
+        }
       }
       
       // Log for debugging (remove in production)

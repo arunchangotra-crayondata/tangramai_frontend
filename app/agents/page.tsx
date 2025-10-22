@@ -91,6 +91,7 @@ export default function AgentLibraryPage() {
   const [deploymentFilter, setDeploymentFilter] = useState<string>("All");
   const [personaFilter, setPersonaFilter] = useState<string>("All");
   const [createChatOpen, setCreateChatOpen] = useState(false);
+  const [aiSearchedAgentIds, setAiSearchedAgentIds] = useState<string[] | null>(null);
   
   const searchParams = useSearchParams();
   const agentIdFromUrl = searchParams.get('agentId');
@@ -173,14 +174,9 @@ export default function AgentLibraryPage() {
     return Array.from(personas).sort();
   }, [agents]);
 
-  const filteredAgents = useMemo(() => {
-    let filtered = agents;
-    
-    // Filter by agent ID from URL parameter (highest priority)
-    if (agentIdFromUrl) {
-      filtered = filtered.filter(agent => agent.id === agentIdFromUrl);
-      return filtered;
-    }
+  // Helper function to apply manual filters to agents
+  const applyManualFilters = (agentList: Agent[]) => {
+    let filtered = agentList;
     
     if (search) {
       const q = search.toLowerCase();
@@ -218,6 +214,24 @@ export default function AgentLibraryPage() {
     }
     
     return filtered;
+  };
+
+  // AI searched agents (filtered by manual filters)
+  const aiSearchedAgents = useMemo(() => {
+    if (!aiSearchedAgentIds) return [];
+    
+    const aiAgents = agents.filter(agent => aiSearchedAgentIds.includes(agent.id));
+    return applyManualFilters(aiAgents);
+  }, [agents, aiSearchedAgentIds, search, providerFilter, capabilityFilter, deploymentFilter, personaFilter]);
+
+  // All agents (filtered by manual filters)
+  const allFilteredAgents = useMemo(() => {
+    // Filter by agent ID from URL parameter (highest priority)
+    if (agentIdFromUrl) {
+      return agents.filter(agent => agent.id === agentIdFromUrl);
+    }
+    
+    return applyManualFilters(agents);
   }, [agents, search, providerFilter, capabilityFilter, deploymentFilter, personaFilter, agentIdFromUrl]);
 
   return (
@@ -254,7 +268,7 @@ export default function AgentLibraryPage() {
             <div className="flex w-full justify-center mb-16">
               <div className="w-full max-w-5xl">
                 {/* reuse same search-chat as home */}
-                <AgentSearchChat />
+                <AgentSearchChat onAgentsSearched={setAiSearchedAgentIds} />
               </div>
             </div>
 
@@ -396,26 +410,68 @@ export default function AgentLibraryPage() {
           
           {!loading && !error && (
             <>
-              <div className="mb-6 text-sm text-muted-foreground">
-                Showing {filteredAgents.length} of {agents.length} agents
-              </div>
-              
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredAgents.map((agent) => (
-                  <AgentCard key={agent.id} {...agent} />
-                ))}
-              </div>
+              {/* AI Search Results Section */}
+              {aiSearchedAgentIds && aiSearchedAgentIds.length > 0 && (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2">AI Search Results</h2>
+                      <p className="text-sm text-muted-foreground">
+                        Showing {aiSearchedAgents.length} of {aiSearchedAgentIds.length} AI-recommended agents
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setAiSearchedAgentIds(null)}
+                      className="text-xs px-3 py-2"
+                    >
+                      Clear AI Search
+                    </Button>
+                  </div>
+                  
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {aiSearchedAgents.map((agent) => (
+                      <AgentCard key={agent.id} {...agent} />
+                    ))}
+                  </div>
 
-              {filteredAgents.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="text-muted-foreground">No agents found matching your criteria.</div>
+                  {aiSearchedAgents.length === 0 && (
+                    <div className="text-center py-12">
+                      <div className="text-muted-foreground">No AI-recommended agents match your current filters.</div>
+                    </div>
+                  )}
                 </div>
               )}
 
-              <div className="mt-12 text-center">
-                <Button variant="outline" size="lg">
-                  Load More
-                </Button>
+              {/* All Agents Section */}
+              <div className={aiSearchedAgentIds && aiSearchedAgentIds.length > 0 ? "border-t pt-12" : ""}>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    {aiSearchedAgentIds && aiSearchedAgentIds.length > 0 ? "All Agents" : "Agents"}
+                  </h2>
+                  <div className="text-sm text-muted-foreground">
+                    Showing {allFilteredAgents.length} of {agents.length} agents
+                  </div>
+                </div>
+                
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {allFilteredAgents.map((agent) => (
+                    <AgentCard key={agent.id} {...agent} />
+                  ))}
+                </div>
+
+                {allFilteredAgents.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="text-muted-foreground">No agents found matching your criteria.</div>
+                  </div>
+                )}
+
+                <div className="mt-12 text-center">
+                  <Button variant="outline" size="lg">
+                    Load More
+                  </Button>
+                </div>
               </div>
               
               {/* Customization prompt */}

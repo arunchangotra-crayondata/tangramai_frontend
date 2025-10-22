@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button"
 import ChatDialog from "@/components/chat-dialog"
 import { Search, Mic } from "lucide-react"
 
-export function AgentSearchChat() {
+type AgentSearchChatProps = {
+  onAgentsSearched?: (agentIds: string[]) => void
+}
+
+export function AgentSearchChat({ onAgentsSearched }: AgentSearchChatProps) {
   const [chatOpen, setChatOpen] = useState(false)
   const [mode, setMode] = useState<"create" | "explore">("explore")
   const [searchInput, setSearchInput] = useState("")
@@ -73,6 +77,7 @@ export function AgentSearchChat() {
         onOpenChange={setChatOpen} 
         initialMode={mode}
         initialMessage={searchInput}
+        onFilteredAgents={onAgentsSearched}
       />
     </div>
   )

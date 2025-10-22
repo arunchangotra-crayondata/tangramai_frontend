@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown } from "lucide-react"
+import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown, Menu, X } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/lib/store/auth.store"
 import { useModal } from "@/hooks/use-modal"
@@ -17,6 +17,7 @@ export function Navbar() {
   const { openModal } = useModal()
   const { toast } = useToast()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [notifications, setNotifications] = useState([
     {
@@ -64,6 +65,27 @@ export function Navbar() {
       document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [])
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const mobileMenu = document.getElementById('mobile-menu')
+      const mobileMenuButton = document.getElementById('mobile-menu-button')
+      
+      if (mobileMenu && mobileMenuButton && 
+          !mobileMenu.contains(event.target as Node) && 
+          !mobileMenuButton.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false)
+      }
+    }
+
+    if (isMobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside)
+      }
+    }
+  }, [isMobileMenuOpen])
 
   const handleLogout = () => {
     logout()
@@ -116,7 +138,17 @@ export function Navbar() {
   }
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 relative z-50">
+    <>
+      {/* Limited Availability Banner */}
+      <div className="bg-blue-50 border-b border-blue-200 text-center py-2">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <p className="text-sm text-blue-700 font-medium">
+            Limited Availability !!
+          </p>
+        </div>
+      </div>
+      
+      <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 relative z-50">
       <div className="mx-auto max-w-[1280px] px-6">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
@@ -130,6 +162,7 @@ export function Navbar() {
                 priority
               />
             </Link>
+            {/* Desktop Navigation */}
             <div className="hidden items-center gap-10 md:flex">
               <Link href="/agents" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
                 Agent Store
@@ -140,21 +173,12 @@ export function Navbar() {
               <Link href="/reseller" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
                 Reseller
               </Link>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
-                    Deployment
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" sideOffset={8} className="w-[200px]">
-                  <Link href="/tech-stack" className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                    Deployment Options
-                  </Link>
-                  <Link href="/ai-catalyst" className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                    Deployment Services
-                  </Link>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Link href="/tech-stack" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+                Deployment Options
+              </Link>
+              <Link href="/ai-catalyst" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+                AI Catalyst
+              </Link>
               <Link href="/contact" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
                 Contact us
               </Link>
@@ -220,29 +244,27 @@ export function Navbar() {
                 
                 {isDropdownOpen && (
                   <div className="absolute right-0 mb-2 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-xl z-60">
-                    <button
-                      onClick={handleDashboardClick}
-                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </button>
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      <User className="h-4 w-4" />
-                      View Profile
-                    </Link>
-                    <Link
-                      href="/help"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      <HelpCircle className="h-4 w-4" />
-                      Help Center
-                    </Link>
+                    {/* Dashboard option - only for ISV and client, not for reseller */}
+                    {user.role !== 'reseller' && (
+                      <button
+                        onClick={handleDashboardClick}
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        Dashboard
+                      </button>
+                    )}
+                    {/* Profile option - for ISV and reseller, not for admin */}
+                    {(user.role === 'isv' || user.role === 'reseller') && (
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <User className="h-4 w-4" />
+                        View Profile
+                      </Link>
+                    )}
                     <hr className="my-1" />
                     <button
                       onClick={handleLogout}
@@ -265,9 +287,73 @@ export function Navbar() {
                 </Button>
               </>
             )}
+            
+            {/* Mobile Menu Button - positioned after profile */}
+            <button
+              id="mobile-menu-button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 rounded-md text-gray-700 hover:text-primary hover:bg-gray-100 transition-colors"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div 
+          id="mobile-menu"
+          className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-40"
+        >
+          <div className="px-6 py-4 space-y-3">
+            <Link 
+              href="/agents" 
+              className="block text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Agent Store
+            </Link>
+            <Link 
+              href="/isv" 
+              className="block text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              ISV
+            </Link>
+            <Link 
+              href="/reseller" 
+              className="block text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Reseller
+            </Link>
+            <Link 
+              href="/tech-stack" 
+              className="block text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Deployment Options
+            </Link>
+            <Link 
+              href="/ai-catalyst" 
+              className="block text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              AI Catalyst
+            </Link>
+            <Link 
+              href="/contact" 
+              className="block text-sm font-medium text-gray-700 hover:text-primary transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Contact us
+            </Link>
+          </div>
+        </div>
+      )}
     </nav>
+    </>
   )
 }

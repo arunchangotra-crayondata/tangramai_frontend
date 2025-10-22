@@ -81,9 +81,6 @@ export const useAuthStore = create<AuthStore>()(
             
             if (!redirectUrl) {
               switch (data.role) {
-                case 'admin':
-                  redirectUrl = '/admin'
-                  break
                 case 'isv':
                   redirectUrl = '/dashboard'
                   break

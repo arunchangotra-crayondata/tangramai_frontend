@@ -10,6 +10,7 @@ import CollapsibleList from "../../../components/collapsible-list"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { readFileSync } from "fs"
 import { join } from "path"
+import ExpandableAddress from "../../../components/expandable-address"
 
 type AgentDetailApiResponse = {
   agent?: {
@@ -148,15 +149,27 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                 <h1 className="mb-2 text-4xl font-bold">{title}</h1>
                 <div className="mt-1 flex items-center gap-2" style={{ fontFamily: 'Inter, sans-serif' }}>
                   <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]">Agent</span>
-                  <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]">Built by: <span style={{ color: '#155EEF' }}>{data?.isv_info?.isv_name || 'Crayon Data India Pvt Ltd'}</span></span>
+                  <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]">Built by: <span style={{ color: '#6B7280' }}>{data?.isv_info?.isv_name || 'Crayon Data India Pvt Ltd'}</span></span>
+                </div>
+                
+                {/* ISV Information */}
+                <div className="mt-4 space-y-2">
+                  {data?.isv_info?.isv_address && (
+                    <ExpandableAddress address={data.isv_info.isv_address} />
+                  )}
+                  {data?.isv_info?.isv_domain && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]" style={{ fontFamily: 'Inter, sans-serif' }}>Domain:</span>
+                      <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle" style={{ color: '#6B7280', fontFamily: 'Inter, sans-serif' }}>{data.isv_info.isv_domain}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Description */}
               <div className="mb-8">
                 <h2 className="mb-3 text-lg font-semibold">Description</h2>
-                <ReadMore text={description} className="mb-6" />
-                {agent?.features && <p className="mb-4 text-muted-foreground">{agent.features}</p>}
+                <ReadMore text={description.replace(/\\n/g, '\n')} className="mb-6" />
               </div>
 
               {/* Metadata */}
@@ -197,6 +210,48 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
 
               {/* Tabs */}
               <Tabs defaultValue="features" className="w-full mt-[100px]">
+                {/* Try It Now Button */}
+                {agent?.demo_link && (
+                  <div className="mb-6 flex justify-center">
+                    <a
+                      href={agent.demo_link}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        width: 120.2935791015625,
+                        height: 43.510398864746094,
+                        maxWidth: 363.41,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 4,
+                        borderWidth: 2,
+                        borderStyle: 'solid',
+                        borderImage: 'linear-gradient(98.05deg, #E2118E 5.32%, #AAF2FF 27.12%, #1576FF 99.78%) 1',
+                        borderImageSlice: 1,
+                        borderRadius: 4,
+                        paddingTop: 13.26,
+                        paddingRight: 17.34,
+                        paddingBottom: 13.26,
+                        paddingLeft: 17.34,
+                        fontFamily: 'Inter, sans-serif',
+                        fontWeight: 500,
+                        fontSize: 14,
+                        lineHeight: '100%',
+                        letterSpacing: '0.5px',
+                        textAlign: 'center',
+                        textTransform: 'uppercase',
+                        backgroundColor: '#000',
+                        color: '#fff',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      TRY IT NOW
+                    </a>
+                  </div>
+                )}
                 <TabsList className="w-full justify-start bg-transparent p-0 gap-6 h-12 rounded-none border-0">
                   <TabsTrigger value="features">Features</TabsTrigger>
                   <TabsTrigger value="roi">ROI</TabsTrigger>
@@ -207,7 +262,9 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                 <TabsContent value="features" className="mt-6">
                   {agent?.features && agent.features !== "na" ? (
                     <div className="prose max-w-none">
-                      <div dangerouslySetInnerHTML={{ __html: formatCodeBlock(agent.features) }} />
+                      <div style={{ whiteSpace: 'pre-line' }} className="text-muted-foreground">
+                        {agent.features.replace(/\\n/g, '\n')}
+                      </div>
                     </div>
                   ) : (
                     <p className="text-muted-foreground">Features information is not available for this agent.</p>
@@ -216,7 +273,9 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                 <TabsContent value="roi" className="mt-6">
                   {agent?.roi && agent.roi !== "na" ? (
                     <div className="prose max-w-none">
-                      <div dangerouslySetInnerHTML={{ __html: formatCodeBlock(agent.roi) }} />
+                      <div style={{ whiteSpace: 'pre-line' }} className="text-muted-foreground">
+                        {agent.roi.replace(/\\n/g, '\n')}
+                      </div>
                     </div>
                   ) : (
                     <p className="text-muted-foreground">ROI information is not available for this agent.</p>
@@ -300,33 +359,6 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
               )}
               
 
-              {/* Developer Info */}
-              <Card className="mt-6 justify-self-end w-[520px]">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div>
-                      <div className="text-sm text-muted-foreground">Developer</div>
-                      <div className="font-semibold">{data?.isv_info?.isv_name || 'na'}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Last Updated</div>
-                      <div className="font-semibold">03-10-2025</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Language</div>
-                      <div className="font-semibold">English</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Installs</div>
-                      <div className="font-semibold">6</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Enterprise users</div>
-                      <div className="font-semibold">{data?.isv_info?.isv_email_no || 'na'}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Document & ROI Links */}
               {/* <div className="flex gap-2">
@@ -338,46 +370,6 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                 </Button>
               </div> */}
             </div>
-
-            {/* Centered CTA spanning both columns */}
-            {agent?.demo_link && (
-              <div className="lg:col-span-2 flex w-full justify-center">
-                <a
-                  href={agent.demo_link}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    width: 120.2935791015625,
-                    height: 43.510398864746094,
-                    maxWidth: 363.41,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 4,
-                    borderWidth: 2,
-                    borderStyle: 'solid',
-                    borderImage: 'linear-gradient(98.05deg, #E2118E 5.32%, #AAF2FF 27.12%, #1576FF 99.78%) 1',
-                    borderImageSlice: 1,
-                    borderRadius: 4,
-                    paddingTop: 13.26,
-                    paddingRight: 17.34,
-                    paddingBottom: 13.26,
-                    paddingLeft: 17.34,
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 500,
-                    fontSize: 14,
-                    lineHeight: '100%',
-                    letterSpacing: '0.5px',
-                    textAlign: 'center',
-                    textTransform: 'uppercase',
-                    backgroundColor: '#000',
-                    color: '#fff',
-                  }}
-                >
-                  TRY IT NOW
-                </a>
-              </div>
-            )}
           </div>
         </div>
         

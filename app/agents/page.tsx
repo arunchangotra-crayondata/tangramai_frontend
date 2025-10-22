@@ -47,6 +47,7 @@ type ApiAgent = {
   service_provider?: string | null;
   asset_type?: string | null;
   by_persona?: string | null;
+  admin_approved?: string | null;
 };
 
 async function fetchAgents() {
@@ -107,25 +108,27 @@ export default function AgentLibraryPage() {
         const data = await res.json();
         
         const apiAgents: ApiAgent[] = data?.agents || [];
-        const mappedAgents = apiAgents.map((a) => ({
-          id: a.agent_id,
-          title: a.agent_name,
-          description: a.description,
-          tags: a.tags
-            ? a.tags
-                .split(",")
-                .map((t) => t.trim())
-                .filter(Boolean)
-            : [],
-          badges: [
-            { label: (a as any).by_value || "", variant: "default" as const },
-          ],
-          // Add new fields for filtering
-          capabilities: a.by_capability ? a.by_capability.split(",").map(c => c.trim()).filter(Boolean) : [],
-          providers: a.service_provider ? a.service_provider.split(",").map(p => p.trim()).filter(Boolean) : [],
-          deploymentType: a.asset_type || "",
-          persona: a.by_persona || "",
-        }));
+        const mappedAgents = apiAgents
+          .filter(a => a.admin_approved === "yes") // Only show approved agents
+          .map((a) => ({
+            id: a.agent_id,
+            title: a.agent_name,
+            description: a.description,
+            tags: a.tags
+              ? a.tags
+                  .split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+              : [],
+            badges: [
+              { label: (a as any).by_value || "", variant: "default" as const },
+            ],
+            // Add new fields for filtering
+            capabilities: a.by_capability ? a.by_capability.split(",").map(c => c.trim()).filter(Boolean) : [],
+            providers: a.service_provider ? a.service_provider.split(",").map(p => p.trim()).filter(Boolean) : [],
+            deploymentType: a.asset_type || "",
+            persona: a.by_persona || "",
+          }));
         
         setAgents(mappedAgents.length > 0 ? mappedAgents : fallbackAgents);
       } catch (err) {
@@ -400,11 +403,11 @@ export default function AgentLibraryPage() {
                 Showing {filteredAgents.length} of {agents.length} agents
               </div>
               
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredAgents.map((agent) => (
-                  <AgentCard key={agent.id} {...agent} />
-                ))}
-              </div>
+              <AgentCard key={agent.id} {...agent} />
+            ))}
+          </div>
 
               {filteredAgents.length === 0 && (
                 <div className="text-center py-12">
@@ -412,11 +415,11 @@ export default function AgentLibraryPage() {
                 </div>
               )}
 
-              <div className="mt-12 text-center">
-                <Button variant="outline" size="lg">
-                  Load More
-                </Button>
-              </div>
+          <div className="mt-12 text-center">
+            <Button variant="outline" size="lg">
+              Load More
+            </Button>
+          </div>
               
               {/* Customization prompt */}
               <div className="mt-16 text-center bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-100">

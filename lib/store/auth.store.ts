@@ -23,14 +23,35 @@ export const useAuthStore = create<AuthStore>()(
           const response = await authService.login(email, password)
           
           if (response.success && response.user) {
+            // Determine redirect URL based on user role
+            let redirectUrl = null
+            
+            // Always use role-based redirect, ignore API redirect URLs
+            switch (response.user.role) {
+              case 'admin':
+                redirectUrl = '/admin'
+                break
+              case 'isv':
+                redirectUrl = '/agents'
+                break
+              case 'reseller':
+                redirectUrl = '/agents'
+                break
+              case 'client':
+                redirectUrl = '/agents'
+                break
+              default:
+                redirectUrl = '/'
+            }
+            
             set({
               user: response.user,
               isAuthenticated: true,
               isLoading: false,
               error: null,
-              redirectUrl: response.redirect || null,
+              redirectUrl: redirectUrl,
             })
-            return { success: true, redirect: response.redirect }
+            return { success: true, redirect: redirectUrl }
           } else {
             set({
               isLoading: false,
@@ -54,15 +75,34 @@ export const useAuthStore = create<AuthStore>()(
           const response = await authService.signup(data)
           
           if (response.success) {
+            // Determine redirect URL based on user role
+            let redirectUrl = response.redirect || null
+            
+            if (!redirectUrl) {
+              switch (data.role) {
+                case 'isv':
+                  redirectUrl = '/dashboard'
+                  break
+                case 'reseller':
+                  redirectUrl = '/'
+                  break
+                case 'client':
+                  redirectUrl = '/dashboard'
+                  break
+                default:
+                  redirectUrl = '/'
+              }
+            }
+            
             set({
               isLoading: false,
               error: null,
-              redirectUrl: response.redirect || null,
+              redirectUrl: redirectUrl,
             })
             return { 
               success: true, 
               message: response.message,
-              redirect: response.redirect 
+              redirect: redirectUrl 
             }
           } else {
             set({

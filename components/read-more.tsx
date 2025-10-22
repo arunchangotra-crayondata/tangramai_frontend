@@ -22,7 +22,9 @@ export default function ReadMore({ text, className, previewWords = 40 }: ReadMor
 
   return (
     <div className={clsx("text-muted-foreground", className)}>
-      <p>{expanded ? text : preview}</p>
+      <div style={{ whiteSpace: 'pre-line' }}>
+        {expanded ? text : preview}
+      </div>
       {needsToggle && (
         <button
           type="button"

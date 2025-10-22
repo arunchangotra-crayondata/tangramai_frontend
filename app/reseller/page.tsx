@@ -18,10 +18,10 @@ export default function ResellerPage() {
                     {/* Decorative A badges */}
 
                     <div className="max-w-2xl">
-                        <h1 className="text-5xl font-bold mb-6 text-balance">Tangram Enterprise Agents Reseller Program</h1>
-                        <p className="text-xl mb-4 font-medium">Drive a new revenue with AI offering</p>
+                        <h1 className="text-5xl font-bold mb-6 text-balance">Drive new revenue with AI offerings from 1000+ ISVs </h1>
+                        <p className="text-xl mb-4 font-medium"> Join Tangram.ai Enterprise Agents Reseller Program Accelerator. </p>
                         <p className="text-gray-700 mb-8 leading-relaxed">
-                            Start referring or integrating Tangram.ai with your clients today to unlock new revenue opportunities, accelerate growth, and deliver intelligent AI solutions at scale.
+                            Start referring or integrating agents from Tangram.ai store with your clients today to unlock new revenue opportunities, accelerate growth, and deliver intelligent AI solutions at scale.
                         </p>
                         <div className="flex gap-4">
                             {/* <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("auth", { mode: "signup", role: "reseller" })}>
@@ -114,39 +114,39 @@ export default function ResellerPage() {
                                         <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white shrink-0"
                                              style={{ background: "linear-gradient(270deg, #3B60AF 0%, #0082C0 100%)" }}>
                                             <Target className="h-5 w-5" />
-                                        </div>
-                                        <div>
+                                            </div>
+                                            <div>
                                             <h4 className="text-sm font-bold mb-1 tracking-wide">GAIN MARKET ACCESS</h4>
                                             <p className="text-sm text-gray-700">Meet the right stakeholders and get their time and attention. Gain streamlined access to key enterprises and sell business value to CEOs and business decision makers directly.</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
+                                    </Card>
 
                                 <Card className="p-6 hover:shadow-md transition-all border bg-white/90">
                                     <div className="flex items-start gap-3">
                                         <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white shrink-0"
                                              style={{ background: "linear-gradient(270deg, #3B60AF 0%, #0082C0 100%)" }}>
                                             <TrendingUp className="h-5 w-5" />
-                                        </div>
-                                        <div>
+                                            </div>
+                                            <div>
                                             <h4 className="text-sm font-bold mb-1 tracking-wide">DEMONSTRATE RAPID OUTCOMES</h4>
                                             <p className="text-sm text-gray-700">Get access to their data to show exactly how valuable you can be to their business. Ability to deliver rapid outcomes to enterprises and realize faster ROI on your products by building on top of our foundational components.</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
+                                    </Card>
 
                                 <Card className="p-6 hover:shadow-md transition-all border bg-white/90">
                                     <div className="flex items-start gap-3">
                                         <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white shrink-0"
                                              style={{ background: "linear-gradient(270deg, #3B60AF 0%, #0082C0 100%)" }}>
                                             <Globe className="h-5 w-5" />
-                                        </div>
-                                        <div>
+                                            </div>
+                                            <div>
                                             <h4 className="text-sm font-bold mb-1 tracking-wide">STREAMLINE MULTIPLE PROCESSES</h4>
                                             <p className="text-sm text-gray-700">Streamline sales, legal and procurement processes and reduce cost of sale and sales cycle. Experience the smoothest commercial processes of vendor registration.</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
+                                    </Card>
                             </div>
                         </div>
                     </div>

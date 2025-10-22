@@ -3,34 +3,17 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Minus, X, Maximize2, Minimize2, ExternalLink, Brain, Zap, Sparkles } from "lucide-react"
+import { Minus, X, Maximize2, Minimize2, ExternalLink, Brain, Zap, Sparkles, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
+import { useChatStore, type ChatMessage } from "@/lib/store/chat.store"
 
 type MarkdownComponentProps = {
   children?: React.ReactNode
-}
-
-type Message = {
-  id: string
-  role: "user" | "assistant"
-  text: string
-  time: string
-  filteredAgentIds?: string[]
-  filteredAgents?: {
-    agent_id: string
-    agent_name: string
-    description: string
-    by_value?: string
-    by_capability?: string
-    service_provider?: string
-    asset_type?: string
-    by_persona?: string
-  }[]
 }
 
 type ChatDialogProps = {
@@ -42,7 +25,7 @@ type ChatDialogProps = {
 }
 
 // Agent Card Component for Chat
-function ChatAgentCard({ agent }: { agent: NonNullable<Message['filteredAgents']>[0] }) {
+function ChatAgentCard({ agent }: { agent: NonNullable<ChatMessage['filteredAgents']>[0] }) {
   return (
     <Card className="mt-3 border border-blue-200 bg-blue-50/50">
       <CardContent className="p-4">
@@ -146,21 +129,43 @@ async function fetchAgentDetails(agentId: string) {
   }
 }
 
-export default function ChatDialog({ open, onOpenChange, initialMode = "explore", initialMessage, onFilteredAgents }: ChatDialogProps) {
-  const [mode, setMode] = useState<"create" | "explore">(initialMode)
+// Function to format chat text for better readability
+function formatChatText(text: string): string {
+  if (!text || text === "AI thinking...") return text
+  
+  return text
+    // Convert \n\n to markdown paragraph breaks
+    .replace(/\n\n/g, '\n\n')
+    // Convert single \n to line breaks (for better spacing)
+    .replace(/\n/g, '\n\n')
+    // Convert bullet points that start with - or * to markdown lists
+    .replace(/^[\s]*[-*]\s+(.+)$/gm, '- $1')
+    // Convert numbered lists
+    .replace(/^[\s]*(\d+)[.)]\s+(.+)$/gm, '$1. $2')
+    // Convert text that looks like headers (all caps or title case) to markdown headers
+    .replace(/^([A-Z][A-Z\s]+)$/gm, '## $1')
+    .replace(/^([A-Z][a-z\s]+):$/gm, '### $1')
+    // Clean up extra line breaks
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
+export default function ChatDialog({ open, onOpenChange, initialMode = "explore", initialMessage }: ChatDialogProps) {
+  const { 
+    messages, 
+    sessionId, 
+    mode, 
+    addMessage, 
+    updateMessage, 
+    clearChat, 
+    setMode, 
+    setSessionId 
+  } = useChatStore()
+  
   const [isMinimized, setIsMinimized] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "m1",
-      role: "assistant",
-      text: "Hi! Tell me what you want to search.",
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    },
-  ])
   const [input, setInput] = useState("")
   const [isSending, setIsSending] = useState(false)
-  const [sessionId, setSessionId] = useState("")
   const [isThinking, setIsThinking] = useState(false)
 
   useEffect(() => {
@@ -168,12 +173,15 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
       const sid = `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
       setSessionId(sid)
     }
-  }, [sessionId])
+  }, [sessionId, setSessionId])
 
   // Ensure mode resets to the requested initialMode whenever dialog opens
   useEffect(() => {
     if (open) {
-      setMode(initialMode)
+      // Only set mode if initialMode is provided and different from current mode
+      if (initialMode && initialMode !== mode) {
+        setMode(initialMode)
+      }
       setIsMinimized(false)
       setIsExpanded(false)
       // If there's an initial message, set it as input and auto-send
@@ -185,19 +193,20 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
         }, 300)
       }
     }
-  }, [open, initialMode, initialMessage])
+  }, [open, initialMode, initialMessage, setMode, mode])
 
   async function handleSendMessage(messageText: string) {
     if (!messageText.trim()) return
     const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     const userText = messageText
-    setMessages((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), role: "user", text: userText, time: now },
-    ])
+    addMessage({ id: crypto.randomUUID(), role: "user", text: userText, time: now })
     setInput("")
     setIsSending(true)
     setIsThinking(true)
+    
+    // Add thinking message immediately
+    const thinkingMessageId = crypto.randomUUID()
+    addMessage({ id: thinkingMessageId, role: "assistant", text: "AI thinking...", time: now })
     
     // Debug logging
     console.log("Sending message with mode:", mode)
@@ -235,23 +244,8 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
         ? new Date(json.data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
         : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       
-      // Add thinking message first
-      setMessages((prev) => [
-        ...prev,
-        { id: crypto.randomUUID(), role: "assistant", text: "AI thinking...", time: replyTs },
-      ])
-      
-      // Simulate thinking delay for better UX (increased for more engaging experience)
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
       // Replace thinking message with actual response
-      setMessages((prev) => 
-        prev.map(msg => 
-          msg.text === "AI thinking..." 
-            ? { ...msg, text: reply, filteredAgentIds }
-            : msg
-        )
-      )
+      updateMessage(thinkingMessageId, { text: reply, filteredAgentIds })
       
       // If we have agent IDs, fetch their details
       if (filteredAgentIds && filteredAgentIds.length > 0) {
@@ -262,13 +256,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
           
           if (validAgents.length > 0) {
             // Update the message with agent details
-            setMessages((prev) => 
-              prev.map(msg => 
-                msg.text === reply && msg.filteredAgentIds === filteredAgentIds
-                  ? { ...msg, filteredAgents: validAgents }
-                  : msg
-              )
-            )
+            updateMessage(thinkingMessageId, { filteredAgents: validAgents })
           }
         } catch (err) {
           console.error("Error fetching agent details:", err)
@@ -276,15 +264,10 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
       }
     } catch (e) {
       const errTs = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
+      updateMessage(thinkingMessageId, {
           text: "I'm currently experiencing technical difficulties. Please try again.",
-          time: errTs,
-        },
-      ])
+        time: errTs
+      })
     } finally {
       setIsSending(false)
       setIsThinking(false)
@@ -294,6 +277,11 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
   async function handleSend() {
     if (!input.trim()) return
     await handleSendMessage(input)
+  }
+
+  function handleClearChat() {
+    clearChat()
+    setInput("")
   }
 
   return (
@@ -331,27 +319,30 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
             </div>
               <div className="flex items-center gap-2">
                 <div className="rounded-full border bg-white p-1 text-xs hidden sm:block">
-                  <button
-                    aria-label="Switch to Create"
+              <button
+                aria-label="Switch to Create"
                     onClick={() => {
                       console.log("Switching to create mode")
                       setMode("create")
                     }}
-                    className={`${mode === "create" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
-                  >
-                    Create
-                  </button>
-                  <button
-                    aria-label="Switch to Explore"
+                className={`${mode === "create" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
+              >
+                Create
+              </button>
+              <button
+                aria-label="Switch to Explore"
                     onClick={() => {
                       console.log("Switching to explore mode")
                       setMode("explore")
                     }}
-                    className={`${mode === "explore" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
-                  >
-                    Explore
+                className={`${mode === "explore" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
+              >
+                Explore
                   </button>
                 </div>
+                <button aria-label="Clear Chat" onClick={handleClearChat} className="rounded-full p-1 hover:bg-gray-100" title="Clear conversation">
+                  <Trash2 className="h-4 w-4" />
+                </button>
                 <button aria-label={isExpanded ? "Restore" : "Expand"} onClick={() => setIsExpanded(!isExpanded)} className="rounded-full p-1 hover:bg-gray-100">
                   {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                 </button>
@@ -360,9 +351,9 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                 </button>
                 <button aria-label="Close" onClick={() => onOpenChange(false)} className="rounded-full p-1 hover:bg-gray-100">
                   <X className="h-4 w-4" />
-                </button>
-              </div>
+              </button>
             </div>
+          </div>
             <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
             {messages.map((m) => (
               <div key={m.id} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
@@ -395,7 +386,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                             em: ({ children }: MarkdownComponentProps) => <em className="italic">{children}</em>,
                           }}
                         >
-                          {m.text}
+                          {formatChatText(m.text)}
                         </ReactMarkdown>
                         
                         {/* Show Contact Us button if "build" keyword is detected */}
@@ -437,25 +428,25 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                 </div>
               </div>
             ))}
-            </div>
+          </div>
             <div className="border-t px-3 py-3">
-              <div className="flex items-center gap-2">
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter" && !isSending) handleSend() }}
-                  placeholder="Type your message..."
-                  className="flex-1"
-                  disabled={isSending}
-                />
-                <Button onClick={handleSend} className="bg-black text-white hover:bg-black/90" disabled={isSending}>
-                  Send
-                </Button>
-              </div>
+            <div className="flex items-center gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && !isSending) handleSend() }}
+                placeholder="Type your message..."
+                className="flex-1"
+                disabled={isSending}
+              />
+              <Button onClick={handleSend} className="bg-black text-white hover:bg-black/90" disabled={isSending}>
+                Send
+              </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </DialogContent>
+    </Dialog>
     </>
   )
 }

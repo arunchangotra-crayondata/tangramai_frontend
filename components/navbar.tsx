@@ -131,36 +131,32 @@ export function Navbar() {
               />
             </Link>
             <div className="hidden items-center gap-10 md:flex">
-              <Link href="/agents" className="text-sm font-medium hover:text-primary">
+              <Link href="/agents" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
                 Agent Store
               </Link>
-              <Link href="/isv" className="text-sm font-medium hover:text-primary">
+              <Link href="/isv" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
                 ISV
               </Link>
-              <Link href="/reseller" className="text-sm font-medium hover:text-primary">
+              <Link href="/reseller" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
                 Reseller
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="text-sm font-medium hover:text-primary">
-                    <span style={{ width: '72px', height: '24px', position: 'relative', left: '16.45px', opacity: 1 }} className="font-inter font-normal text-[14px] leading-[24px] align-middle">
-                      Deployment 
-                    </span>
+                  <button className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+                    Deployment
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" sideOffset={8} className="w-[200px]">
-                  <Link href="/tech-stack" className="block px-3 py-2 text-sm hover:bg-gray-100">
+                  <Link href="/tech-stack" className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                     Deployment Options
                   </Link>
-                  <Link href="/ai-catalyst" className="block px-3 py-2 text-sm hover:bg-gray-100">
+                  <Link href="/ai-catalyst" className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                     Deployment Services
                   </Link>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Link href="/contact" className="text-sm font-medium hover:text-primary">
-                <span style={{ width: '72px', height: '24px', position: 'relative', left: '16.45px', opacity: 1 }} className="font-inter font-normal text-[14px] leading-[24px] align-middle">
-                  Contact us
-                </span>
+              <Link href="/contact" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+                Contact us
               </Link>
             </div>
           </div>
@@ -261,10 +257,10 @@ export function Navbar() {
             ) : (
               // Unauthenticated state - Login and Sign Up buttons
               <>
-                <Button variant="ghost" onClick={() => openModal("auth", { mode: "login", role: "client" })}>
+                <Button variant="ghost" onClick={() => openModal("auth", { mode: "login", role: "client" })} className="text-sm font-medium text-gray-700 hover:text-primary">
                   Login
                 </Button>
-                <Button onClick={() => openModal("auth", { mode: "signup", role: "client" })}>
+                <Button onClick={() => openModal("auth", { mode: "signup", role: "client" })} className="text-sm font-medium bg-primary hover:bg-primary/90 text-white">
                   Sign Up
                 </Button>
               </>

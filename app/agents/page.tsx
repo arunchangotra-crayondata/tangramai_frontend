@@ -47,6 +47,7 @@ type ApiAgent = {
   service_provider?: string | null;
   asset_type?: string | null;
   by_persona?: string | null;
+  admin_approved?: string | null;
 };
 
 async function fetchAgents() {
@@ -108,25 +109,27 @@ export default function AgentLibraryPage() {
         const data = await res.json();
         
         const apiAgents: ApiAgent[] = data?.agents || [];
-        const mappedAgents = apiAgents.map((a) => ({
-          id: a.agent_id,
-          title: a.agent_name,
-          description: a.description,
-          tags: a.tags
-            ? a.tags
-                .split(",")
-                .map((t) => t.trim())
-                .filter(Boolean)
-            : [],
-          badges: [
-            { label: (a as any).by_value || "", variant: "default" as const },
-          ],
-          // Add new fields for filtering
-          capabilities: a.by_capability ? a.by_capability.split(",").map(c => c.trim()).filter(Boolean) : [],
-          providers: a.service_provider ? a.service_provider.split(",").map(p => p.trim()).filter(Boolean) : [],
-          deploymentType: a.asset_type || "",
-          persona: a.by_persona || "",
-        }));
+        const mappedAgents = apiAgents
+          .filter(a => a.admin_approved === "yes") // Only show approved agents
+          .map((a) => ({
+            id: a.agent_id,
+            title: a.agent_name,
+            description: a.description,
+            tags: a.tags
+              ? a.tags
+                  .split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+              : [],
+            badges: [
+              { label: (a as any).by_value || "", variant: "default" as const },
+            ],
+            // Add new fields for filtering
+            capabilities: a.by_capability ? a.by_capability.split(",").map(c => c.trim()).filter(Boolean) : [],
+            providers: a.service_provider ? a.service_provider.split(",").map(p => p.trim()).filter(Boolean) : [],
+            deploymentType: a.asset_type || "",
+            persona: a.by_persona || "",
+          }));
         
         setAgents(mappedAgents.length > 0 ? mappedAgents : fallbackAgents);
       } catch (err) {

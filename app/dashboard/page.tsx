@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAuthStore } from "@/lib/store/auth.store"
-import { useToast } from "@/hooks/use-toast"
+import { Button } from "../../components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
+import { useAuthStore } from "../../lib/store/auth.store"
+import { useToast } from "../../hooks/use-toast"
 
 type Agent = {
   agent_id: string

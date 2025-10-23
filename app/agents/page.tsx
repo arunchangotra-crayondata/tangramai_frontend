@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { AgentSearchChat } from "@/components/agent-search-chat";
-import { AgentCard } from "@/components/agent-card";
-import ChatDialog from "@/components/chat-dialog";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { AgentSearchChat } from "../../components/agent-search-chat";
+import { AgentCard } from "../../components/agent-card";
+import ChatDialog from "../../components/chat-dialog";
 import { Search, ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useChatStore } from "@/lib/store/chat.store";
+import { useChatStore } from "../../lib/store/chat.store";
 
 // Fallback mock data (minimal) in case the API fails
 const fallbackAgents = [

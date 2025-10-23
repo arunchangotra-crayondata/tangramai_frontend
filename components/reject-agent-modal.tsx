@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import type { AgentAPIResponse } from "@/lib/types/admin.types"
+import { Button } from "./ui/button"
+import { Textarea } from "./ui/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
+import type { AgentAPIResponse } from "../lib/types/admin.types"
 
 interface RejectAgentModalProps {
   agent: AgentAPIResponse

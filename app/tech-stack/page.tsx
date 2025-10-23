@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { DeploymentCard } from "@/components/deployment-card"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import { DeploymentCard } from "../../components/deployment-card"
 import Image from "next/image"
 import { Search, ChevronDown, Cloud as CloudIcon } from "lucide-react"
 import Head from "next/head"

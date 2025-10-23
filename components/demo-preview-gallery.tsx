@@ -1,10 +1,10 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "./ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
 import { ChevronLeft, ChevronRight, X, Play, Image as ImageIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "../lib/utils"
 
 interface DemoPreviewGalleryProps {
   demoPreview: string

@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "./ui/dialog"
 import { Minus, X, Maximize2, Minimize2, ExternalLink, Brain, Zap, Sparkles, Trash2 } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Input } from "./ui/input"
+import { Button } from "./ui/button"
+import { Card, CardContent } from "./ui/card"
+import { Badge } from "./ui/badge"
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
-import { useChatStore, type ChatMessage } from "@/lib/store/chat.store"
+import { useChatStore, type ChatMessage } from "../lib/store/chat.store"
 
 type MarkdownComponentProps = {
   children?: React.ReactNode

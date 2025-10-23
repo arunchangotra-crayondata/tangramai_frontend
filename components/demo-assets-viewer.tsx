@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import clsx from "clsx"
-import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { AspectRatio } from "./ui/aspect-ratio"
 
 type DemoAsset = { demo_asset_link?: string; demo_link?: string }
 

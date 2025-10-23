@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { ProfileService } from '@/lib/api/profile.service'
-import { ClientProfile, ClientProfileUpdate } from '@/lib/types/profile.types'
-import { useToast } from '@/hooks/use-toast'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Label } from '../ui/label'
+import { Card } from '../ui/card'
+import { Avatar, AvatarFallback } from '../ui/avatar'
+import { ProfileService } from '../../lib/api/profile.service'
+import { ClientProfile, ClientProfileUpdate } from '../../lib/types/profile.types'
+import { useToast } from '../../hooks/use-toast'
 import { Edit, Save, X, Lock } from 'lucide-react'
 
 interface ClientProfileComponentProps {

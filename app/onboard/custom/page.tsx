@@ -1,17 +1,17 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+import { Button } from "../../../components/ui/button"
+import { Input } from "../../../components/ui/input"
+import { Textarea } from "../../../components/ui/textarea"
+import { Label } from "../../../components/ui/label"
 import { ArrowLeft, ArrowRight, Check, ChevronRight, X, Upload, FileText, Image as ImageIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { MultiSelectInput } from "@/components/multi-select-input"
-import { DropdownWithCustom } from "@/components/dropdown-with-custom"
-import { useAuthStore } from "@/lib/store/auth.store"
-import { OnboardAgentPreview } from "@/components/onboard-agent-preview"
+import { cn } from "../../../lib/utils"
+import { MultiSelectInput } from "../../../components/multi-select-input"
+import { DropdownWithCustom } from "../../../components/dropdown-with-custom"
+import { useAuthStore } from "../../../lib/store/auth.store"
+import { OnboardAgentPreview } from "../../../components/onboard-agent-preview"
 
 type Step = 1 | 2 | 3 | 4 | 5
 
@@ -272,7 +272,7 @@ export default function CustomOnboardPage() {
       }
 
       // Import agent service and make API call
-      const { agentService } = await import("@/lib/api/agent.service")
+      const { agentService } = await import("../../../lib/api/agent.service")
       const response = await agentService.onboardAgent(apiData)
       
       console.log("Agent onboarded successfully:", response)

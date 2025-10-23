@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/badge";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Badge } from "../components/badge";
 import { Search, Mic, Database, Gauge, Clock, Cloud, Settings, Shield, Rocket, CheckCircle2, ChevronDown } from "lucide-react";
-import { useModal } from "@/hooks/use-modal";
+import { useModal } from "../hooks/use-modal";
 import { useState } from "react";
-import ChatDialog from "@/components/chat-dialog";
+import ChatDialog from "../components/chat-dialog";
 import Image from "next/image";
 import Link from "next/link";
 

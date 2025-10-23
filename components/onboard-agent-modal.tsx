@@ -1,7 +1,7 @@
 "use client"
 
 import { ModalWrapper } from "./modal-wrapper"
-import { useModal } from "@/hooks/use-modal"
+import { useModal } from "../hooks/use-modal"
 import { Button } from "./ui/button"
 import { useRouter } from "next/navigation"
 import Image from "next/image"

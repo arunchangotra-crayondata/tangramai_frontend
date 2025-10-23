@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useModal } from "@/hooks/use-modal"
+import { useModal } from "../../../hooks/use-modal"
 
 export default function SignupPage() {
   const router = useRouter()

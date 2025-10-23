@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import ChatDialog from "@/components/chat-dialog";
+import { Button } from "../../components/ui/button";
+import ChatDialog from "../../components/chat-dialog";
 import { Gauge, Settings, TrendingUp, CheckCircle2 } from "lucide-react";
 import Head from "next/head";
 

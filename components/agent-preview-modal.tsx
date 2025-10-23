@@ -1,17 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Button } from "./ui/button"
+import { Badge } from "./ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import { Card, CardContent } from "./ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion"
 import { CheckCircle, XCircle, ExternalLink, MapPin, Phone, Mail, Globe } from "lucide-react"
-import ReadMore from "@/components/read-more"
-import CollapsibleList from "@/components/collapsible-list"
-import DemoAssetsViewer from "@/components/demo-assets-viewer"
-import type { AgentAPIResponse } from "@/lib/types/admin.types"
+import ReadMore from "./read-more"
+import CollapsibleList from "./collapsible-list"
+import DemoAssetsViewer from "./demo-assets-viewer"
+import type { AgentAPIResponse } from "../lib/types/admin.types"
 
 // Types for the full agent details API response
 type AgentDetailApiResponse = {

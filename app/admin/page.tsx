@@ -9,9 +9,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Search, SlidersHorizontal, MoreVertical, Eye, Edit, CheckCircle, XCircle, Trash2, ExternalLink, MessageSquare, Users, User } from "lucide-react"
 import { AgentPreviewModal } from "../../components/agent-preview-modal"
 import { RejectAgentModal } from "../../components/reject-agent-modal"
-import { ISVDetailsDrawer } from "../../components/isv-details-drawer"
+import { ISVDetailsModal } from "../../components/isv-details-modal"
 import { RejectISVModal } from "../../components/reject-isv-modal"
-import { ResellerDetailsDrawer } from "../../components/reseller-details-drawer"
+import { ResellerDetailsModal } from "../../components/reseller-details-modal"
 import { RejectResellerModal } from "../../components/reject-reseller-modal"
 import { EditISVModal } from "../../components/edit-isv-modal"
 import { EditResellerModal } from "../../components/edit-reseller-modal"
@@ -85,8 +85,8 @@ export default function AdminPage() {
 
   // Drawer States
   const [agentDetailsOpen, setAgentDetailsOpen] = useState(false)
-  const [isvDetailsOpen, setISVDetailsOpen] = useState(false)
-  const [resellerDetailsOpen, setResellerDetailsOpen] = useState(false)
+  const [isvModalOpen, setISVModalOpen] = useState(false)
+  const [resellerModalOpen, setResellerModalOpen] = useState(false)
 
   // Modal States
   const [rejectAgentModalOpen, setRejectAgentModalOpen] = useState(false)
@@ -274,7 +274,7 @@ export default function AdminPage() {
         isv_email: isv.isv_email_no,
         admin_approved: "yes" 
       })
-      setISVDetailsOpen(false)
+      setISVModalOpen(false)
       await fetchISVs()
       toast({
         description: `${isv.isv_name} has been approved successfully.`,
@@ -295,7 +295,7 @@ export default function AdminPage() {
         admin_approved: "no" 
       })
       setRejectISVModalOpen(false)
-      setISVDetailsOpen(false)
+      setISVModalOpen(false)
       await fetchISVs()
       toast({
         description: `${isv.isv_name} has been rejected.`,
@@ -315,7 +315,7 @@ export default function AdminPage() {
         reseller_email: reseller.reseller_email_no,
         admin_approved: "yes" 
       })
-      setResellerDetailsOpen(false)
+      setResellerModalOpen(false)
       await fetchResellers()
       toast({
         description: `${reseller.reseller_name} has been approved successfully.`,
@@ -336,7 +336,7 @@ export default function AdminPage() {
         admin_approved: "no" 
       })
       setRejectResellerModalOpen(false)
-      setResellerDetailsOpen(false)
+      setResellerModalOpen(false)
       await fetchResellers()
       toast({
         description: `${reseller.reseller_name} has been rejected.`,
@@ -350,12 +350,12 @@ export default function AdminPage() {
   }
 
   const handleEditISV = () => {
-    setISVDetailsOpen(false)
+    setISVModalOpen(false)
     setEditISVModalOpen(true)
   }
 
   const handleEditReseller = () => {
-    setResellerDetailsOpen(false)
+    setResellerModalOpen(false)
     setEditResellerModalOpen(true)
   }
 
@@ -673,7 +673,7 @@ export default function AdminPage() {
                                 <DropdownMenuItem 
                                   onClick={() => {
                                     setSelectedISV(isv)
-                                    setISVDetailsOpen(true)
+                                    setISVModalOpen(true)
                                   }}
                                 >
                                   <Eye className="mr-2 h-4 w-4" />
@@ -757,7 +757,7 @@ export default function AdminPage() {
                                 <DropdownMenuItem 
                                   onClick={() => {
                                     setSelectedReseller(reseller)
-                                    setResellerDetailsOpen(true)
+                                    setResellerModalOpen(true)
                                   }}
                                 >
                                   <Eye className="mr-2 h-4 w-4" />
@@ -852,10 +852,10 @@ export default function AdminPage() {
 
       {selectedISV && (
         <>
-          <ISVDetailsDrawer
+          <ISVDetailsModal
             isv={selectedISV}
-            open={isvDetailsOpen}
-            onOpenChange={setISVDetailsOpen}
+            open={isvModalOpen}
+            onOpenChange={setISVModalOpen}
             onApprove={handleApproveISV}
             onReject={() => setRejectISVModalOpen(true)}
             onEdit={handleEditISV}
@@ -877,10 +877,10 @@ export default function AdminPage() {
 
       {selectedReseller && (
         <>
-          <ResellerDetailsDrawer
+          <ResellerDetailsModal
             reseller={selectedReseller}
-            open={resellerDetailsOpen}
-            onOpenChange={setResellerDetailsOpen}
+            open={resellerModalOpen}
+            onOpenChange={setResellerModalOpen}
             onApprove={handleApproveReseller}
             onReject={() => setRejectResellerModalOpen(true)}
             onEdit={handleEditReseller}

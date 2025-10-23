@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { getBrandConfig } from "@/lib/brand"
+import { getBrandConfig } from "../lib/brand"
 
 interface BrandLogoProps {
   width?: number

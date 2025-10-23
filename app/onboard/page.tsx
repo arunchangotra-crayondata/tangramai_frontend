@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "../../components/ui/button"
 import { ArrowLeft, Upload, FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"

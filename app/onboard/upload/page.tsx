@@ -3,8 +3,8 @@
 import type React from "react"
 
 import { useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "../../../components/ui/button"
+import { Badge } from "../../../components/ui/badge"
 import { ArrowLeft, ArrowRight, CloudUpload, FileSpreadsheet, RotateCw, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"

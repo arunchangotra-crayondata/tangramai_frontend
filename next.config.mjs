@@ -13,7 +13,7 @@ const nextConfig = {
   experimental: {
     esmExternals: true,
   },
-  // Rewrites for development - in production we use /api/proxy/[...path] route
+  // Rewrites for both development and production
   async rewrites() {
     return [
       {

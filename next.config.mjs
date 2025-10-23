@@ -9,6 +9,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Rewrites for development - in production we use /api/proxy/[...path] route
   async rewrites() {
     return [
       {

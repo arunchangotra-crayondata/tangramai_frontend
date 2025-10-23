@@ -1,7 +1,7 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Button } from "../../components/ui/button"
+import { Card } from "../../components/ui/card"
 import {
   ArrowRight,
   Target,
@@ -26,7 +26,7 @@ import {
   BarChart3,
 } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import Link from "next/link"
 
 export default function OverviewPage() {

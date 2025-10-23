@@ -1,12 +1,12 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Input } from "@/components/ui/input"
+import { Button } from "../../components/ui/button"
+import { Card } from "../../components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion"
+import { Input } from "../../components/ui/input"
 import { ArrowRight, Target, Globe, TrendingUp } from "lucide-react"
 import Image from "next/image"
-import { useModal } from "@/hooks/use-modal"
+import { useModal } from "../../hooks/use-modal"
 
 export default function ResellerPage() {
     const { openModal } = useModal()

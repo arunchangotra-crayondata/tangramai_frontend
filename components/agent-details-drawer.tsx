@@ -1,12 +1,12 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Separator } from "@/components/ui/separator"
-import { DemoPreviewGallery } from "@/components/demo-preview-gallery"
+import { Button } from "./ui/button"
+import { Badge } from "./ui/badge"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet"
+import { Separator } from "./ui/separator"
+import { DemoPreviewGallery } from "./demo-preview-gallery"
 import { ExternalLink, CheckCircle, XCircle } from "lucide-react"
-import type { AgentAPIResponse } from "@/lib/types/admin.types"
+import type { AgentAPIResponse } from "../lib/types/admin.types"
 
 interface AgentDetailsDrawerProps {
   agent: AgentAPIResponse

@@ -8,8 +8,8 @@ import { InputField } from "./input-field"
 import { PrimaryButton } from "./primary-button"
 import { PhoneInputWithCode } from "./phone-input-with-code"
 import { FileUploadField } from "./file-upload-field"
-import { useModal } from "@/hooks/use-modal"
-import { useAuthStore } from "@/lib/store/auth.store"
+import { useModal } from "../hooks/use-modal"
+import { useAuthStore } from "../lib/store/auth.store"
 
 interface UnifiedAuthModalProps {
   isOpen: boolean

@@ -1,5 +1,5 @@
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://agents-store.onrender.com' 
+  ? '' // Use proxy in production to avoid CORS issues
   : ''
 
 export const apiConfig = {
@@ -31,10 +31,11 @@ export const endpoints = {
 
 // Helper function to create full URL
 export const createApiUrl = (endpoint: string) => {
-  if (API_BASE_URL) {
-    return `${API_BASE_URL}${endpoint}`
+  if (process.env.NODE_ENV === 'production') {
+    // In production, use the Next.js API proxy to avoid CORS issues
+    return `/api/proxy${endpoint}`
   }
-  // In development, use the Next.js proxy
+  // In development, use the Next.js rewrites
   return endpoint
 }
 

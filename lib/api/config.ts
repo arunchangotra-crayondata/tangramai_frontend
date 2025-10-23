@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? '' // Use proxy in production to avoid CORS issues
-  : ''
+  ? '' // Use rewrites in production
+  : '' // Use rewrites in development
 
 export const apiConfig = {
   baseURL: API_BASE_URL,
@@ -31,11 +31,7 @@ export const endpoints = {
 
 // Helper function to create full URL
 export const createApiUrl = (endpoint: string) => {
-  if (process.env.NODE_ENV === 'production') {
-    // In production, use the Next.js API proxy to avoid CORS issues
-    return `/api/proxy${endpoint}`
-  }
-  // In development, use the Next.js rewrites
+  // Use rewrites for both development and production
   return endpoint
 }
 

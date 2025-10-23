@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store/auth.store'
-import { useToast } from '@/hooks/use-toast'
-import { ClientProfileComponent } from '@/components/profile/client-profile'
-import { ISVProfileComponent } from '@/components/profile/isv-profile'
-import { ResellerProfileComponent } from '@/components/profile/reseller-profile'
+import { useAuthStore } from '../../lib/store/auth.store'
+import { useToast } from '../../hooks/use-toast'
+import { ClientProfileComponent } from '../../components/profile/client-profile'
+import { ISVProfileComponent } from '../../components/profile/isv-profile'
+import { ResellerProfileComponent } from '../../components/profile/reseller-profile'
 
 export default function ProfilePage() {
   const router = useRouter()

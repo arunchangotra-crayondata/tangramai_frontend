@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import ChatDialog from "@/components/chat-dialog"
+import { Input } from "./ui/input"
+import { Button } from "./ui/button"
+import ChatDialog from "./chat-dialog"
 import { Search, Mic } from "lucide-react"
-import { useChatStore } from "@/lib/store/chat.store"
+import { useChatStore } from "../lib/store/chat.store"
 
 export function AgentSearchChat() {
   const [chatOpen, setChatOpen] = useState(false)

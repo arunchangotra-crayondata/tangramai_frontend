@@ -6,7 +6,7 @@ import {
   ISVProfileUpdate, 
   ResellerProfileUpdate,
   ProfileApiResponse 
-} from '@/lib/types/profile.types'
+} from '../types/profile.types'
 
 const API_BASE_URL = 'https://agents-store.onrender.com'
 

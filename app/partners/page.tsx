@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "../../components/ui/button"
+import { Card, CardContent } from "../../components/ui/card"
 import { Lightbulb, Globe, Zap } from "lucide-react"
 
 export default function PartnersPage() {

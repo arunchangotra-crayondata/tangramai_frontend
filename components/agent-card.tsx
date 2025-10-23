@@ -1,6 +1,6 @@
 import Link from "next/link"
-import { Badge } from "@/components/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "./badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
 interface AgentCardProps {
   id: string

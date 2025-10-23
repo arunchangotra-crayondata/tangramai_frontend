@@ -1,12 +1,12 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Input } from "@/components/ui/input"
+import { Button } from "../../components/ui/button"
+import { Card } from "../../components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion"
+import { Input } from "../../components/ui/input"
 import Image from "next/image"
-import { useModal } from "@/hooks/use-modal"
-import { useAuthStore } from "@/lib/store/auth.store"
+import { useModal } from "../../hooks/use-modal"
+import { useAuthStore } from "../../lib/store/auth.store"
 import { useRouter } from "next/navigation"
 import { ArrowRight, Target, Globe, TrendingUp } from "lucide-react"
 

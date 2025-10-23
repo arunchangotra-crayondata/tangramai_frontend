@@ -9,6 +9,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Ensure proper module resolution
+  experimental: {
+    esmExternals: true,
+  },
   // Rewrites for development - in production we use /api/proxy/[...path] route
   async rewrites() {
     return [

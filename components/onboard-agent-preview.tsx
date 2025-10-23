@@ -1,13 +1,13 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Badge } from "./ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import { Card, CardContent } from "./ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion"
 import { ExternalLink } from "lucide-react"
-import ReadMore from "@/components/read-more"
-import CollapsibleList from "@/components/collapsible-list"
-import DemoAssetsViewer from "@/components/demo-assets-viewer"
+import ReadMore from "./read-more"
+import CollapsibleList from "./collapsible-list"
+import DemoAssetsViewer from "./demo-assets-viewer"
 
 // Import the FormData interface from the onboard page
 interface FormData {

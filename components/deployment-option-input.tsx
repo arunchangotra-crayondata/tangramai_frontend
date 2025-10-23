@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "./ui/button"
+import { Input } from "./ui/input"
+import { Label } from "./ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { Trash2, Plus } from "lucide-react"
-import type { DeploymentOption } from "@/lib/types/agent.types"
+import type { DeploymentOption } from "../lib/types/agent.types"
 
 // Dropdown options
 const serviceProviderOptions = ["AWS", "Azure", "GCP", "Open-Source", "SaaS"]

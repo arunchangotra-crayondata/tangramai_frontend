@@ -1,16 +1,16 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card } from '@/components/ui/card'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { FileUpload } from '@/components/file-upload'
-import { ProfileService } from '@/lib/api/profile.service'
-import { ISVProfile, ISVProfileUpdate } from '@/lib/types/profile.types'
-import { useToast } from '@/hooks/use-toast'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Label } from '../ui/label'
+import { Textarea } from '../ui/textarea'
+import { Card } from '../ui/card'
+import { Avatar, AvatarFallback } from '../ui/avatar'
+import { FileUpload } from '../file-upload'
+import { ProfileService } from '../../lib/api/profile.service'
+import { ISVProfile, ISVProfileUpdate } from '../../lib/types/profile.types'
+import { useToast } from '../../hooks/use-toast'
 import { Download, Trash2, Edit, Save, X } from 'lucide-react'
 
 interface ISVProfileComponentProps {

@@ -3,14 +3,14 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { Button } from "./ui/button"
 import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown, Menu, X } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { BrandLogo } from "@/components/brand-logo"
-import { useAuthStore } from "@/lib/store/auth.store"
-import { useModal } from "@/hooks/use-modal"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu"
+import { BrandLogo } from "./brand-logo"
+import { useAuthStore } from "../lib/store/auth.store"
+import { useModal } from "../hooks/use-modal"
 import { useState, useRef, useEffect } from "react"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "../hooks/use-toast"
 
 export function Navbar() {
   const router = useRouter()

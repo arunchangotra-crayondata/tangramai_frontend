@@ -1,6 +1,6 @@
 import type React from "react"
-import { Badge } from "@/components/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "./badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
 interface DeploymentCardProps {
   title: string

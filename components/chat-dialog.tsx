@@ -123,7 +123,6 @@ async function fetchAgentDetails(agentId: string) {
     const data = await res.json()
     return data?.agent || null
   } catch (err) {
-    console.error(`Error fetching agent ${agentId}:`, err)
     return null
   }
 }
@@ -207,11 +206,6 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
     const thinkingMessageId = crypto.randomUUID()
     addMessage({ id: thinkingMessageId, role: "assistant", text: "AI thinking...", time: now })
     
-    // Debug logging
-    console.log("Sending message with mode:", mode)
-    console.log("Message text:", userText)
-    console.log("Session ID:", sessionId)
-    
     try {
       const res = await fetch("https://agents-store.onrender.com/api/chat", {
         method: "POST",
@@ -230,17 +224,26 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
         filteredAgentIds = json.data.filtered_agents
       }
       
-      // Log for debugging (remove in production)
-      if (filteredAgentIds) {
-        console.log("Found filtered agent IDs:", filteredAgentIds)
-      }
+      // Check if lets_build flag is set
+      const letsBuild = json?.data?.lets_build === true
+      const gatheredInfo = json?.data?.gathered_info || {}
+      const brdDownloadUrl = json?.data?.brd_download_url || null
+      const brdStatus = json?.data?.brd_status || null
       
       const replyTs = json?.data?.timestamp
         ? new Date(json.data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
         : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       
       // Replace thinking message with actual response
-      updateMessage(thinkingMessageId, { text: reply, filteredAgentIds })
+      updateMessage(thinkingMessageId, { 
+        text: reply, 
+        time: replyTs,
+        filteredAgentIds, 
+        letsBuild, 
+        gatheredInfo,
+        brdDownloadUrl,
+        brdStatus
+      })
       
       // If we have agent IDs, fetch their details
       if (filteredAgentIds && filteredAgentIds.length > 0) {
@@ -254,7 +257,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
             updateMessage(thinkingMessageId, { filteredAgents: validAgents })
           }
         } catch (err) {
-          console.error("Error fetching agent details:", err)
+          // Silently handle error fetching agent details
         }
       }
     } catch (e) {
@@ -278,7 +281,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
     clearChat()
     setInput("")
   }
-
+  
   return (
     <>
       {/* Minimized pill - shows when minimized */}
@@ -300,7 +303,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
           className={`p-0 overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 ease-out ${
             isExpanded 
               ? "sm:max-w-[900px] md:max-w-[960px] animate-in slide-in-from-bottom-4" 
-              : "sm:max-w-[420px] md:max-w-[420px] fixed bottom-6 right-6 left-auto top-auto translate-x-0 translate-y-0 animate-in slide-in-from-bottom-4"
+              : "sm:max-w-[420px] md:max-w-[420px] fixed bottom-6 right-6 left-auto top-auto translate-x-0 translate-y-0 animate-in slide-in-from-bottom-4 z-[100]"
           }`}
           showCloseButton={false}
         >
@@ -316,20 +319,14 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                 <div className="rounded-full border bg-white p-1 text-xs hidden sm:block">
               <button
                 aria-label="Switch to Create"
-                    onClick={() => {
-                      console.log("Switching to create mode")
-                      setMode("create")
-                    }}
+                    onClick={() => setMode("create")}
                 className={`${mode === "create" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
               >
                 Create
               </button>
               <button
                 aria-label="Switch to Explore"
-                    onClick={() => {
-                      console.log("Switching to explore mode")
-                      setMode("explore")
-                    }}
+                    onClick={() => setMode("explore")}
                 className={`${mode === "explore" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
               >
                 Explore
@@ -384,14 +381,57 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                           {formatChatText(m.text)}
                         </ReactMarkdown>
                         
-                        {/* Show Contact Us button if "build" keyword is detected */}
-                        {m.text.toLowerCase().includes("build") && (
-                          <div className="mt-3 pt-3 border-t border-gray-200">
+                        
+
+                        {/* Show Let's Build buttons if lets_build flag is true */}
+                        {m.letsBuild === true && (
+                          <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
                             <Link href="/contact">
-                              <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2">
-                                Contact Us to Build Your Agent
+                              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2">
+                                Contact Us to Start Building
                               </Button>
                             </Link>
+                            <Button 
+                              onClick={async () => {
+                                try {
+                                  // Use the BRD download URL from API if available, otherwise fall back
+                                  const downloadUrl = m.brdDownloadUrl 
+                                    ? `https://agents-store.onrender.com${m.brdDownloadUrl}`
+                                    : `https://agents-store.onrender.com/api/chat/download-brd`
+                                  
+                                  const response = await fetch(downloadUrl, {
+                                    method: m.brdDownloadUrl ? 'GET' : 'POST',
+                                    headers: m.brdDownloadUrl ? {} : {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: m.brdDownloadUrl ? undefined : JSON.stringify({
+                                      session_id: sessionId,
+                                      gathered_info: m.gatheredInfo || {}
+                                    })
+                                  })
+                                  
+                                  if (!response.ok) throw new Error('Failed to download BRD')
+                                  
+                                  // Get the blob and download it
+                                  const blob = await response.blob()
+                                  const url = window.URL.createObjectURL(blob)
+                                  const a = document.createElement('a')
+                                  a.href = url
+                                  a.download = `BRD_${sessionId}.docx`
+                                  document.body.appendChild(a)
+                                  a.click()
+                                  window.URL.revokeObjectURL(url)
+                                  document.body.removeChild(a)
+                                } catch (error) {
+                                  alert('Failed to download BRD document. Please try again or contact support.')
+                                }
+                              }}
+                              variant="outline" 
+                              className="w-full text-sm px-4 py-2 border-gray-300 hover:bg-gray-50"
+                              disabled={false}
+                            >
+                              Download BRD Document
+                            </Button>
                           </div>
                         )}
                         

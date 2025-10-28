@@ -8,13 +8,21 @@ interface AgentCardProps {
   description: string
   badges: Array<{ label: string; variant?: "default" | "primary" | "secondary" | "outline" }>
   tags: string[]
+  assetType?: string
 }
 
-export function AgentCard({ id, title, description, badges, tags }: AgentCardProps) {
+export function AgentCard({ id, title, description, badges, tags, assetType }: AgentCardProps) {
   return (
     <Link href={`/agents/${id}`}>
-      <Card className="h-full transition-shadow hover:shadow-lg">
-        <CardHeader>
+      <Card className="h-full transition-shadow hover:shadow-lg relative">
+        {assetType && (
+          <div className="absolute top-4 right-4 z-10">
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">
+              {assetType}
+            </Badge>
+          </div>
+        )}
+        <CardHeader className={assetType ? "pr-24" : ""}>
           <CardTitle className="text-lg">{title}</CardTitle>
           <CardDescription className="line-clamp-3">{description}</CardDescription>
         </CardHeader>

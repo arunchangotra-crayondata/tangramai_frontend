@@ -142,7 +142,7 @@ export function Navbar() {
     <>
       {/* Limited Availability Banner */}
       <div className="bg-blue-50 border-b border-blue-200 text-center py-2">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <p className="text-sm text-blue-700 font-medium">
             Limited Availability !!
           </p>
@@ -150,7 +150,7 @@ export function Navbar() {
       </div>
       
       <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 relative z-50">
-      <div className="mx-auto max-w-[1280px] px-6">
+      <div className="w-full px-8 md:px-12 lg:px-16">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2">

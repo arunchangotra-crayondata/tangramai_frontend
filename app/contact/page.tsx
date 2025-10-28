@@ -31,14 +31,14 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20 bg-white">
-        {/* Background gradient image */}
-        <div aria-hidden="true" className="absolute inset-0 -z-10">
+      <section className="relative py-20 bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100">
+        {/* Background gradient image - full width */}
+        <div aria-hidden="true" className="absolute inset-0 -z-10 w-full">
           <img src="/gradiant%20image%20left.png" alt="" className="h-full w-full object-cover" />
         </div>
-        <div className="mx-auto max-w-[1280px] px-6 relative">
+        <div className="w-full px-8 md:px-12 lg:px-16 relative">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start bt-10">
              {/* Left Side - Header */}
              <div className="relative min-h-[500px]">
@@ -174,7 +174,7 @@ export default function ContactPage() {
 
       {/* Ask Question Section */}
       <section className="py-16 bg-white">
-        <div className="mx-auto max-w-[800px] px-6 text-center">
+        <div className="w-full px-8 md:px-12 lg:px-16 text-center">
           <h3 className="text-2xl font-semibold text-gray-900 mb-4">
             Have Questions?
           </h3>

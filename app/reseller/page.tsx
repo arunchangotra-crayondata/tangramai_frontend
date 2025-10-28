@@ -13,15 +13,19 @@ export default function ResellerPage() {
     return (
         <div className="min-h-screen">
             {/* Hero Section with Gradient */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100">
-                <div className="mx-auto max-w-[1280px] px-6 py-20 relative">
+            <section className="relative overflow-hidden bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 min-h-[90vh]">
+        {/* Background gradient image - positioned to the left, visible */}
+        <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-full md:w-1/2 lg:w-2/3">
+          <img src="/gradiant%20image%20right.png" alt="" className="h-full w-full object-contain md:object-cover" />
+        </div>
+                <div className="w-full px-8 md:px-12 lg:px-16 py-20 relative">
                     {/* Decorative A badges */}
 
                     <div className="max-w-2xl">
                         <h1 className="text-5xl font-bold mb-6 text-balance">Drive new revenue with AI offerings from 1000+ ISVs </h1>
                         <p className="text-xl mb-4 font-medium"> Join Tangram.ai Enterprise Agents Reseller Program Accelerator. </p>
                         <p className="text-gray-700 mb-8 leading-relaxed">
-                            Start referring or integrating agents from Tangram.ai store with your clients today to unlock new revenue opportunities, accelerate growth, and deliver intelligent AI solutions at scale.
+                            Start referring or integrating agents from Tangram.ai store with your clients today to unlock new revenue opportunities, accelerate growth, and deliver intelligent AI solutions at scale.
                         </p>
                         <div className="flex gap-4">
                             {/* <Button size="lg" className="bg-black text-white hover:bg-gray-800" onClick={() => openModal("auth", { mode: "signup", role: "reseller" })}>
@@ -42,7 +46,7 @@ export default function ResellerPage() {
 
            
             <section className="py-16 relative">
-                <div className="mx-auto max-w-[1280px] px-6 text-center pt-12">
+                <div className="w-full px-8 md:px-12 lg:px-16 text-center pt-12">
                     <h2 className="text-4xl font-bold mb-4">Are You a Good Fit?</h2>
                     <p className="text-gray-700 leading-relaxed">
                         You’re a good fit for the Tangram.ai Reseller Program if you help clients adopt AI-driven solutions and want to expand your portfolio with enterprise-ready intelligence.
@@ -52,7 +56,7 @@ export default function ResellerPage() {
 
             {/* Three Feature Cards */}
             <section className="py-16">
-                <div className="mx-auto max-w-[1280px] px-6">
+                <div className="w-full px-8 md:px-12 lg:px-16">
                     <div className="grid md:grid-cols-3 gap-8">
                         <Card className="p-8 border-2 bg-white">
                             <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-6">
@@ -96,7 +100,7 @@ export default function ResellerPage() {
 
             {/* Discover Partnerships */}
             <section className="bg-gray-50 py-16 relative">
-                <div className="mx-auto max-w-[1280px] px-6">
+                <div className="w-full px-8 md:px-12 lg:px-16">
                     <div className="flex flex-col md:flex-row gap-12 items-center">
                         {/* Left side - Text content (50%) */}
                         <div className="flex-1 md:w-1/2">
@@ -155,7 +159,7 @@ export default function ResellerPage() {
 
       {/* Testimonials */}
       <section className="bg-white py-16 relative">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <h2 className="text-3xl font-bold mb-12 text-center">Reseller Testimonials</h2>
 
           <div className="bg-white border-2 rounded-lg p-12">
@@ -197,7 +201,7 @@ export default function ResellerPage() {
 
             {/* FAQ Section */}
             <section className="bg-gray-50 py-16 relative">
-                <div className="mx-auto max-w-[1280px] px-6">
+                <div className="w-full px-8 md:px-12 lg:px-16">
                     <div className="flex flex-col md:flex-row gap-12 items-start">
                         {/* Left side - Title (50%) */}
                         <div className="flex-1 md:w-1/2">
@@ -245,7 +249,7 @@ export default function ResellerPage() {
 
             {/* Contact Section */}
             <section className="bg-white py-16">
-                <div className="mx-auto max-w-[1280px] px-6">
+                <div className="w-full px-8 md:px-12 lg:px-16">
                     <div className="flex flex-col md:flex-row gap-8 items-center justify-between">
                         <div className="flex-1">
                             <h2 className="text-2xl font-bold mb-2">

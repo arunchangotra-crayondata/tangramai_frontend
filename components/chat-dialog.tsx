@@ -240,6 +240,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
         time: replyTs,
         filteredAgentIds, 
         letsBuild, 
+        letsBuildTimestamp: letsBuild ? Date.now() : undefined,
         gatheredInfo,
         brdDownloadUrl,
         brdStatus
@@ -303,7 +304,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
           className={`p-0 overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 ease-out ${
             isExpanded 
               ? "sm:max-w-[900px] md:max-w-[960px] animate-in slide-in-from-bottom-4" 
-              : "sm:max-w-[420px] md:max-w-[420px] fixed bottom-6 right-6 left-auto top-auto translate-x-0 translate-y-0 animate-in slide-in-from-bottom-4 z-[100]"
+              : "sm:max-w-[600px] md:max-w-[600px] fixed bottom-6 right-6 left-auto top-auto translate-x-0 translate-y-0 animate-in slide-in-from-bottom-4 z-[100]"
           }`}
           showCloseButton={false}
         >
@@ -385,9 +386,10 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
 
                         {/* Show Let's Build buttons if lets_build flag is true */}
                         {m.letsBuild === true && (
-                          <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-                            <Link href="/contact">
-                              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2">
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <div className="flex flex-col sm:flex-row gap-2">
+                            <Link href="/contact" className="flex-1">
+                                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2">
                                 Contact Us to Start Building
                               </Button>
                             </Link>
@@ -426,12 +428,12 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                                   alert('Failed to download BRD document. Please try again or contact support.')
                                 }
                               }}
-                              variant="outline" 
-                              className="w-full text-sm px-4 py-2 border-gray-300 hover:bg-gray-50"
-                              disabled={false}
+                              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={(() => { if (!m.letsBuildTimestamp) return true; const elapsed = Date.now() - m.letsBuildTimestamp; return elapsed < 10000; })()}
                             >
                               Download BRD Document
                             </Button>
+                            </div>
                           </div>
                         )}
                         

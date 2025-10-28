@@ -32,6 +32,7 @@ export type ChatMessage = {
   text: string
   time: string
   letsBuild?: boolean
+  letsBuildTimestamp?: number
   gatheredInfo?: Record<string, any>
   brdDownloadUrl?: string
   brdStatus?: string

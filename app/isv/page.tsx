@@ -29,7 +29,7 @@ export default function ISVPage() {
             {/* Hero Section with Gradient */}
             <section className="relative overflow-hidden bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 min-h-[90vh]">
         {/* Background gradient image - positioned to the left, visible */}
-        <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-full md:w-1/2 lg:w-2/3">
+        <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-full md:w-1/2 lg:w-3/3">
           <img src="/gradiant%20image%20right.png" alt="" className="h-full w-full object-contain md:object-cover" />
         </div>
                 <div className="w-full px-8 md:px-12 lg:px-16 py-12 md:py-20 lg:py-24 relative">

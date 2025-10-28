@@ -102,22 +102,20 @@ export const useAuthStore = create<AuthStore>()(
           
           if (response.success) {
             // Determine redirect URL based on user role
-            let redirectUrl = response.redirect || null
+            let redirectUrl = null
             
-            if (!redirectUrl) {
-              switch (data.role) {
-                case 'isv':
-                  redirectUrl = '/dashboard'
-                  break
-                case 'reseller':
-                  redirectUrl = '/'
-                  break
-                case 'client':
-                  redirectUrl = '/dashboard'
-                  break
-                default:
-                  redirectUrl = '/'
-              }
+            switch (data.role) {
+              case 'isv':
+                redirectUrl = '/dashboard'
+                break
+              case 'reseller':
+                redirectUrl = '/'
+                break
+              case 'client':
+                redirectUrl = '/'
+                break
+              default:
+                redirectUrl = '/'
             }
             
             set({

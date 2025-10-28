@@ -26,9 +26,13 @@ export default function ISVPage() {
   }
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Gradient */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100">
-        <div className="mx-auto max-w-[1280px] px-6 py-20 relative">
+            {/* Hero Section with Gradient */}
+            <section className="relative overflow-hidden bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 min-h-[90vh]">
+        {/* Background gradient image - positioned to the left, visible */}
+        <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-full md:w-1/2 lg:w-2/3">
+          <img src="/gradiant%20image%20right.png" alt="" className="h-full w-full object-contain md:object-cover" />
+        </div>
+                <div className="w-full px-8 md:px-12 lg:px-16 py-12 md:py-20 lg:py-24 relative">
           {/* Decorative A badges */}
 
           <div className="max-w-2xl">
@@ -53,9 +57,9 @@ export default function ISVPage() {
 <section className="bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100">
 
 
-      {/* Build the Future Together */}
-      <section className=" py-16 relative">
-        <div className="mx-auto max-w-[1280px] px-6 text-center pt-12">
+            {/* Build the Future Together */}
+            <section className="py-12 md:py-16 lg:py-20 relative">
+                <div className="w-full px-8 md:px-12 lg:px-16 text-center">
           <h2 className="text-4xl font-bold mb-4">Build the Future Together</h2>
           <p className="text-gray-700 leading-relaxed">
             The Tangram.ai ISV Program empowers Independent Software Vendors to build, integrate, and scale on the
@@ -66,8 +70,8 @@ export default function ISVPage() {
       </section>
 
       {/* Three Feature Cards */}
-      <section className=" py-16">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="py-12 md:py-16 lg:py-20">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="p-8 border-2 bg-white">
               <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-6">
@@ -106,8 +110,8 @@ export default function ISVPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-white py-16 relative">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="bg-white py-12 md:py-16 lg:py-20 relative">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <h2 className="text-3xl font-bold mb-12 text-center">ISV Testimonials</h2>
 
           <div className="bg-white border-2 rounded-lg p-12">
@@ -148,8 +152,8 @@ export default function ISVPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="bg-gray-50 py-16 relative">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="bg-gray-50 py-12 md:py-16 lg:py-20 relative">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="flex flex-col md:flex-row gap-12 items-start">
             {/* Left side - Title (50%) */}
             <div className="flex-1 md:w-1/2">
@@ -196,8 +200,8 @@ export default function ISVPage() {
       </section>
 
       {/* Contact Section */}
-      <section className="bg-white py-16">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="bg-white py-12 md:py-16 lg:py-20">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="flex flex-col md:flex-row gap-8 items-center justify-between">
             <div className="flex-1">
               <h2 className="text-2xl font-bold mb-2">

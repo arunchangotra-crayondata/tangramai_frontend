@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { useAuthStore } from "../../lib/store/auth.store"
 import { useToast } from "../../hooks/use-toast"
+import ChatDialog from "../../components/chat-dialog"
 
 type Agent = {
   agent_id: string
@@ -54,6 +55,12 @@ export default function DashboardPage() {
   const [data, setData] = useState<ApiResponse | null>(null)
   const [filter, setFilter] = useState<"all" | "approved" | "pending" | "rejected">("all")
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [chatOpen, setChatOpen] = useState(false)
+
+  // Debug log when chatOpen changes
+  useEffect(() => {
+    console.log('Dashboard - chatOpen state changed:', chatOpen)
+  }, [chatOpen])
 
   // Authentication and role check
   useEffect(() => {
@@ -143,7 +150,7 @@ export default function DashboardPage() {
   }, [agents, filter])
 
   return (
-    <div className="mx-auto max-w-[1280px] px-6 py-8">
+    <div className="w-full px-8 md:px-12 lg:px-16 py-12 md:py-16 lg:py-20">
       {isCheckingAuth ? (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
@@ -153,24 +160,27 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-bold">Agent Details</h1>
-              <p className="text-sm text-gray-600">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">Agent Details</h1>
+              <p className="text-base text-gray-600">
                 {data?.isv?.isv_name ? `${data.isv.isv_name} - ` : ''}ISVs with us to showcase your AI solutions to our enterprise clients.
               </p>
             </div>
             <div>
               <Button 
                 className="bg-black text-white hover:bg-black/90"
-                onClick={() => router.push('/onboard')}
+                onClick={() => {
+                  console.log('Button clicked, opening chat dialog')
+                  setChatOpen(true)
+                }}
               >
-                Onboard Agent
+                START BUILDING YOUR AGENT
               </Button>
             </div>
           </div>
 
-          <div className="mt-6 flex items-center gap-3 justify-end">
+          <div className="flex items-center gap-3 justify-end mb-6">
             <Button variant={filter === "all" ? "default" : "outline"} size="sm" onClick={() => setFilter("all")}>
               All ({counts.all})
             </Button>
@@ -239,6 +249,13 @@ export default function DashboardPage() {
           </div>
         </>
       )}
+
+      {/* Chat Dialog */}
+      <ChatDialog 
+        open={chatOpen} 
+        onOpenChange={setChatOpen} 
+        initialMode="create"
+      />
     </div>
   )
 }

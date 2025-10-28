@@ -35,17 +35,20 @@ export function AgentSearchChat() {
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyPress={handleKeyPress}
         />
-        <Button size="icon" variant="ghost" onClick={handleSearchClick}>
+        <Button 
+          size="icon" 
+          variant="ghost" 
+          onClick={handleSearchClick}
+          disabled
+          className="opacity-30 cursor-not-allowed"
+        >
           <Mic className="h-5 w-5" />
         </Button>
         
         {/* Mode Toggle */}
         <div className="flex rounded-full border bg-gray-50 p-1 mr-2">
           <button
-            onClick={() => {
-              console.log("Search: Switching to explore mode")
-              setMode("explore")
-            }}
+            onClick={() => setMode("explore")}
             className={`px-4 py-2 text-sm rounded-full transition-colors ${
               mode === "explore" 
                 ? "bg-white text-gray-900 shadow-sm" 
@@ -55,10 +58,7 @@ export function AgentSearchChat() {
             Explore
           </button>
           <button
-            onClick={() => {
-              console.log("Search: Switching to create mode")
-              setMode("create")
-            }}
+            onClick={() => setMode("create")}
             className={`px-4 py-2 text-sm rounded-full transition-colors ${
               mode === "create" 
                 ? "bg-white text-gray-900 shadow-sm" 

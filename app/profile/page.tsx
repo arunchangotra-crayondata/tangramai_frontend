@@ -78,7 +78,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="w-full px-8 md:px-12 lg:px-16 py-12 md:py-16 lg:py-20">
       {renderProfileComponent()}
     </div>
   )

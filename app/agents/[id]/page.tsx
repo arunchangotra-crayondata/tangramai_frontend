@@ -131,7 +131,7 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
     <div className="flex flex-col">
       {/* Breadcrumb */}
       <div className="border-b bg-white py-4">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <Link href="/agents" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
             <ChevronLeft className="mr-1 h-4 w-4" />
             From Find to Platform
@@ -141,7 +141,7 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
 
       {/* Main Content */}
       <section className="relative py-12">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="grid gap-8 lg:grid-cols-2">
             {/* Left Column - Main Content */}
             <div>

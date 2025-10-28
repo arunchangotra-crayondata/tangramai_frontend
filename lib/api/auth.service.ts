@@ -11,9 +11,6 @@ class AuthService {
       const url = createApiUrl(endpoint)
       const formData = createFormData(data)
 
-      console.log('Making request to:', url)
-      console.log('Request data:', Object.fromEntries(formData))
-
       const response = await fetch(url, {
         method,
         headers: {
@@ -25,11 +22,7 @@ class AuthService {
         mode: 'cors', // Explicitly set CORS mode
       })
 
-      console.log('Response status:', response.status)
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
-
       const result = await response.json()
-      console.log('Response data:', result)
 
       if (!response.ok) {
         // Try to get more detailed error information
@@ -55,8 +48,6 @@ class AuthService {
 
       return result
     } catch (error) {
-      console.log('Request error:', error)
-      
       if ((error as ApiError).message) {
         throw error
       }

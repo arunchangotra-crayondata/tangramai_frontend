@@ -9,7 +9,7 @@ export default function OnboardSuccessPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
-      <div className="mx-auto max-w-2xl px-6 text-center">
+      <div className="w-full px-8 md:px-12 lg:px-16 text-center max-w-2xl mx-auto">
         {/* Success Icon */}
         <div className="mb-8 flex justify-center">
           <div className="flex h-32 w-32 items-center justify-center rounded-full bg-green-500">

@@ -7,7 +7,7 @@ export default function PartnersPage() {
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="gradient-bg py-20">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h1 className="mb-4 text-5xl font-bold text-balance">
               <span className="gradient-text">Our Partners</span>
@@ -33,7 +33,7 @@ export default function PartnersPage() {
 
       {/* Partner Logos Section */}
       <section className="border-b bg-white py-12">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <div className="mb-8 text-sm text-muted-foreground">Our Enterprise AI Partners</div>
             <div className="flex flex-wrap items-center justify-center gap-12">
@@ -56,7 +56,7 @@ export default function PartnersPage() {
 
       {/* Why Partner With Us */}
       <section className="py-20">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h2 className="mb-4 text-4xl font-bold">Why partner with us</h2>
             <p className="mb-12 text-muted-foreground text-balance">
@@ -118,7 +118,7 @@ export default function PartnersPage() {
 
       {/* Partner Ecosystem */}
       <section className="bg-gray-50 py-20">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h2 className="mb-4 text-4xl font-bold">Tangram.ai Partner Ecosystem</h2>
             <p className="mb-12 text-muted-foreground">
@@ -207,7 +207,7 @@ export default function PartnersPage() {
 
       {/* Accelerate Growth Section */}
       <section className="py-20">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h2 className="mb-12 text-4xl font-bold">Accelerate growth with Tangram.ai</h2>
 

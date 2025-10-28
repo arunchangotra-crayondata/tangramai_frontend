@@ -92,7 +92,13 @@ async function handleRequest(
     const response = await fetch(fullUrl, requestOptions)
     
     console.log('Backend response status:', response.status)
-    console.log('Backend response headers:', Object.fromEntries(response.headers.entries()))
+    // Fix for Safari: safely convert headers to object
+    try {
+      const headersObj = Object.fromEntries(response.headers.entries())
+      console.log('Backend response headers:', headersObj)
+    } catch (e) {
+      console.log('Backend response headers: [unable to log in Safari]')
+    }
 
     // Get response body
     const responseText = await response.text()

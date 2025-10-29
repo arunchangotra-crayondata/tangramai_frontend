@@ -62,7 +62,10 @@ async function fetchAgents() {
     const data = await res.json();
     // Map API response to AgentCard props
     const apiAgents: ApiAgent[] = data?.agents || [];
-    return apiAgents.map((a) => ({
+    // Filter to only show approved agents
+    return apiAgents
+      .filter(a => a.admin_approved === "yes")
+      .map((a) => ({
       id: a.agent_id,
       title: a.agent_name,
       description: a.description,

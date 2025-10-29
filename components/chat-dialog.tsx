@@ -121,7 +121,21 @@ async function fetchAgentDetails(agentId: string) {
     })
     if (!res.ok) throw new Error(`Failed to fetch agent ${agentId}: ${res.status}`)
     const data = await res.json()
-    return data?.agent || null
+    
+    // Check if agent is approved before returning
+    if (data?.agent) {
+      const agentsRes = await fetch("https://agents-store.onrender.com/api/agents", { cache: "no-store" })
+      if (agentsRes.ok) {
+        const agentsData = await agentsRes.json()
+        const agentInList = agentsData?.agents?.find((a: any) => a.agent_id === agentId)
+        // Only return agent if approved
+        if (agentInList?.admin_approved === "yes") {
+          return data?.agent || null
+        }
+      }
+    }
+    
+    return null
   } catch (err) {
     return null
   }

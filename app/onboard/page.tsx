@@ -22,7 +22,7 @@ export default function OnboardPage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="border-b">
-        <div className="mx-auto max-w-[1280px] px-6 py-4">
+        <div className="w-full px-8 md:px-12 lg:px-16 py-4">
           <button
             onClick={() => router.back()}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"

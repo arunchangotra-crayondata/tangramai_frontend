@@ -23,6 +23,7 @@ const fallbackAgents = [
     providers: ["AWS"],
     deploymentType: "Solution",
     persona: "Operations Teams",
+    assetType: "Solution",
   },
 ];
 
@@ -36,6 +37,7 @@ type Agent = {
   providers: string[];
   deploymentType: string;
   persona: string;
+  assetType: string;
 };
 
 type ApiAgent = {
@@ -60,7 +62,10 @@ async function fetchAgents() {
     const data = await res.json();
     // Map API response to AgentCard props
     const apiAgents: ApiAgent[] = data?.agents || [];
-    return apiAgents.map((a) => ({
+    // Filter to only show approved agents
+    return apiAgents
+      .filter(a => a.admin_approved === "yes")
+      .map((a) => ({
       id: a.agent_id,
       title: a.agent_name,
       description: a.description,
@@ -74,6 +79,11 @@ async function fetchAgents() {
       badges: [
         { label: (a as any).by_value || "", variant: "default" as const },
       ],
+      capabilities: a.by_capability ? a.by_capability.split(",").map(c => c.trim()).filter(Boolean) : [],
+      providers: a.service_provider ? a.service_provider.split(",").map(p => p.trim()).filter(Boolean) : [],
+      deploymentType: a.asset_type || "",
+      persona: a.by_persona || "",
+      assetType: a.asset_type || "",
     }));
   } catch (err) {
     // On any error return fallback
@@ -93,6 +103,8 @@ export default function AgentLibraryPage() {
   const [deploymentFilter, setDeploymentFilter] = useState<string>("All");
   const [personaFilter, setPersonaFilter] = useState<string>("All");
   const [createChatOpen, setCreateChatOpen] = useState(false);
+  const [displayedCount, setDisplayedCount] = useState(25);
+  const [displayedAICount, setDisplayedAICount] = useState(25);
   
   const searchParams = useSearchParams();
   const { messages } = useChatStore();
@@ -130,6 +142,7 @@ export default function AgentLibraryPage() {
             providers: a.service_provider ? a.service_provider.split(",").map(p => p.trim()).filter(Boolean) : [],
             deploymentType: a.asset_type || "",
             persona: a.by_persona || "",
+            assetType: a.asset_type || "",
           }));
         
         setAgents(mappedAgents.length > 0 ? mappedAgents : fallbackAgents);
@@ -251,11 +264,11 @@ export default function AgentLibraryPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative py-16">
+      <section className="relative py-12 md:py-16 lg:py-20">
         <div aria-hidden="true" className="absolute inset-0 -z-10">
           <img src="/gradiant%20image%20right.png" alt="" className="h-full w-full object-cover" />
         </div>
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h1 className="mb-4 font-inter font-extrabold text-[64px] leading-[110%] tracking-[-0.02em] text-balance">
               <span
@@ -344,6 +357,18 @@ export default function AgentLibraryPage() {
         {/* Additional Filters */}
         <div className="mx-auto max-w-[1280px] px-6 py-4">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Quick Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Quick search by name, tags, or description..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 pr-4 py-2 w-full"
+              />
+            </div>
+            
             {/* Filters */}
             <div className="flex flex-wrap gap-3 ml-auto">
               <select
@@ -408,8 +433,8 @@ export default function AgentLibraryPage() {
       </section>
 
       {/* Agent Grid */}
-      <section className="py-12">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="py-12 md:py-16 lg:py-20">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           {loading && (
             <div className="text-center py-12">
               <div className="text-muted-foreground">Loading agents...</div>
@@ -448,15 +473,27 @@ export default function AgentLibraryPage() {
                     </Button>
                   </div>
                   
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {aiSearchedAgents.map((agent) => (
-                      <AgentCard key={agent.id} {...agent} />
-                    ))}
-                  </div>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {aiSearchedAgents.slice(0, displayedAICount).map((agent) => (
+                    <AgentCard key={agent.id} {...agent} assetType={agent.assetType} />
+                  ))}
+                </div>
 
                   {aiSearchedAgents.length === 0 && (
                     <div className="text-center py-12">
                       <div className="text-muted-foreground">No AI-recommended agents match your current filters.</div>
+                    </div>
+                  )}
+
+                  {aiSearchedAgents.length > displayedAICount && (
+                    <div className="mt-12 text-center">
+                      <Button 
+                        variant="outline" 
+                        size="lg"
+                        onClick={() => setDisplayedAICount(aiSearchedAgents.length)}
+                      >
+                        Load More ({aiSearchedAgents.length - displayedAICount} remaining)
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -474,8 +511,8 @@ export default function AgentLibraryPage() {
                 </div>
                 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {allFilteredAgents.map((agent) => (
-                    <AgentCard key={agent.id} {...agent} />
+                  {allFilteredAgents.slice(0, displayedCount).map((agent) => (
+                    <AgentCard key={agent.id} {...agent} assetType={agent.assetType} />
                   ))}
                 </div>
 
@@ -485,11 +522,17 @@ export default function AgentLibraryPage() {
                   </div>
                 )}
 
-                <div className="mt-12 text-center">
-                  <Button variant="outline" size="lg">
-                    Load More
-                  </Button>
-                </div>
+                {allFilteredAgents.length > displayedCount && (
+                  <div className="mt-12 text-center">
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      onClick={() => setDisplayedCount(allFilteredAgents.length)}
+                    >
+                      Load More ({allFilteredAgents.length - displayedCount} remaining)
+                    </Button>
+                  </div>
+                )}
               </div>
               
               {/* Customization prompt */}

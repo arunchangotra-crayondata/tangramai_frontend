@@ -32,7 +32,13 @@ class AgentService {
       })
 
       console.log('Making agent request to:', url)
-      console.log('Request data keys:', Array.from(formData.keys()))
+      // Fix for Safari: use Array.from safely
+      try {
+        const formDataKeys = Array.from(formData.keys())
+        console.log('Request data keys:', formDataKeys)
+      } catch (e) {
+        console.log('Request data keys: [unable to log in Safari]')
+      }
 
       const response = await fetch(url, {
         method,
@@ -46,7 +52,13 @@ class AgentService {
       })
 
       console.log('Response status:', response.status)
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+      // Fix for Safari: safely convert headers to object
+      try {
+        const headersObj = Object.fromEntries(response.headers.entries())
+        console.log('Response headers:', headersObj)
+      } catch (e) {
+        console.log('Response headers: [unable to log in Safari]')
+      }
 
       // Check if response is JSON
       const contentType = response.headers.get('content-type')

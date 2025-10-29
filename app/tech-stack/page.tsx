@@ -90,15 +90,29 @@ export default function TechStackPage() {
         <title>Deployment Option - Tangram AI</title>
         <meta name="description" content="Choose your preferred platform and deployment model for AI agents" />
       </Head>
-      <div className="flex flex-col min-h-screen bg-gray-50">
+      <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="gradient-bg py-16">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="relative py-16 md:py-20 lg:py-24 min-h-[90vh] flex items-center">
+        <div aria-hidden="true" className="absolute inset-0 -z-10">
+          <img src="/gradiant%20image%20right.png" alt="" className="h-full w-full object-cover" />
+        </div>
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
-            <h1 className="mb-4 text-4xl font-bold text-balance">
-              <span className="gradient-text">Deployment Options</span>
+            <h1 className="mb-4 text-4xl md:text-5xl font-bold text-balance">
+              <span
+                style={{
+                  background:
+                    "radial-gradient(80.73% 80.73% at 3.12% 25.58%, #7935F4 0%, #9A4681 49.5%, #614BDB 96.87%)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  color: "transparent",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Deployment Options
+              </span>
             </h1>
-            <p className="mb-8 text-lg text-muted-foreground text-balance">
+            <p className="mb-8 text-lg md:text-xl text-gray-600 text-balance max-w-3xl mx-auto">
               Choose your preferred platform and deployment model for AI agents
             </p>
           </div>
@@ -107,7 +121,7 @@ export default function TechStackPage() {
 
       {/* Interactive Filter Panel */}
       <section className="bg-white border-b shadow-sm">
-        <div className="mx-auto max-w-[1280px] px-6 py-6">
+        <div className="w-full px-8 md:px-12 lg:px-16 py-6">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
@@ -148,8 +162,8 @@ export default function TechStackPage() {
       </section>
 
       {/* Results */}
-      <section className="flex-1 py-8">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="flex-1 py-12 md:py-16 lg:py-20 bg-white">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           {loading && (
             <div className="text-center py-12">
               <div className="text-muted-foreground">Loading deployment options...</div>

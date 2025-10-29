@@ -13,7 +13,7 @@ export function Footer() {
         <div className="absolute bottom-2 right-0 w-full h-[1px] bg-gradient-to-l from-yellow-400/50 to-transparent transform -rotate-45 origin-bottom-right" />
       </div>
 
-      <div className="relative px-12 py-10">
+      <div className="relative px-8 md:px-12 lg:px-16 py-8 md:py-12">
         {/* Top section with logos and button */}
         <div className="flex items-start justify-between mb-8">
           {/* Left side - Logos and tagline */}

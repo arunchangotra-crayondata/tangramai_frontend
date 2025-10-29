@@ -3,7 +3,7 @@
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/badge";
-import { Search, Mic, Database, Gauge, Clock, Cloud, Settings, Shield, Rocket, CheckCircle2, ChevronDown } from "lucide-react";
+import { Search, Database, Gauge, Clock, Cloud, Settings, Shield, Rocket, CheckCircle2, ChevronDown } from "lucide-react";
 import { useModal } from "../hooks/use-modal";
 import { useState } from "react";
 import ChatDialog from "../components/chat-dialog";
@@ -17,11 +17,11 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section (Agents hero moved here) */}
-      <section className="relative py-20 min-h-[80vh] flex items-center">
+      <section className="relative py-16 md:py-20 lg:py-24 min-h-[80vh] flex items-center">
         <div aria-hidden="true" className="absolute inset-0 -z-10">
           <img src="/gradiant%20image%20right.png" alt="" className="h-full w-full object-cover" />
         </div>
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h1 className="mb-4 mt-20 font-inter font-extrabold text-[64px] leading-[110%] tracking-[-0.02em] text-balance">
               <span
@@ -62,8 +62,8 @@ export default function HomePage() {
       
 
       {/* Stop Searching Section */}
-      <section className="py-20 min-h-[70vh] flex items-center">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="py-16 md:py-20 lg:py-24 min-h-[70vh] flex items-center">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h2 className="mb-4 text-4xl font-bold text-balance">
               <span className="gradient-text">
@@ -119,8 +119,8 @@ AI success made easy. </span>
         </div>
       </section>
       {/* AI Catalyst Section */}
-      <section className="py-20 min-h-[80vh] flex items-center">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="py-16 md:py-20 lg:py-24 min-h-[80vh] flex items-center">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h2 className="mb-6 text-4xl font-bold text-balance">
               <span className="gradient-text">
@@ -128,7 +128,7 @@ AI success made easy. </span>
               </span>
             </h2>
             {/* Subheader bullets (pill chips) */}
-            <div className="mx-auto mb-6 grid max-w-5xl grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            <div className="mx-auto mb-10 grid max-w-5xl grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
               <div className="flex items-center gap-3 rounded-full border bg-white/80 backdrop-blur px-4 py-2 shadow-sm">
                 <span className="inline-flex h-7 w-7 items-center justify-center rounded-full text-white shadow-sm" style={{background: "linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)"}}>
                   <Shield className="h-4 w-4" />
@@ -230,8 +230,8 @@ AI success made easy. </span>
 
 
       {/* Tech Stack Section */}
-      <section className="bg-gradient-to-b from-white to-gray-50 py-20 min-h-[80vh] flex items-center">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="bg-gradient-to-b from-white to-gray-50 py-16 md:py-20 lg:py-24 min-h-[80vh] flex items-center">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h2 className="mb-4 text-4xl font-bold text-balance">
               <span className="gradient-text">Pick Your Tech Stack</span>
@@ -343,8 +343,8 @@ AI success made easy. </span>
       </section>
 
       {/* Partners Section */}
-      <section className="py-20 min-h-[70vh] flex items-center">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <section className="py-16 md:py-20 lg:py-24 min-h-[70vh] flex items-center">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="text-center">
             <h2 className="mb-4 text-4xl font-bold text-[#181818] max-w-xl mx-auto whitespace-nowrap">
               Accelerate growth with Tangram.ai

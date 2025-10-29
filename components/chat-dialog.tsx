@@ -121,9 +121,22 @@ async function fetchAgentDetails(agentId: string) {
     })
     if (!res.ok) throw new Error(`Failed to fetch agent ${agentId}: ${res.status}`)
     const data = await res.json()
-    return data?.agent || null
+    
+    // Check if agent is approved before returning
+    if (data?.agent) {
+      const agentsRes = await fetch("https://agents-store.onrender.com/api/agents", { cache: "no-store" })
+      if (agentsRes.ok) {
+        const agentsData = await agentsRes.json()
+        const agentInList = agentsData?.agents?.find((a: any) => a.agent_id === agentId)
+        // Only return agent if approved
+        if (agentInList?.admin_approved === "yes") {
+          return data?.agent || null
+        }
+      }
+    }
+    
+    return null
   } catch (err) {
-    console.error(`Error fetching agent ${agentId}:`, err)
     return null
   }
 }
@@ -132,20 +145,21 @@ async function fetchAgentDetails(agentId: string) {
 function formatChatText(text: string): string {
   if (!text || text === "AI thinking...") return text
   
-  return text
-    // Convert \n\n to markdown paragraph breaks
-    .replace(/\n\n/g, '\n\n')
-    // Convert single \n to line breaks (for better spacing)
-    .replace(/\n/g, '\n\n')
-    // Remove bullet points and convert to simple text lines
-    .replace(/^[\s]*[-*]\s+(.+)$/gm, '$1')
-    // Remove numbered lists and convert to simple text lines
-    .replace(/^[\s]*(\d+)[.)]\s+(.+)$/gm, '$2')
-    // Convert text that looks like headers (all caps or title case) to markdown headers
-    .replace(/^([A-Z][A-Z\s]+)$/gm, '## $1')
-    .replace(/^([A-Z][a-z\s]+):$/gm, '### $1')
-    // Clean up extra line breaks
-    .replace(/\n{3,}/g, '\n\n')
+  // First, replace all escape sequences with actual characters
+  let formatted = text
+    .replace(/\\n\d+/g, '\n')        // Convert \n1, \n2, \n3, etc. to actual newline
+    .replace(/\\n/g, '\n')           // Convert \n to actual newline
+    .replace(/\\t/g, '\t')           // Convert \t to tab
+    .replace(/\\r/g, '\r')           // Convert \r to carriage return
+    .replace(/\\"/g, '"')            // Convert \" to quote
+    .replace(/\\'/g, "'")            // Convert \' to apostrophe
+    .replace(/\\\\/g, '\\')          // Convert \\ to backslash
+  
+  // Now format the text for markdown
+  return formatted
+    // Convert \n\n to markdown paragraph breaks (already done, but keep structure)
+    .replace(/\n\n\n+/g, '\n\n')     // Clean up multiple consecutive newlines
+    // Keep the original structure for headers, lists, etc.
     .trim()
 }
 
@@ -207,11 +221,6 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
     const thinkingMessageId = crypto.randomUUID()
     addMessage({ id: thinkingMessageId, role: "assistant", text: "AI thinking...", time: now })
     
-    // Debug logging
-    console.log("Sending message with mode:", mode)
-    console.log("Message text:", userText)
-    console.log("Session ID:", sessionId)
-    
     try {
       const res = await fetch("https://agents-store.onrender.com/api/chat", {
         method: "POST",
@@ -230,17 +239,27 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
         filteredAgentIds = json.data.filtered_agents
       }
       
-      // Log for debugging (remove in production)
-      if (filteredAgentIds) {
-        console.log("Found filtered agent IDs:", filteredAgentIds)
-      }
+      // Check if lets_build flag is set
+      const letsBuild = json?.data?.lets_build === true
+      const gatheredInfo = json?.data?.gathered_info || {}
+      const brdDownloadUrl = json?.data?.brd_download_url || null
+      const brdStatus = json?.data?.brd_status || null
       
       const replyTs = json?.data?.timestamp
         ? new Date(json.data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
         : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       
       // Replace thinking message with actual response
-      updateMessage(thinkingMessageId, { text: reply, filteredAgentIds })
+      updateMessage(thinkingMessageId, { 
+        text: reply, 
+        time: replyTs,
+        filteredAgentIds, 
+        letsBuild, 
+        letsBuildTimestamp: letsBuild ? Date.now() : undefined,
+        gatheredInfo,
+        brdDownloadUrl,
+        brdStatus
+      })
       
       // If we have agent IDs, fetch their details
       if (filteredAgentIds && filteredAgentIds.length > 0) {
@@ -254,7 +273,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
             updateMessage(thinkingMessageId, { filteredAgents: validAgents })
           }
         } catch (err) {
-          console.error("Error fetching agent details:", err)
+          // Silently handle error fetching agent details
         }
       }
     } catch (e) {
@@ -278,7 +297,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
     clearChat()
     setInput("")
   }
-
+  
   return (
     <>
       {/* Minimized pill - shows when minimized */}
@@ -300,7 +319,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
           className={`p-0 overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 ease-out ${
             isExpanded 
               ? "sm:max-w-[900px] md:max-w-[960px] animate-in slide-in-from-bottom-4" 
-              : "sm:max-w-[420px] md:max-w-[420px] fixed bottom-6 right-6 left-auto top-auto translate-x-0 translate-y-0 animate-in slide-in-from-bottom-4"
+              : "sm:max-w-[600px] md:max-w-[600px] fixed bottom-6 right-6 left-auto top-auto translate-x-0 translate-y-0 animate-in slide-in-from-bottom-4 z-[100]"
           }`}
           showCloseButton={false}
         >
@@ -316,20 +335,14 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                 <div className="rounded-full border bg-white p-1 text-xs hidden sm:block">
               <button
                 aria-label="Switch to Create"
-                    onClick={() => {
-                      console.log("Switching to create mode")
-                      setMode("create")
-                    }}
+                    onClick={() => setMode("create")}
                 className={`${mode === "create" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
               >
                 Create
               </button>
               <button
                 aria-label="Switch to Explore"
-                    onClick={() => {
-                      console.log("Switching to explore mode")
-                      setMode("explore")
-                    }}
+                    onClick={() => setMode("explore")}
                 className={`${mode === "explore" ? "bg-black text-white" : "text-gray-700"} rounded-full px-3 py-1`}
               >
                 Explore
@@ -384,14 +397,58 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                           {formatChatText(m.text)}
                         </ReactMarkdown>
                         
-                        {/* Show Contact Us button if "build" keyword is detected */}
-                        {m.text.toLowerCase().includes("build") && (
+                        
+
+                        {/* Show Let's Build buttons if lets_build flag is true */}
+                        {m.letsBuild === true && (
                           <div className="mt-3 pt-3 border-t border-gray-200">
-                            <Link href="/contact">
-                              <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2">
-                                Contact Us to Build Your Agent
+                            <div className="flex flex-col sm:flex-row gap-2">
+                            <Link href="/contact" className="flex-1">
+                                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2">
+                                Contact Us to Start Building
                               </Button>
                             </Link>
+                            <Button 
+                              onClick={async () => {
+                                try {
+                                  // Use the BRD download URL from API if available, otherwise fall back
+                                  const downloadUrl = m.brdDownloadUrl 
+                                    ? `https://agents-store.onrender.com${m.brdDownloadUrl}`
+                                    : `https://agents-store.onrender.com/api/chat/download-brd`
+                                  
+                                  const response = await fetch(downloadUrl, {
+                                    method: m.brdDownloadUrl ? 'GET' : 'POST',
+                                    headers: m.brdDownloadUrl ? {} : {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: m.brdDownloadUrl ? undefined : JSON.stringify({
+                                      session_id: sessionId,
+                                      gathered_info: m.gatheredInfo || {}
+                                    })
+                                  })
+                                  
+                                  if (!response.ok) throw new Error('Failed to download BRD')
+                                  
+                                  // Get the blob and download it
+                                  const blob = await response.blob()
+                                  const url = window.URL.createObjectURL(blob)
+                                  const a = document.createElement('a')
+                                  a.href = url
+                                  a.download = `BRD_${sessionId}.docx`
+                                  document.body.appendChild(a)
+                                  a.click()
+                                  window.URL.revokeObjectURL(url)
+                                  document.body.removeChild(a)
+                                } catch (error) {
+                                  alert('Failed to download BRD document. Please try again or contact support.')
+                                }
+                              }}
+                              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={(() => { if (!m.letsBuildTimestamp) return true; const elapsed = Date.now() - m.letsBuildTimestamp; return elapsed < 5000; })()}
+                            >
+                              Download BRD Document
+                            </Button>
+                            </div>
                           </div>
                         )}
                         

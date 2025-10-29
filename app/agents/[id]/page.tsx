@@ -68,7 +68,21 @@ async function fetchAgentDetail(agentId: string) {
     const res = await fetch(`https://agents-store.onrender.com/api/agents/${agentId}`, { cache: "no-store" })
     if (!res.ok) throw new Error(`Failed to fetch agent ${agentId}: ${res.status}`)
     const data: AgentDetailApiResponse = await res.json()
-    return data
+    // Check if agent is approved before returning
+    if (data?.agent) {
+      // Fetch agent list to check approval status
+      const agentsRes = await fetch("https://agents-store.onrender.com/api/agents", { cache: "no-store" })
+      if (agentsRes.ok) {
+        const agentsData = await agentsRes.json()
+        const agentInList = agentsData?.agents?.find((a: any) => a.agent_id === agentId)
+        // Only return data if agent is approved
+        if (agentInList?.admin_approved === "yes") {
+          return data
+        }
+      }
+    }
+    // Return null if not approved or not found
+    return null
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err)
@@ -116,22 +130,37 @@ function formatCodeBlock(content: string): string {
 export default async function AgentDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const data = await fetchAgentDetail(id)
-  const agent = data?.agent
+  
+  // If agent doesn't exist or is not approved, show error and redirect
+  if (!data || !data.agent) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h1 className="text-2xl font-bold mb-4">Agent Not Found</h1>
+        <p className="text-muted-foreground mb-6">This agent is not available or not approved yet.</p>
+        <Link href="/agents" className="inline-flex items-center text-blue-600 hover:underline">
+          <ChevronLeft className="mr-1 h-4 w-4" />
+          Back to Agents
+        </Link>
+      </div>
+    )
+  }
+  
+  const agent = data.agent
   const readmeContent = readReadmeFile()
 
   const title = agent?.agent_name || "Business Representative"
   const description = agent?.description ||
     `Whether you're nurturing inbound leads, answering marketing inquiries, or booking meetings, this tool
                   streamlines engagement and ensures no opportunity slips through the cracks.`
-  const categories = data?.capabilities?.map((c) => c.by_capability || "") .filter(Boolean) || ["Marketing"]
+  const categories = data.capabilities?.map((c) => c.by_capability || "") .filter(Boolean) || ["Marketing"]
   const personas = agent?.by_persona ? [agent.by_persona] : ["Executives (CXO)"]
   const valueProps = agent?.by_value ? [agent.by_value] : ["Productivity"]
-  const worksWith = data?.deployments?.slice(0, 1).map((d) => d.service_name || "").filter(Boolean) || ["OpenAI GPT-4o"]
+  const worksWith = data.deployments?.slice(0, 1).map((d) => d.service_name || "").filter(Boolean) || ["OpenAI GPT-4o"]
   return (
     <div className="flex flex-col">
       {/* Breadcrumb */}
       <div className="border-b bg-white py-4">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <Link href="/agents" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
             <ChevronLeft className="mr-1 h-4 w-4" />
             From Find to Platform
@@ -141,7 +170,7 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
 
       {/* Main Content */}
       <section className="relative py-12">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="w-full px-8 md:px-12 lg:px-16">
           <div className="grid gap-8 lg:grid-cols-2">
             {/* Left Column - Main Content */}
             <div>

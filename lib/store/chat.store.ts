@@ -1,11 +1,41 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+
+// Safari-safe localStorage wrapper
+const safeLocalStorage = {
+  getItem: (key: string) => {
+    try {
+      return localStorage.getItem(key)
+    } catch (e) {
+      return null
+    }
+  },
+  setItem: (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value)
+    } catch (e) {
+      // Silently handle localStorage errors
+    }
+  },
+  removeItem: (key: string) => {
+    try {
+      localStorage.removeItem(key)
+    } catch (e) {
+      // Silently handle localStorage errors
+    }
+  },
+}
 
 export type ChatMessage = {
   id: string
   role: "user" | "assistant"
   text: string
   time: string
+  letsBuild?: boolean
+  letsBuildTimestamp?: number
+  gatheredInfo?: Record<string, any>
+  brdDownloadUrl?: string
+  brdStatus?: string
   filteredAgentIds?: string[]
   filteredAgents?: {
     agent_id: string
@@ -65,6 +95,7 @@ export const useChatStore = create<ChatState>()(
     }),
     {
       name: 'chat-storage',
+      storage: createJSONStorage(() => safeLocalStorage),
       partialize: (state) => ({
         messages: state.messages,
         sessionId: state.sessionId,

@@ -3,6 +3,32 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { authService } from '../api/auth.service'
 import type { AuthState, AuthActions, SignupRequest } from '../types/auth.types'
 
+// Safari-safe localStorage wrapper
+const safeLocalStorage = {
+  getItem: (key: string) => {
+    try {
+      return localStorage.getItem(key)
+    } catch (e) {
+      console.error('Error accessing localStorage:', e)
+      return null
+    }
+  },
+  setItem: (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value)
+    } catch (e) {
+      console.error('Error setting localStorage:', e)
+    }
+  },
+  removeItem: (key: string) => {
+    try {
+      localStorage.removeItem(key)
+    } catch (e) {
+      console.error('Error removing from localStorage:', e)
+    }
+  },
+}
+
 interface AuthStore extends AuthState, AuthActions {}
 
 export const useAuthStore = create<AuthStore>()(
@@ -76,22 +102,20 @@ export const useAuthStore = create<AuthStore>()(
           
           if (response.success) {
             // Determine redirect URL based on user role
-            let redirectUrl = response.redirect || null
+            let redirectUrl = null
             
-            if (!redirectUrl) {
-              switch (data.role) {
-                case 'isv':
-                  redirectUrl = '/dashboard'
-                  break
-                case 'reseller':
-                  redirectUrl = '/'
-                  break
-                case 'client':
-                  redirectUrl = '/dashboard'
-                  break
-                default:
-                  redirectUrl = '/'
-              }
+            switch (data.role) {
+              case 'isv':
+                redirectUrl = '/dashboard'
+                break
+              case 'reseller':
+                redirectUrl = '/'
+                break
+              case 'client':
+                redirectUrl = '/'
+                break
+              default:
+                redirectUrl = '/'
             }
             
             set({
@@ -140,7 +164,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => safeLocalStorage),
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,

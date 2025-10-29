@@ -2,17 +2,30 @@
 
 export const getStoredToken = (): string | null => {
   if (typeof window === 'undefined') return null
-  return localStorage.getItem('auth-token')
+  try {
+    return localStorage.getItem('auth-token')
+  } catch (e) {
+    console.error('Error accessing localStorage:', e)
+    return null
+  }
 }
 
 export const setStoredToken = (token: string): void => {
   if (typeof window === 'undefined') return
-  localStorage.setItem('auth-token', token)
+  try {
+    localStorage.setItem('auth-token', token)
+  } catch (e) {
+    console.error('Error setting localStorage:', e)
+  }
 }
 
 export const removeStoredToken = (): void => {
   if (typeof window === 'undefined') return
-  localStorage.removeItem('auth-token')
+  try {
+    localStorage.removeItem('auth-token')
+  } catch (e) {
+    console.error('Error removing from localStorage:', e)
+  }
 }
 
 export const isTokenExpired = (token: string): boolean => {

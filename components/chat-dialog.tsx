@@ -444,7 +444,7 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                                 }
                               }}
                               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                              disabled={(() => { if (!m.letsBuildTimestamp) return true; const elapsed = Date.now() - m.letsBuildTimestamp; return elapsed < 10000; })()}
+                              disabled={(() => { if (!m.letsBuildTimestamp) return true; const elapsed = Date.now() - m.letsBuildTimestamp; return elapsed < 5000; })()}
                             >
                               Download BRD Document
                             </Button>

@@ -145,20 +145,21 @@ async function fetchAgentDetails(agentId: string) {
 function formatChatText(text: string): string {
   if (!text || text === "AI thinking...") return text
   
-  return text
-    // Convert \n\n to markdown paragraph breaks
-    .replace(/\n\n/g, '\n\n')
-    // Convert single \n to line breaks (for better spacing)
-    .replace(/\n/g, '\n\n')
-    // Remove bullet points and convert to simple text lines
-    .replace(/^[\s]*[-*]\s+(.+)$/gm, '$1')
-    // Remove numbered lists and convert to simple text lines
-    .replace(/^[\s]*(\d+)[.)]\s+(.+)$/gm, '$2')
-    // Convert text that looks like headers (all caps or title case) to markdown headers
-    .replace(/^([A-Z][A-Z\s]+)$/gm, '## $1')
-    .replace(/^([A-Z][a-z\s]+):$/gm, '### $1')
-    // Clean up extra line breaks
-    .replace(/\n{3,}/g, '\n\n')
+  // First, replace all escape sequences with actual characters
+  let formatted = text
+    .replace(/\\n\d+/g, '\n')        // Convert \n1, \n2, \n3, etc. to actual newline
+    .replace(/\\n/g, '\n')           // Convert \n to actual newline
+    .replace(/\\t/g, '\t')           // Convert \t to tab
+    .replace(/\\r/g, '\r')           // Convert \r to carriage return
+    .replace(/\\"/g, '"')            // Convert \" to quote
+    .replace(/\\'/g, "'")            // Convert \' to apostrophe
+    .replace(/\\\\/g, '\\')          // Convert \\ to backslash
+  
+  // Now format the text for markdown
+  return formatted
+    // Convert \n\n to markdown paragraph breaks (already done, but keep structure)
+    .replace(/\n\n\n+/g, '\n\n')     // Clean up multiple consecutive newlines
+    // Keep the original structure for headers, lists, etc.
     .trim()
 }
 

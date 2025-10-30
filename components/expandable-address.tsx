@@ -18,18 +18,15 @@ export default function ExpandableAddress({ address, showLabel = true }: { addre
       {showLabel && (
         <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]" style={{ fontFamily: 'Inter, sans-serif' }}>Address:</span>
       )}
-      <div className="flex-1">
-        <span 
-          className={`font-medium text-[14px] leading-[100%] tracking-[0] align-middle cursor-pointer hover:text-gray-500 transition-colors ${isExpanded ? '' : 'truncate block'}`}
+      <div className="flex-1 min-w-0">
+        <span
+          className={`block font-medium text-[14px] leading-[100%] tracking-[0] align-middle cursor-pointer hover:text-gray-500 transition-colors ${isExpanded ? 'whitespace-pre-wrap break-words' : 'truncate'}`}
           style={{ color: '#6B7280', fontFamily: 'Inter, sans-serif' }}
           onClick={() => setIsExpanded(!isExpanded)}
           title={isExpanded ? 'Click to collapse' : 'Click to expand'}
         >
-          {displayText}
+          {displayText}{!isExpanded && shouldTruncate ? '…' : ''}
         </span>
-        {!isExpanded && shouldTruncate && (
-          <span className="text-xs text-gray-400 ml-1">...</span>
-        )}
       </div>
     </div>
   )

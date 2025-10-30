@@ -114,6 +114,68 @@ class AgentService {
   async onboardAgent(data: AgentOnboardRequest): Promise<AgentOnboardResponse> {
     return this.makeRequest<AgentOnboardResponse>('/api/agent/onboard', data)
   }
+
+  async updateAgent(agentId: string, formData: FormData): Promise<any> {
+    try {
+      const url = createApiUrl(`/api/agents/${agentId}`)
+      
+      console.log(`Agent API PUT request to:`, url)
+
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json',
+          // Don't set Content-Type - let browser set it with boundary for multipart
+        },
+        body: formData,
+        credentials: 'include',
+        mode: 'cors',
+      })
+
+      console.log('Response status:', response.status)
+
+      const result = await response.json()
+      console.log('Response data:', result)
+
+      if (!response.ok) {
+        let errorMessage = result.message || `HTTP ${response.status}: ${response.statusText}`
+        
+        if (response.status === 401) {
+          errorMessage = "Unauthorized. Please log in again."
+        } else if (response.status === 403) {
+          errorMessage = "Access denied. You don't have permission to update this agent."
+        } else if (response.status === 500) {
+          errorMessage = "Server error. Please try again later."
+        } else if (response.status === 422) {
+          errorMessage = "Invalid data provided. Please check all fields."
+        } else if (response.status === 404) {
+          errorMessage = "Agent not found."
+        }
+        
+        throw {
+          message: errorMessage,
+          status: response.status,
+          code: result.code,
+        } as ApiError
+      }
+
+      return result
+    } catch (error) {
+      console.error('Agent API request error:', error)
+      
+      if ((error as ApiError).message) {
+        throw error
+      }
+      if (error instanceof Error) {
+        throw {
+          message: error.message,
+          status: 0,
+          code: 'NETWORK_ERROR',
+        } as ApiError
+      }
+      throw error
+    }
+  }
 }
 
 export const agentService = new AgentService()

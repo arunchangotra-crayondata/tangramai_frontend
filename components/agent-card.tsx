@@ -13,7 +13,7 @@ interface AgentCardProps {
 
 export function AgentCard({ id, title, description, badges, tags, assetType }: AgentCardProps) {
   return (
-    <Link href={`/agents/${id}`}>
+    <Link href={`/agents/${id}`} scroll>
       <Card className="h-full transition-shadow hover:shadow-lg relative">
         {assetType && (
           <div className="absolute top-4 right-4 z-10">

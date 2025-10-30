@@ -3,7 +3,7 @@ import { Button } from "../../../components/ui/button"
 import { Badge } from "../../../components/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
 import { Card, CardContent } from "../../../components/ui/card"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Code, Lock, ExternalLink, FileText } from "lucide-react"
 import DemoAssetsViewer from "../../../components/demo-assets-viewer"
 import ReadMore from "../../../components/read-more"
 import CollapsibleList from "../../../components/collapsible-list"
@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "..
 import { readFileSync } from "fs"
 import { join } from "path"
 import ExpandableAddress from "../../../components/expandable-address"
+import ScrollToTop from "../../../components/scroll-to-top"
 
 type AgentDetailApiResponse = {
   agent?: {
@@ -156,8 +157,32 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
   const personas = agent?.by_persona ? [agent.by_persona] : ["Executives (CXO)"]
   const valueProps = agent?.by_value ? [agent.by_value] : ["Productivity"]
   const worksWith = data.deployments?.slice(0, 1).map((d) => d.service_name || "").filter(Boolean) || ["OpenAI GPT-4o"]
+
+  // Compute next agent id (server-side) to enable Next Agent navigation
+  let nextAgentId: string | null = null
+  let prevAgentId: string | null = null
+  try {
+    const agentsRes = await fetch("https://agents-store.onrender.com/api/agents", { cache: "no-store" })
+    if (agentsRes.ok) {
+      const agentsJson = await agentsRes.json()
+      const agentIds: string[] = (agentsJson?.agents || [])
+        .filter((a: any) => a?.admin_approved === "yes")
+        .map((a: any) => a?.agent_id)
+        .filter(Boolean)
+      if (agentIds.length > 0) {
+        const idx = Math.max(0, agentIds.findIndex((aid) => aid === id))
+        const nextIdx = idx >= 0 ? (idx + 1) % agentIds.length : 0
+        const prevIdx = idx >= 0 ? (idx - 1 + agentIds.length) % agentIds.length : 0
+        nextAgentId = agentIds[nextIdx] || null
+        prevAgentId = agentIds[prevIdx] || null
+      }
+    }
+  } catch {
+    // ignore - keep nextAgentId null
+  }
   return (
     <div className="flex flex-col">
+      <ScrollToTop />
       {/* Breadcrumb */}
       <div className="border-b bg-white py-4">
         <div className="w-full px-8 md:px-12 lg:px-16">
@@ -176,22 +201,25 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
             <div>
               <div className="mb-6">
                 <h1 className="mb-2 text-4xl font-bold">{title}</h1>
-                <div className="mt-1 flex items-center gap-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]">Agent</span>
-                  <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]">Built by: <span style={{ color: '#6B7280' }}>{data?.isv_info?.isv_name || 'Crayon Data India Pvt Ltd'}</span></span>
-                </div>
-                
-                {/* ISV Information */}
-                <div className="mt-4 space-y-2">
-                  {data?.isv_info?.isv_address && (
-                    <ExpandableAddress address={data.isv_info.isv_address} />
-                  )}
-                  {data?.isv_info?.isv_domain && (
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle text-[#111827]" style={{ fontFamily: 'Inter, sans-serif' }}>Domain:</span>
-                      <span className="font-medium text-[14px] leading-[100%] tracking-[0] align-middle" style={{ color: '#6B7280', fontFamily: 'Inter, sans-serif' }}>{data.isv_info.isv_domain}</span>
-                    </div>
-                  )}
+                <div className="mt-2 space-y-2">
+                  {/* Built by */}
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-medium text-[#111827]">Agent Built By:</span>
+                    <span className="font-medium text-gray-500">{data?.isv_info?.isv_name || 'Crayon Data India Pvt Ltd'}</span>
+                  </div>
+
+                  {/* ISV Information */}
+                  <div className="space-y-2">
+                    {data?.isv_info?.isv_address && (
+                      <ExpandableAddress address={data.isv_info.isv_address} />
+                    )}
+                    {data?.isv_info?.isv_domain && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="font-medium text-[#111827]">Domain:</span>
+                        <span className="font-medium text-gray-500">{data.isv_info.isv_domain}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -202,30 +230,50 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
               </div>
 
               {/* Metadata */}
-              <div className="mb-8 space-y-4">
-                <div>
-                  <span className="font-semibold">Categories : </span>
-                  {categories.map((c, i) => (
-                    <Badge key={i} variant="default" className="ml-2">
-                      {c}
-                    </Badge>
-                  ))}
+              <div className="mb-8 space-y-3">
+                {/* Categories */}
+                <div className="flex items-start gap-3">
+                  <span className="font-semibold text-sm text-[#111827] whitespace-nowrap min-w-[130px]">Categories :</span>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((c, i) => (
+                      <Badge key={i} variant="default" className="text-xs">
+                        {c}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <span className="font-semibold">Target Personas : </span>
-                  {personas.map((p, i) => (
-                    <Badge key={i} variant="outline" className="ml-2">
-                      {p}
-                    </Badge>
-                  ))}
+                {/* Tags (from API) */}
+                <div className="flex items-start gap-3">
+                  <span className="font-semibold text-sm text-[#111827] whitespace-nowrap min-w-[130px]">Tags :</span>
+                  <div className="flex flex-wrap gap-2">
+                    {(agent?.tags ? agent.tags.split(',').map(t => t.trim()).filter(Boolean) : []).map((t, i) => (
+                      <Badge key={i} variant="outline" className="text-xs">
+                        {t}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <span className="font-semibold">Value Propositions: </span>
-                  {valueProps.map((v, i) => (
-                    <Badge key={i} variant="primary" className="ml-2">
-                      {v}
-                    </Badge>
-                  ))}
+                {/* Target Personas */}
+                <div className="flex items-start gap-3">
+                  <span className="font-semibold text-sm text-[#111827] whitespace-nowrap min-w-[130px]">Target Personas :</span>
+                  <div className="flex flex-wrap gap-2">
+                    {personas.map((p, i) => (
+                      <Badge key={i} variant="outline" className="text-xs">
+                        {p}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                {/* Value Propositions */}
+                <div className="flex items-start gap-3">
+                  <span className="font-semibold text-sm text-[#111827] whitespace-nowrap min-w-[130px]">Value Propositions:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {valueProps.map((v, i) => (
+                      <Badge key={i} variant="primary" className="text-xs">
+                        {v}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
                 {/* <div>
                   <span className="font-semibold">Works with : </span>
@@ -290,22 +338,40 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                 <div className="h-px bg-gray-200 -mx-6" />
                 <TabsContent value="features" className="mt-6">
                   {agent?.features && agent.features !== "na" ? (
-                    <div className="prose max-w-none">
-                      <div style={{ whiteSpace: 'pre-line' }} className="text-muted-foreground">
-                        {agent.features.replace(/\\n/g, '\n')}
-                      </div>
-                    </div>
+                    (() => {
+                      const items = agent.features
+                        .replace(/\\n/g, '\n')
+                        .split(/[:\n]+/)
+                        .map(s => s.trim().replace(/^[,\-\s]+|[,\-\s]+$/g, ''))
+                        .filter(Boolean)
+                      return (
+                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                          {items.map((it, i) => (
+                            <li key={i} className="leading-relaxed">{it}</li>
+                          ))}
+                        </ul>
+                      )
+                    })()
                   ) : (
                     <p className="text-muted-foreground">Features information is not available for this agent.</p>
                   )}
                 </TabsContent>
                 <TabsContent value="roi" className="mt-6">
                   {agent?.roi && agent.roi !== "na" ? (
-                    <div className="prose max-w-none">
-                      <div style={{ whiteSpace: 'pre-line' }} className="text-muted-foreground">
-                        {agent.roi.replace(/\\n/g, '\n')}
-                      </div>
-                    </div>
+                    (() => {
+                      const items = agent.roi
+                        .replace(/\\n/g, '\n')
+                        .split(/[:\n]+/)
+                        .map(s => s.trim().replace(/^[,\-\s]+|[,\-\s]+$/g, ''))
+                        .filter(Boolean)
+                      return (
+                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                          {items.map((it, i) => (
+                            <li key={i} className="leading-relaxed">{it}</li>
+                          ))}
+                        </ul>
+                      )
+                    })()
                   ) : (
                     <p className="text-muted-foreground">ROI information is not available for this agent.</p>
                   )}
@@ -357,24 +423,173 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                   )}
                 </TabsContent>
                 <TabsContent value="docs" className="mt-6">
-                  <div className="max-h-[600px] overflow-y-auto border rounded-lg p-6 bg-gray-50">
-                    <div className="prose max-w-none">
-                      <div dangerouslySetInnerHTML={{ __html: formatCodeBlock(readmeContent) }} />
+                  {data?.documentation && data.documentation.length > 0 && data.documentation[0] ? (
+                    <div className="space-y-6">
+                      {/* Top row cards */}
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {data.documentation[0].sdk_details && (
+                          <Card className="transition-shadow hover:shadow-md">
+                            <CardContent className="p-5">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 p-2 rounded-lg bg-blue-50">
+                                  <Code className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-sm mb-2">SDK Details</h3>
+                                  <a
+                                    href={data.documentation[0].sdk_details}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate w-full"
+                                  >
+                                    <span className="truncate">{data.documentation[0].sdk_details}</span>
+                                    <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+                                  </a>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {data.documentation[0].swagger_details && (
+                          <Card className="transition-shadow hover:shadow-md">
+                            <CardContent className="p-5">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 p-2 rounded-lg bg-green-50">
+                                  <Code className="h-5 w-5 text-green-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-sm mb-2">API Swagger</h3>
+                                  <a
+                                    href={data.documentation[0].swagger_details}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate w-full"
+                                  >
+                                    <span className="truncate">{data.documentation[0].swagger_details}</span>
+                                    <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+                                  </a>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {data.documentation[0].security_details && (
+                          <Card className="transition-shadow hover:shadow-md">
+                            <CardContent className="p-5">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 p-2 rounded-lg bg-red-50">
+                                  <Lock className="h-5 w-5 text-red-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-sm mb-2">Security Details</h3>
+                                  <a
+                                    href={data.documentation[0].security_details}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate w-full"
+                                  >
+                                    <span className="truncate">{data.documentation[0].security_details}</span>
+                                    <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+                                  </a>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {data.documentation[0].related_files && (
+                          <Card className="transition-shadow hover:shadow-md">
+                            <CardContent className="p-5">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 p-2 rounded-lg bg-purple-50">
+                                  <FileText className="h-5 w-5 text-purple-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-sm mb-2">Related Files</h3>
+                                  <a
+                                    href={data.documentation[0].related_files}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate w-full"
+                                  >
+                                    <span className="truncate">{data.documentation[0].related_files}</span>
+                                    <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+                                  </a>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+
+                      {/* Sample Input/Output */}
+                      {(data.documentation[0].sample_input || data.documentation[0].sample_output) && (
+                        <div className="space-y-4">
+                          {data.documentation[0].sample_input && (
+                            <Card className="transition-shadow hover:shadow-md">
+                              <CardContent className="p-0">
+                                <div className="border-b px-5 py-3">
+                                  <h3 className="font-semibold text-sm">Sample Input</h3>
+                                </div>
+                                <div className="bg-gray-900 rounded-b-lg p-4 overflow-x-auto">
+                                  <pre className="text-sm text-green-400 font-mono whitespace-pre-wrap">
+                                    <code>{data.documentation[0].sample_input}</code>
+                                  </pre>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+
+                          {data.documentation[0].sample_output && (
+                            <Card className="transition-shadow hover:shadow-md">
+                              <CardContent className="p-0">
+                                <div className="border-b px-5 py-3">
+                                  <h3 className="font-semibold text-sm">Sample Output</h3>
+                                </div>
+                                <div className="bg-gray-900 rounded-b-lg p-4 overflow-x-auto">
+                                  <pre className="text-sm text-blue-400 font-mono whitespace-pre-wrap">
+                                    <code>{data.documentation[0].sample_output}</code>
+                                  </pre>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  ) : (
+                    <p className="text-muted-foreground">Documentation is not available for this agent.</p>
+                  )}
                 </TabsContent>
               </Tabs>
 
               {/* Navigation */}
-              <div className="mt-8 flex items-center justify-between">
-                <Button variant="ghost" size="sm">
-                  <ChevronLeft className="mr-2 h-4 w-4" />
-                  Apply and AI
-                </Button>
-                <Button variant="ghost" size="sm">
-                  Next Agent
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
+              <div className="mt-10 flex items-center justify-between">
+                {prevAgentId ? (
+                  <Link href={`/agents/${prevAgentId}`} className="group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors">
+                    <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                    <span className="font-medium underline-offset-4 group-hover:underline">Previous agent</span>
+                  </Link>
+                ) : (
+                  <span className="inline-flex items-center gap-2 text-gray-400 cursor-not-allowed">
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="font-medium">Previous agent</span>
+                  </span>
+                )}
+
+                {nextAgentId ? (
+                  <Link href={`/agents/${nextAgentId}`} className="group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors">
+                    <span className="font-medium underline-offset-4 group-hover:underline">Next agent</span>
+                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                ) : (
+                  <span className="inline-flex items-center gap-2 text-gray-400 cursor-not-allowed">
+                    <span className="font-medium">Next agent</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </span>
+                )}
               </div>
             </div>
 
@@ -403,6 +618,23 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
         </div>
         
       </section>
+
+      {/* Floating TRY IT NOW button (only on agent details page) */}
+      {agent?.demo_link && (
+        <a
+          href={agent.demo_link}
+          target="_blank"
+          rel="noreferrer"
+          className="fixed right-6 bottom-24 z-50"
+          aria-label="Try it now"
+        >
+          <button
+            className="px-5 py-3 rounded-full shadow-lg border border-gray-200 bg-black text-white hover:bg-black/90 transition-colors text-xs sm:text-sm"
+          >
+            TRY IT NOW
+          </button>
+        </a>
+      )}
     </div>
   )
 }

@@ -3,10 +3,10 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 const S3_CONFIG = {
-  bucket_name: "agentsstore",
-  region: "us-east-1",
-  access_key_id: "process.env.S3_ACCESS_KEY_ID || """,
-  secret_access_key: "rPE7dcsPv63lRhTkXUJwZ+7G7Gef43yu34ZEeydL"
+  bucket_name: process.env.S3_BUCKET_NAME || "agentsstore",
+  region: process.env.S3_REGION || "us-east-1",
+  access_key_id: process.env.S3_ACCESS_KEY_ID || "",
+  secret_access_key: process.env.S3_SECRET_ACCESS_KEY || ""
 }
 
 const s3Client = new S3Client({

@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "npm dedupe && npm rebuild lightningcss || true",
+    "postinstall": "npm dedupe || true",
+    "prebuild": "npm install --force lightningcss@^1.29.0 || echo 'Warning: lightningcss reinstall failed, continuing...'",
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",

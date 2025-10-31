@@ -17,7 +17,20 @@ type DemoAssetsViewerProps = {
 export default function DemoAssetsViewer({ assets, className }: DemoAssetsViewerProps) {
   const normalized = useMemo(() => {
     return (assets || [])
-      .map(a => ({ url: a.demo_link || a.demo_asset_link || a.asset_url || "" }))
+      .map(a => {
+        let url = a.demo_link || a.demo_asset_link || a.asset_url || ""
+        
+        // Convert GitHub raw URLs to jsDelivr CDN to avoid rate limits
+        if (url.startsWith('https://raw.githubusercontent.com/')) {
+          // Convert: https://raw.githubusercontent.com/user/repo/branch/path
+          // To: https://cdn.jsdelivr.net/gh/user/repo@branch/path
+          url = url.replace(
+            'https://raw.githubusercontent.com/',
+            'https://cdn.jsdelivr.net/gh/'
+          ).replace('/main/', '@main/').replace('/master/', '@master/')
+        }
+        return { url }
+      })
       .filter(a => !!a.url)
   }, [assets])
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -26,16 +39,6 @@ export default function DemoAssetsViewer({ assets, className }: DemoAssetsViewer
   const selected = normalized[selectedIndex]
   const selectedUrl = selected?.url || ""
   const isVideo = /\.mp4($|\?)/i.test(selectedUrl)
-
-  // If first asset is video, start with it selected
-  // (only on initial render when index is 0 and first is video)
-  if (normalized.length > 0 && selectedIndex === 0) {
-    const firstIsVideo = /\.mp4($|\?)/i.test(normalized[0]?.url || "")
-    if (firstIsVideo && !isVideo) {
-      // This setState is safe: render will stabilize quickly
-      setSelectedIndex(0)
-    }
-  }
 
   return (
     <div className={clsx("w-full", className)}>

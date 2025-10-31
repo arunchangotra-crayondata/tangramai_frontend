@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Mark route as dynamic to prevent static generation
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 const API_BASE_URL = 'https://agents-store.onrender.com'
 
 export async function GET(
@@ -58,8 +62,13 @@ async function handleRequest(
 
     // Prepare headers
     const headers: HeadersInit = {
-      'Content-Type': 'application/x-www-form-urlencoded',
       'Accept': 'application/json',
+    }
+
+    // Preserve Content-Type from original request if it exists
+    const contentType = request.headers.get('content-type')
+    if (contentType) {
+      headers['Content-Type'] = contentType
     }
 
     // Forward relevant headers from the original request
@@ -79,9 +88,16 @@ async function handleRequest(
 
     // Add body for non-GET requests
     if (method !== 'GET') {
-      const body = await request.text()
-      if (body) {
-        requestOptions.body = body
+      try {
+        // Use arrayBuffer to handle all content types (text, JSON, binary, etc.)
+        // This avoids serialization issues with request.text()
+        const arrayBuffer = await request.arrayBuffer()
+        if (arrayBuffer.byteLength > 0) {
+          requestOptions.body = arrayBuffer
+        }
+      } catch (error) {
+        // Log error but continue without body if reading fails
+        console.error('Failed to read request body:', error instanceof Error ? error.message : 'Unknown error')
       }
     }
 

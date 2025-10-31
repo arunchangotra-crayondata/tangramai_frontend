@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { useAuthStore } from "../../lib/store/auth.store"
 import { useToast } from "../../hooks/use-toast"
 import ChatDialog from "../../components/chat-dialog"
+import { AgentPreviewModal } from "../../components/agent-preview-modal"
+import { EditAgentModal } from "../../components/edit-agent-modal"
 
 type Agent = {
   agent_id: string
@@ -56,6 +58,10 @@ export default function DashboardPage() {
   const [filter, setFilter] = useState<"all" | "approved" | "pending" | "rejected">("all")
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [chatOpen, setChatOpen] = useState(false)
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
+  const [viewModalOpen, setViewModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [agentDetailsData, setAgentDetailsData] = useState<any>(null)
 
   // Debug log when chatOpen changes
   useEffect(() => {
@@ -236,8 +242,46 @@ export default function DashboardPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm">View</Button>
-                            <Button variant="outline" size="sm">Edit</Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={async () => {
+                                setSelectedAgent(a)
+                                // Fetch full agent details
+                                try {
+                                  const response = await fetch(`/api/agents/${a.agent_id}`)
+                                  if (response.ok) {
+                                    const data = await response.json()
+                                    setAgentDetailsData(data)
+                                  }
+                                } catch (error) {
+                                  console.error('Error fetching agent details:', error)
+                                }
+                                setViewModalOpen(true)
+                              }}
+                            >
+                              View
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={async () => {
+                                setSelectedAgent(a)
+                                // Fetch full agent details for edit
+                                try {
+                                  const response = await fetch(`/api/agents/${a.agent_id}`)
+                                  if (response.ok) {
+                                    const data = await response.json()
+                                    setAgentDetailsData(data)
+                                  }
+                                } catch (error) {
+                                  console.error('Error fetching agent details:', error)
+                                }
+                                setEditModalOpen(true)
+                              }}
+                            >
+                              Edit
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -256,6 +300,67 @@ export default function DashboardPage() {
         onOpenChange={setChatOpen} 
         initialMode="create"
       />
+
+      {/* Agent View Modal */}
+      {selectedAgent && (
+        <AgentPreviewModal
+          agent={{
+            agent_id: selectedAgent.agent_id,
+            agent_name: selectedAgent.agent_name,
+            asset_type: selectedAgent.asset_type || '',
+            isv_id: selectedAgent.isv_id,
+            by_persona: selectedAgent.by_persona || '',
+            by_value: selectedAgent.by_value || '',
+            demo_link: selectedAgent.demo_link || '',
+            demo_preview: selectedAgent.demo_preview || '',
+            description: selectedAgent.description || '',
+            features: '',
+            tags: selectedAgent.tags || '',
+            roi: '',
+            admin_approved: (selectedAgent.admin_approved === 'yes' ? 'yes' : 'no') as 'yes' | 'no',
+            is_approved: selectedAgent.admin_approved === 'yes',
+          }}
+          open={viewModalOpen}
+          onOpenChange={setViewModalOpen}
+          onApprove={() => {}}
+          onReject={() => {}}
+        />
+      )}
+
+      {/* Agent Edit Modal */}
+      {selectedAgent && (
+        <EditAgentModal
+          agent={{
+            agent_id: selectedAgent.agent_id,
+            agent_name: selectedAgent.agent_name,
+            asset_type: selectedAgent.asset_type || '',
+            isv_id: selectedAgent.isv_id,
+            by_persona: selectedAgent.by_persona || '',
+            by_value: selectedAgent.by_value || '',
+            demo_link: selectedAgent.demo_link || '',
+            demo_preview: selectedAgent.demo_preview || '',
+            description: selectedAgent.description || '',
+            features: '',
+            tags: selectedAgent.tags || '',
+            roi: '',
+            admin_approved: (selectedAgent.admin_approved === 'yes' ? 'yes' : 'no') as 'yes' | 'no',
+            is_approved: selectedAgent.admin_approved === 'yes',
+          }}
+          agentDetails={agentDetailsData}
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          onSuccess={() => {
+            // Refresh agent list after successful edit
+            if (isvId) {
+              fetch(`https://agents-store.onrender.com/api/isv/profile/${isvId}`, { cache: "no-store" })
+                .then(res => res.json())
+                .then(json => setData(json))
+                .catch(e => setError(e?.message || "Failed to refresh"))
+            }
+            setEditModalOpen(false)
+          }}
+        />
+      )}
     </div>
   )
 }

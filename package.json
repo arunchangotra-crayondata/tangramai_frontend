@@ -2,13 +2,19 @@
   "name": "my-v0-project",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.17.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "postinstall": "npm dedupe || true",
     "prebuild": "npm install --force lightningcss@^1.29.0 || echo 'Warning: lightningcss reinstall failed, continuing...'",
     "build": "next build",
+    "build:render": "npm ci --legacy-peer-deps && npm rebuild lightningcss --build-from-source && npm run build",
     "dev": "next dev",
     "lint": "eslint .",
-    "start": "next start"
+    "start": "next start",
+    "check-versions": "npm list lightningcss || true"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.921.0",
@@ -77,5 +83,8 @@
     "zod": "3.25.76",
     "zustand": "latest"
   },
-  "devDependencies": {}
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "^1.29.0",
+    "lightningcss-linux-x64-musl": "^1.29.0"
+  }
 }

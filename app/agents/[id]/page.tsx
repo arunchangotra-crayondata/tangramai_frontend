@@ -42,7 +42,11 @@ type AgentDetailApiResponse = {
     deployment_id?: string
     capability_name?: string
   }>
+<<<<<<< HEAD
   demo_assets?: Array<{ demo_asset_link?: string; demo_link?: string; asset_url?: string }>
+=======
+  demo_assets?: Array<{ demo_asset_link?: string; demo_link?: string }>
+>>>>>>> 0d7071b34e611c60cffcd8729d91fb1d28d4cd7c
   documentation?: Array<{ 
     agent_id?: string
     sdk_details?: string
@@ -342,7 +346,11 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                     (() => {
                       const items = agent.features
                         .replace(/\\n/g, '\n')
+<<<<<<< HEAD
                         .split(/[;\n]+/)
+=======
+                        .split(/[:\n]+/)
+>>>>>>> 0d7071b34e611c60cffcd8729d91fb1d28d4cd7c
                         .map(s => s.trim().replace(/^[,\-\s]+|[,\-\s]+$/g, ''))
                         .filter(Boolean)
                       return (
@@ -425,7 +433,145 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                 </TabsContent>
                 <TabsContent value="docs" className="mt-6">
                   {data?.documentation && data.documentation.length > 0 && data.documentation[0] ? (
+<<<<<<< HEAD
                     <DocumentationSection documentation={data.documentation[0]} />
+=======
+                    <div className="space-y-6">
+                      {/* Top row cards */}
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {data.documentation[0].sdk_details && (
+                          <Card className="transition-shadow hover:shadow-md">
+                            <CardContent className="p-5">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 p-2 rounded-lg bg-blue-50">
+                                  <Code className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-sm mb-2">SDK Details</h3>
+                                  <a
+                                    href={data.documentation[0].sdk_details}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate w-full"
+                                  >
+                                    <span className="truncate">{data.documentation[0].sdk_details}</span>
+                                    <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+                                  </a>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {data.documentation[0].swagger_details && (
+                          <Card className="transition-shadow hover:shadow-md">
+                            <CardContent className="p-5">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 p-2 rounded-lg bg-green-50">
+                                  <Code className="h-5 w-5 text-green-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-sm mb-2">API Swagger</h3>
+                                  <a
+                                    href={data.documentation[0].swagger_details}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate w-full"
+                                  >
+                                    <span className="truncate">{data.documentation[0].swagger_details}</span>
+                                    <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+                                  </a>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {data.documentation[0].security_details && (
+                          <Card className="transition-shadow hover:shadow-md">
+                            <CardContent className="p-5">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 p-2 rounded-lg bg-red-50">
+                                  <Lock className="h-5 w-5 text-red-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-sm mb-2">Security Details</h3>
+                                  <a
+                                    href={data.documentation[0].security_details}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate w-full"
+                                  >
+                                    <span className="truncate">{data.documentation[0].security_details}</span>
+                                    <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+                                  </a>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {data.documentation[0].related_files && (
+                          <Card className="transition-shadow hover:shadow-md">
+                            <CardContent className="p-5">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 p-2 rounded-lg bg-purple-50">
+                                  <FileText className="h-5 w-5 text-purple-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-sm mb-2">Related Files</h3>
+                                  <a
+                                    href={data.documentation[0].related_files}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate w-full"
+                                  >
+                                    <span className="truncate">{data.documentation[0].related_files}</span>
+                                    <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+                                  </a>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+
+                      {/* Sample Input/Output */}
+                      {(data.documentation[0].sample_input || data.documentation[0].sample_output) && (
+                        <div className="space-y-4">
+                          {data.documentation[0].sample_input && (
+                            <Card className="transition-shadow hover:shadow-md">
+                              <CardContent className="p-0">
+                                <div className="border-b px-5 py-3">
+                                  <h3 className="font-semibold text-sm">Sample Input</h3>
+                                </div>
+                                <div className="bg-gray-900 rounded-b-lg p-4 overflow-x-auto">
+                                  <pre className="text-sm text-green-400 font-mono whitespace-pre-wrap">
+                                    <code>{data.documentation[0].sample_input}</code>
+                                  </pre>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+
+                          {data.documentation[0].sample_output && (
+                            <Card className="transition-shadow hover:shadow-md">
+                              <CardContent className="p-0">
+                                <div className="border-b px-5 py-3">
+                                  <h3 className="font-semibold text-sm">Sample Output</h3>
+                                </div>
+                                <div className="bg-gray-900 rounded-b-lg p-4 overflow-x-auto">
+                                  <pre className="text-sm text-blue-400 font-mono whitespace-pre-wrap">
+                                    <code>{data.documentation[0].sample_output}</code>
+                                  </pre>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </div>
+                      )}
+                    </div>
+>>>>>>> 0d7071b34e611c60cffcd8729d91fb1d28d4cd7c
                   ) : (
                     <p className="text-muted-foreground">Documentation is not available for this agent.</p>
                   )}
@@ -486,7 +632,26 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
         
       </section>
 
+<<<<<<< HEAD
      
+=======
+      {/* Floating TRY IT NOW button (only on agent details page) */}
+      {agent?.demo_link && (
+        <a
+          href={agent.demo_link}
+          target="_blank"
+          rel="noreferrer"
+          className="fixed right-6 bottom-24 z-50"
+          aria-label="Try it now"
+        >
+          <button
+            className="px-5 py-3 rounded-full shadow-lg border border-gray-200 bg-black text-white hover:bg-black/90 transition-colors text-xs sm:text-sm"
+          >
+            TRY IT NOW
+          </button>
+        </a>
+      )}
+>>>>>>> 0d7071b34e611c60cffcd8729d91fb1d28d4cd7c
     </div>
   )
 }

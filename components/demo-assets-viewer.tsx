@@ -17,6 +17,7 @@ type DemoAssetsViewerProps = {
 export default function DemoAssetsViewer({ assets, className }: DemoAssetsViewerProps) {
   const normalized = useMemo(() => {
     return (assets || [])
+<<<<<<< HEAD
       .map(a => {
         let url = a.demo_link || a.demo_asset_link || a.asset_url || ""
         
@@ -31,6 +32,9 @@ export default function DemoAssetsViewer({ assets, className }: DemoAssetsViewer
         }
         return { url }
       })
+=======
+      .map(a => ({ url: a.demo_link || a.demo_asset_link || a.asset_url || "" }))
+>>>>>>> 0d7071b34e611c60cffcd8729d91fb1d28d4cd7c
       .filter(a => !!a.url)
   }, [assets])
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -40,6 +44,19 @@ export default function DemoAssetsViewer({ assets, className }: DemoAssetsViewer
   const selectedUrl = selected?.url || ""
   const isVideo = /\.mp4($|\?)/i.test(selectedUrl)
 
+<<<<<<< HEAD
+=======
+  // If first asset is video, start with it selected
+  // (only on initial render when index is 0 and first is video)
+  if (normalized.length > 0 && selectedIndex === 0) {
+    const firstIsVideo = /\.mp4($|\?)/i.test(normalized[0]?.url || "")
+    if (firstIsVideo && !isVideo) {
+      // This setState is safe: render will stabilize quickly
+      setSelectedIndex(0)
+    }
+  }
+
+>>>>>>> 0d7071b34e611c60cffcd8729d91fb1d28d4cd7c
   return (
     <div className={clsx("w-full", className)}>
       {/* Header */}

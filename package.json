@@ -73,5 +73,6 @@
     "use-sync-external-store": "latest",
     "zod": "3.25.76",
     "zustand": "latest"
-  }
+  },
+  "devDependencies": {}
 }

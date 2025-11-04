@@ -537,7 +537,7 @@ export default function AdminPage() {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent Name</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Type</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ISV ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Demo Link</th>
+                        
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
@@ -551,21 +551,7 @@ export default function AdminPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{agent.asset_type}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{agent.isv_id}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {agent.demo_link ? (
-                              <a
-                                href={agent.demo_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                                View Demo
-                              </a>
-                            ) : (
-                              <span className="text-gray-400">No demo</span>
-                            )}
-                          </td>
+                          
                           <td className="px-6 py-4 whitespace-nowrap">
                             {getStatusBadge(agent.admin_approved)}
                           </td>

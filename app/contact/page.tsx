@@ -6,8 +6,12 @@ import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import { Label } from "../../components/ui/label";
 import ChatDialog from "../../components/chat-dialog";
+import { useAuthStore } from "../../lib/store/auth.store";
+import { useToast } from "../../hooks/use-toast";
 
 export default function ContactPage() {
+  const { user } = useAuthStore();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: "",
     company: "",
@@ -16,11 +20,67 @@ export default function ContactPage() {
     message: "",
   });
   const [chatOpen, setChatOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
+    setIsSubmitting(true);
+
+    try {
+      // Generate session_id if not available
+      const sessionId = `contact_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      
+      // Prepare request body
+      const requestBody = {
+        company_name: formData.company,
+        email: formData.email,
+        full_name: formData.fullName,
+        message: formData.message,
+        phone: formData.phone || "",
+        session_id: sessionId,
+        type: "contact",
+        user_id: user?.user_id || null,
+        user_type: user?.role || "client",
+      };
+
+      const response = await fetch("https://agents-store.onrender.com/api/contact", {
+        method: "POST",
+        headers: {
+          "accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast({
+          description: data.message || "Thank you for your enquiry! We'll get back to you soon.",
+        });
+        // Reset form
+        setFormData({
+          fullName: "",
+          company: "",
+          email: "",
+          phone: "",
+          message: "",
+        });
+      } else {
+        toast({
+          description: data.message || "Failed to submit your enquiry. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      toast({
+        description: "An error occurred. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -160,9 +220,10 @@ export default function ContactPage() {
                   <div className="pt-2 flex justify-start">
                     <Button
                       type="submit"
-                      className="bg-black hover:bg-black/90 text-white px-6 py-2 text-sm font-medium"
+                      disabled={isSubmitting}
+                      className="bg-black hover:bg-black/90 text-white px-6 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Submit
+                      {isSubmitting ? "Submitting..." : "Submit"}
                     </Button>
                   </div>
                 </form>

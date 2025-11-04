@@ -177,8 +177,7 @@ export default function DashboardPage() {
               <Button 
                 className="bg-black text-white hover:bg-black/90"
                 onClick={() => {
-                  console.log('Button clicked, opening chat dialog')
-                  setChatOpen(true)
+                  router.push('/onboard')
                 }}
               >
                 START BUILDING YOUR AGENT
@@ -217,9 +216,6 @@ export default function DashboardPage() {
                     <TableHead>S. No</TableHead>
                     <TableHead>Agent Name</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Organisation Name</TableHead>
-                    <TableHead>Language</TableHead>
-                    <TableHead>Last Updated</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
@@ -232,9 +228,7 @@ export default function DashboardPage() {
                         <TableCell>{idx + 1}</TableCell>
                         <TableCell className="font-medium">{a.agent_name}</TableCell>
                         <TableCell>{a.asset_type || "-"}</TableCell>
-                        <TableCell>{data?.isv?.isv_name || a.isv_id}</TableCell>
-                        <TableCell>English</TableCell>
-                        <TableCell>{a.updated_at || "—"}</TableCell>
+                        
                         <TableCell>
                           <span className={`inline-flex items-center rounded px-2 py-1 text-xs font-medium ${statusStyle[status]}`}>
                             {status}

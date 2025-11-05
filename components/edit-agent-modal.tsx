@@ -395,7 +395,7 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
 
         <div className="flex-1 overflow-hidden flex flex-col bg-gray-50">
           {/* Progress Steps */}
-          <div className="border-b bg-white px-4 md:px-8 py-5 sticky top-[80px] z-10">
+          <div className="border-b bg-white px-4 md:px-8 py-5 sticky top-[0px] z-10">
             <div className="flex items-center justify-between gap-2 overflow-x-auto">
               {steps.map((step, index) => (
                 <div key={step.number} className="flex flex-1 items-center min-w-[120px]">

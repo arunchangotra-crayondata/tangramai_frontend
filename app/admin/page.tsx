@@ -6,8 +6,9 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Badge } from "../../components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu"
-import { Search, SlidersHorizontal, MoreVertical, Eye, Edit, CheckCircle, XCircle, Trash2, ExternalLink, MessageSquare, Users, User } from "lucide-react"
+import { Search, SlidersHorizontal, MoreVertical, Eye, Edit, CheckCircle, XCircle, Trash2, ExternalLink, MessageSquare, Users, User, Mail, Building2, Phone, Calendar, UserCircle, ChevronDown, ChevronUp } from "lucide-react"
 import { AgentPreviewModal } from "../../components/agent-preview-modal"
+import { EditAgentModal } from "../../components/edit-agent-modal"
 import { RejectAgentModal } from "../../components/reject-agent-modal"
 import { ISVDetailsModal } from "../../components/isv-details-modal"
 import { RejectISVModal } from "../../components/reject-isv-modal"
@@ -21,7 +22,7 @@ import { adminService } from "../../lib/api/admin.service"
 import { useAuthStore } from "../../lib/store/auth.store"
 import type { AgentAPIResponse, ISVAPIResponse, ResellerAPIResponse } from "../../lib/types/admin.types"
 
-type TabType = "agents" | "isvs" | "resellers"
+type TabType = "agents" | "isvs" | "resellers" | "enquiries"
 
 export default function AdminPage() {
   const { toast } = useToast()
@@ -36,6 +37,11 @@ export default function AdminPage() {
   const [agents, setAgents] = useState<AgentAPIResponse[]>([])
   const [isvs, setISVs] = useState<ISVAPIResponse[]>([])
   const [resellers, setResellers] = useState<ResellerAPIResponse[]>([])
+  const [enquiries, setEnquiries] = useState<any[]>([])
+
+  // Enquiry filter states
+  const [enquiryStatusFilter, setEnquiryStatusFilter] = useState<"all" | "new" | "read">("all")
+  const [enquiryUserTypeFilter, setEnquiryUserTypeFilter] = useState<string>("all")
 
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState("")
@@ -94,6 +100,22 @@ export default function AdminPage() {
   const [rejectResellerModalOpen, setRejectResellerModalOpen] = useState(false)
   const [editISVModalOpen, setEditISVModalOpen] = useState(false)
   const [editResellerModalOpen, setEditResellerModalOpen] = useState(false)
+  const [editAgentModalOpen, setEditAgentModalOpen] = useState(false)
+  
+  // Expanded rows state for enquiries
+  const [expandedEnquiries, setExpandedEnquiries] = useState<Set<string>>(new Set())
+  
+  const toggleEnquiryExpansion = (enquiryId: string) => {
+    setExpandedEnquiries(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(enquiryId)) {
+        newSet.delete(enquiryId)
+      } else {
+        newSet.add(enquiryId)
+      }
+      return newSet
+    })
+  }
 
   // Fetch functions
   const fetchAgents = async () => {
@@ -150,6 +172,37 @@ export default function AdminPage() {
     }
   }
 
+  const fetchEnquiries = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('https://agents-store.onrender.com/api/enquiries', {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+        },
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.enquiries) {
+          setEnquiries(data.enquiries)
+        }
+      } else {
+        throw new Error('Failed to fetch enquiries')
+      }
+    } catch (err: any) {
+      console.error('Error fetching enquiries:', err)
+      setError(err.message || 'Failed to fetch enquiries')
+      toast({
+        description: err.message || 'Failed to fetch enquiries',
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Fetch data when tab changes
   useEffect(() => {
     if (activeTab === "agents") {
@@ -158,6 +211,8 @@ export default function AdminPage() {
       fetchISVs()
     } else if (activeTab === "resellers") {
       fetchResellers()
+    } else if (activeTab === "enquiries") {
+      fetchEnquiries()
     }
   }, [activeTab])
 
@@ -231,6 +286,60 @@ export default function AdminPage() {
     }
 
     return filtered
+  }
+
+  const getFilteredEnquiries = () => {
+    let filtered = enquiries
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(enquiry =>
+        enquiry.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        enquiry.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        enquiry.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        enquiry.message?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    // Status filter
+    if (enquiryStatusFilter !== "all") {
+      filtered = filtered.filter(enquiry =>
+        enquiryStatusFilter === "new" ? enquiry.status === "new" : enquiry.status !== "new"
+      )
+    }
+
+    // User type filter
+    if (enquiryUserTypeFilter !== "all") {
+      filtered = filtered.filter(enquiry => enquiry.user_type === enquiryUserTypeFilter)
+    }
+
+    return filtered
+  }
+
+  // Format date to readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  // Get relative time
+  const getRelativeTime = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+    
+    if (diffInSeconds < 60) return 'just now'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
+    
+    return formatDate(dateString)
   }
 
   // Action handlers
@@ -419,6 +528,7 @@ export default function AdminPage() {
                 { id: "agents", label: "Agents", icon: MessageSquare },
                 { id: "isvs", label: "ISVs", icon: Users },
                 { id: "resellers", label: "Resellers", icon: User },
+                { id: "enquiries", label: "Enquiries", icon: Mail },
               ].map((tab) => {
                 const Icon = tab.icon
                 return (
@@ -489,6 +599,40 @@ export default function AdminPage() {
               </DropdownMenu>
             )}
 
+            {/* Enquiry Status Filter (only for enquiries) */}
+            {activeTab === "enquiries" && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    Status: {enquiryStatusFilter === "all" ? "All" : enquiryStatusFilter === "new" ? "New" : "Read"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => setEnquiryStatusFilter("all")}>All</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setEnquiryStatusFilter("new")}>New</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setEnquiryStatusFilter("read")}>Read</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {/* Enquiry User Type Filter (only for enquiries) */}
+            {activeTab === "enquiries" && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    User Type: {enquiryUserTypeFilter === "all" ? "All" : enquiryUserTypeFilter}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("all")}>All</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("client")}>Client</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("isv")}>ISV</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("reseller")}>Reseller</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("anonymous")}>Anonymous</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
             {/* Clear Filters */}
             <Button
               variant="outline"
@@ -496,6 +640,8 @@ export default function AdminPage() {
                 setSearchTerm("")
                 setStatusFilter("all")
                 setAssetTypeFilter("all")
+                setEnquiryStatusFilter("all")
+                setEnquiryUserTypeFilter("all")
               }}
             >
               Clear Filters
@@ -518,6 +664,7 @@ export default function AdminPage() {
               if (activeTab === "agents") fetchAgents()
               else if (activeTab === "isvs") fetchISVs()
               else if (activeTab === "resellers") fetchResellers()
+              else if (activeTab === "enquiries") fetchEnquiries()
             }}>
               Retry
             </Button>
@@ -556,55 +703,48 @@ export default function AdminPage() {
                             {getStatusBadge(agent.admin_approved)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem 
-                                  onClick={() => {
-                                    setSelectedAgent(agent)
-                                    setAgentDetailsOpen(true)
-                                  }}
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  onClick={() => handleApproveAgent(agent)}
-                                  className="text-green-600"
-                                >
-                                  <CheckCircle className="mr-2 h-4 w-4" />
-                                  Approve
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => {
-                                    setSelectedAgent(agent)
-                                    setRejectAgentModalOpen(true)
-                                  }}
-                                  className="text-red-600"
-                                >
-                                  <XCircle className="mr-2 h-4 w-4" />
-                                  Reject
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => {
-                                    // TODO: Implement delete functionality
-                                    toast({
-                                      description: "Delete functionality not implemented yet",
-                                      variant: "destructive",
-                                    })
-                                  }}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  router.push(`/agents/${agent.agent_id}`)
+                                }}
+                              >
+                                View
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedAgent(agent)
+                                  setEditAgentModalOpen(true)
+                                }}
+                              >
+                                Edit
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleApproveAgent(agent)}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                              >
+                                <CheckCircle className="mr-1 h-3 w-3" />
+                                Approve
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedAgent(agent)
+                                  setRejectAgentModalOpen(true)
+                                }}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <XCircle className="mr-1 h-3 w-3" />
+                                Reject
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -813,6 +953,132 @@ export default function AdminPage() {
                 <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
               </div>
             )}
+
+            {/* Enquiries Table */}
+            {activeTab === "enquiries" && (
+              <div className="bg-white rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold">Contact Enquiries ({getFilteredEnquiries().length})</h2>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Type</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {getFilteredEnquiries().map((enquiry) => {
+                        const isExpanded = expandedEnquiries.has(enquiry.enquiry_id)
+                        return (
+                          <>
+                            <tr 
+                              key={enquiry.enquiry_id} 
+                              className={`hover:bg-gray-50 cursor-pointer transition-colors ${enquiry.status === 'new' ? 'bg-blue-50/30' : ''}`}
+                              onClick={() => toggleEnquiryExpansion(enquiry.enquiry_id)}
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center gap-2">
+                                  {isExpanded ? (
+                                    <ChevronUp className="h-4 w-4 text-gray-400" />
+                                  ) : (
+                                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                                  )}
+                                  <Mail className="h-4 w-4 text-blue-600" />
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {enquiry.full_name || 'Unknown'}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center gap-1">
+                                  {enquiry.company_name ? (
+                                    <>
+                                      <Building2 className="h-3 w-3 text-gray-400" />
+                                      <span className="text-sm text-gray-900">{enquiry.company_name}</span>
+                                    </>
+                                  ) : (
+                                    <span className="text-sm text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900 truncate max-w-[200px]">
+                                  {enquiry.email || '-'}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">
+                                  {enquiry.phone || '-'}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {enquiry.user_type && enquiry.user_type !== 'anonymous' ? (
+                                  <Badge variant="outline" className="text-xs">
+                                    {enquiry.user_type.toUpperCase()}
+                                  </Badge>
+                                ) : (
+                                  <span className="text-sm text-gray-400">Anonymous</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {enquiry.status === 'new' ? (
+                                  <Badge variant="default" className="bg-blue-600 text-white text-xs">
+                                    New
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-xs">
+                                    Read
+                                  </Badge>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>{getRelativeTime(enquiry.created_at)}</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="text-sm text-gray-700 line-clamp-2 max-w-[300px]">
+                                  {enquiry.message || 'No message provided'}
+                                </div>
+                              </td>
+                            </tr>
+                            {isExpanded && (
+                              <tr className="bg-gray-50">
+                                <td colSpan={8} className="px-6 py-4">
+                                  <div>
+                                    <h4 className="text-xs font-semibold text-gray-500 uppercase mb-3">Message</h4>
+                                    <div className="bg-white border rounded-lg p-4 md:p-6">
+                                      <p className="text-sm md:text-base text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                        {enquiry.message || 'No message provided'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                  {getFilteredEnquiries().length === 0 && (
+                    <div className="text-center py-12">
+                      <Mail className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <p className="text-gray-600">No enquiries found</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -826,6 +1092,16 @@ export default function AdminPage() {
             onOpenChange={setAgentDetailsOpen}
             onApprove={handleApproveAgent}
             onReject={() => setRejectAgentModalOpen(true)}
+          />
+          <EditAgentModal
+            agent={selectedAgent}
+            open={editAgentModalOpen}
+            onOpenChange={setEditAgentModalOpen}
+            onSave={() => {
+              // Refresh agent list after successful save
+              fetchAgents()
+              setEditAgentModalOpen(false)
+            }}
           />
           <RejectAgentModal
             agent={selectedAgent}

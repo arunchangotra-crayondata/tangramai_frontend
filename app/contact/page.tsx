@@ -30,18 +30,42 @@ export default function ContactPage() {
       // Generate session_id if not available
       const sessionId = `contact_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       
-      // Prepare request body
+      // Prepare request body - ensure all required fields are included
       const requestBody = {
-        company_name: formData.company,
-        email: formData.email,
-        full_name: formData.fullName,
-        message: formData.message,
-        phone: formData.phone || "",
+        company_name: formData.company.trim() || "",
+        email: formData.email.trim(),
+        full_name: formData.fullName.trim(),
+        message: formData.message.trim(),
+        phone: formData.phone.trim() || "",
         session_id: sessionId,
         type: "contact",
-        user_id: user?.user_id || null,
+        user_id: user?.user_id || "anonymous",
         user_type: user?.role || "client",
       };
+
+      // Validate required fields
+      if (!requestBody.email || !requestBody.full_name || !requestBody.message) {
+        toast({
+          description: "Please fill in all required fields.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(requestBody.email)) {
+        toast({
+          description: "Please enter a valid email address.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Log request for debugging
+      console.log("Submitting contact form:", requestBody);
 
       const response = await fetch("https://agents-store.onrender.com/api/contact", {
         method: "POST",
@@ -52,7 +76,15 @@ export default function ContactPage() {
         body: JSON.stringify(requestBody),
       });
 
-      const data = await response.json();
+      // Try to parse JSON response, but handle cases where response might not be valid JSON
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        // If response is not valid JSON, create a generic error response
+        console.error("Failed to parse response:", parseError);
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
 
       if (response.ok && data.success) {
         toast({
@@ -67,15 +99,23 @@ export default function ContactPage() {
           message: "",
         });
       } else {
+        // Handle error responses - FastAPI often uses 'detail' field for errors
+        const errorMessage = data?.detail || data?.message || data?.error || `Server error: ${response.status} ${response.statusText}`;
         toast({
-          description: data.message || "Failed to submit your enquiry. Please try again.",
+          description: errorMessage,
           variant: "destructive",
         });
+        console.error("Contact form submission error:", {
+          status: response.status,
+          statusText: response.statusText,
+          data: data,
+          requestBody: requestBody,
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting contact form:", error);
       toast({
-        description: "An error occurred. Please try again later.",
+        description: error.message || "An error occurred. Please try again later.",
         variant: "destructive",
       });
     } finally {

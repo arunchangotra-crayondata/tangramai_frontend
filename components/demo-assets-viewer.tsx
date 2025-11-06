@@ -30,7 +30,7 @@ type DemoAsset = {
   demo_link?: string
   asset_url?: string // Primary field for S3 image URLs
   asset_file_path?: string
-  demo_asset_name?: string
+  demo_asset_name?: string // Used for alphabetical sorting
   demo_asset_type?: string
   demo_asset_id?: string
 }
@@ -101,20 +101,17 @@ export default function DemoAssetsViewer({ assets, className, demoPreview }: Dem
   
   const normalized = useMemo(() => {
     const urls: string[] = []
+    const addedUrls = new Set<string>() // Track added URLs to avoid duplicates
     
-    // First, process demo_preview if provided (comma-separated URLs)
-    if (demoPreview) {
-      const rawUrls = demoPreview.split(',').map(url => url.trim()).filter(url => !!url)
-      const previewUrls = rawUrls.map(url => normalizeImageUrl(url)).filter(url => !!url)
-      
-      console.log('Processing demo_preview:', demoPreview)
-      console.log('Raw URLs from demo_preview:', rawUrls)
-      console.log('Normalized preview URLs:', previewUrls)
-      urls.push(...previewUrls)
-    }
+    // First, process assets array - sort alphabetically by demo_asset_name
+    // Sort assets alphabetically by demo_asset_name before processing
+    const sortedAssets = [...(assets || [])].sort((a, b) => {
+      const nameA = (a.demo_asset_name || '').toLowerCase()
+      const nameB = (b.demo_asset_name || '').toLowerCase()
+      return nameA.localeCompare(nameB)
+    })
     
-    // Then, process assets array - prioritize asset_url as per requirements
-    ;(assets || []).forEach(a => {
+    sortedAssets.forEach(a => {
       // Priority: asset_url (primary) > asset_file_path > demo_asset_link > demo_link
       // Using asset_url as the primary source for demo images from S3
       let url = a.asset_url || a.asset_file_path || a.demo_asset_link || a.demo_link || ""
@@ -133,11 +130,31 @@ export default function DemoAssetsViewer({ assets, className, demoPreview }: Dem
         }
         
         // Only add if not already in the list (avoid duplicates)
-        if (url && !urls.includes(url)) {
+        if (url && !addedUrls.has(url)) {
           urls.push(url)
+          addedUrls.add(url)
         }
       }
     })
+    
+    // Then, process demo_preview if provided (comma-separated URLs)
+    // These are added after sorted assets since they don't have demo_asset_name
+    if (demoPreview) {
+      const rawUrls = demoPreview.split(',').map(url => url.trim()).filter(url => !!url)
+      const previewUrls = rawUrls.map(url => normalizeImageUrl(url)).filter(url => !!url)
+      
+      console.log('Processing demo_preview:', demoPreview)
+      console.log('Raw URLs from demo_preview:', rawUrls)
+      console.log('Normalized preview URLs:', previewUrls)
+      
+      previewUrls.forEach(url => {
+        // Only add if not already in the list (avoid duplicates)
+        if (url && !addedUrls.has(url)) {
+          urls.push(url)
+          addedUrls.add(url)
+        }
+      })
+    }
     
     console.log('All normalized URLs:', urls)
     

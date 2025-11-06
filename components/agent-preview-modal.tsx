@@ -160,8 +160,8 @@ export function AgentPreviewModal({
         tags: agentData.tags || '',
         roi: agentData.roi || '',
         demo_link: agentData.demo_link || '',
-        demo_links: agentDetails.demo_assets?.map(a => a.demo_link || a.demo_asset_link).filter(Boolean) || [],
-        capabilities: agentDetails.capabilities?.map(c => c.by_capability || '').filter(Boolean) || [],
+        demo_links: agentDetails.demo_assets?.map(a => a.demo_link || a.demo_asset_link).filter((link): link is string => Boolean(link)) || [],
+        capabilities: agentDetails.capabilities?.map(c => c.by_capability || '').filter((cap): cap is string => Boolean(cap)) || [],
         sdk_details: agentDetails.documentation?.[0]?.sdk_details || '',
         swagger_details: agentDetails.documentation?.[0]?.swagger_details || '',
         sample_input: agentDetails.documentation?.[0]?.sample_input || '',
@@ -543,7 +543,7 @@ export function AgentPreviewModal({
                     ) : valueProps.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {valueProps.map((value, index) => (
-                          <Badge key={index} variant="primary" className="text-xs">
+                          <Badge key={index} variant="default" className="text-xs">
                             {value}
                           </Badge>
                         ))}

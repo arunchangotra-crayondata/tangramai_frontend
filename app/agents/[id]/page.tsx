@@ -42,7 +42,15 @@ type AgentDetailApiResponse = {
     deployment_id?: string
     capability_name?: string
   }>
-  demo_assets?: Array<{ demo_asset_link?: string; demo_link?: string; asset_url?: string }>
+  demo_assets?: Array<{ 
+    demo_asset_link?: string
+    demo_link?: string
+    asset_url?: string
+    asset_file_path?: string
+    demo_asset_name?: string
+    demo_asset_type?: string
+    demo_asset_id?: string
+  }>
   documentation?: Array<{ 
     agent_id?: string
     sdk_details?: string
@@ -362,7 +370,7 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                     (() => {
                       const items = agent.roi
                         .replace(/\\n/g, '\n')
-                        .split(/[:\n]+/)
+                        .split(/[;\n]+/)
                         .map(s => s.trim().replace(/^[,\-\s]+|[,\-\s]+$/g, ''))
                         .filter(Boolean)
                       return (
@@ -462,11 +470,14 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
 
             {/* Right Column - Demo Assets + Sidebar */}
             <div className="space-y-52 pr-6 lg:pr-8 ">
-              {data?.demo_assets && data.demo_assets.length > 0 && (
+              {((data?.demo_assets && data.demo_assets.length > 0) || data?.agent?.demo_preview) && (
                 <div className="relative w-[720px] overflow-hidden rounded-xl">
                   <img src="/gradiant%20image%20right.png" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover object-right" />
-                  <DemoAssetsViewer assets={data.demo_assets} />
-                    </div>
+                  <DemoAssetsViewer 
+                    assets={data.demo_assets || []} 
+                    demoPreview={data?.agent?.demo_preview}
+                  />
+                </div>
               )}
               
 

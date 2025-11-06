@@ -961,10 +961,13 @@ export function AgentPreviewModal({
                       )}
                     </div>
                   </div>
-                ) : demoAssets.length > 0 ? (
+                ) : (demoAssets.length > 0 || agentData?.demo_preview) ? (
                   <div className="relative w-[720px] overflow-hidden rounded-xl">
                     <img src="/gradiant%20image%20right.png" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover object-right" />
-                    <DemoAssetsViewer assets={demoAssets} />
+                    <DemoAssetsViewer 
+                      assets={demoAssets} 
+                      demoPreview={agentData?.demo_preview}
+                    />
                   </div>
                 ) : null}
 

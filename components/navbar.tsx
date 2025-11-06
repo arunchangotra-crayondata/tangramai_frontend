@@ -4,13 +4,14 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "./ui/button"
-import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown, Menu, X } from "lucide-react"
+import { Bell, LayoutDashboard, User, HelpCircle, LogOut, ChevronDown, Menu, X, Mail, Building2 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { BrandLogo } from "./brand-logo"
 import { useAuthStore } from "../lib/store/auth.store"
 import { useModal } from "../hooks/use-modal"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { useToast } from "../hooks/use-toast"
+import { Badge } from "./ui/badge"
 
 export function Navbar() {
   const router = useRouter()
@@ -20,38 +21,88 @@ export function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const [notifications, setNotifications] = useState([
-    {
-      id: 'n1',
-      title: 'Build finished successfully',
-      description: 'Your agent "Claims Triage" is ready to test.',
-      time: '2m ago',
-      logo: '/crayon_bw.png',
-      read: false,
-    },
-    {
-      id: 'n2',
-      title: 'New deployment available',
-      description: 'AWS us-east-1 rollout passed checks.',
-      time: '1h ago',
-      logo: '/aws.png',
-      read: false,
-    },
-    {
-      id: 'n3',
-      title: 'Partner invite accepted',
-      description: 'Mozark joined your workspace.',
-      time: 'Yesterday',
-      logo: '/mozak_bw.png',
-      read: true,
-    },
-  ])
+  const [notifications, setNotifications] = useState<Array<{
+    id: string
+    title: string
+    description: string
+    time: string
+    logo?: string
+    read: boolean
+    type?: 'enquiry' | 'system'
+    enquiryData?: any
+  }>>([])
+  const [enquiries, setEnquiries] = useState<any[]>([])
+  const [isLoadingEnquiries, setIsLoadingEnquiries] = useState(false)
 
   const hasUnread = notifications.some((n) => !n.read)
 
   const markAllAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
   }
+
+  // Format date to relative time
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+    
+    if (diffInSeconds < 60) return 'just now'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
+    
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
+  // Fetch enquiries for admin users
+  const fetchEnquiries = useCallback(async () => {
+    if (user?.role !== 'admin') return
+    
+    setIsLoadingEnquiries(true)
+    try {
+      const response = await fetch('https://agents-store.onrender.com/api/enquiries', {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+        },
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.enquiries) {
+          setEnquiries(data.enquiries)
+          
+          // Transform enquiries to notifications
+          const enquiryNotifications = data.enquiries.map((enquiry: any) => ({
+            id: enquiry.enquiry_id || `enquiry_${enquiry.created_at}`,
+            title: `New Contact Enquiry from ${enquiry.full_name}`,
+            description: enquiry.message || 'No message provided',
+            time: formatRelativeTime(enquiry.created_at),
+            read: enquiry.status !== 'new',
+            type: 'enquiry' as const,
+            enquiryData: enquiry,
+          }))
+          
+          // For admin, show only enquiries (remove hardcoded notifications)
+          setNotifications(enquiryNotifications)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching enquiries:', error)
+    } finally {
+      setIsLoadingEnquiries(false)
+    }
+  }, [user?.role])
+
+  // Fetch enquiries when user is admin
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      fetchEnquiries()
+      // Refresh enquiries every 30 seconds
+      const interval = setInterval(() => fetchEnquiries(), 30000)
+      return () => clearInterval(interval)
+    }
+  }, [user?.role, fetchEnquiries])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -189,36 +240,120 @@ export function Navbar() {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={8} className="w-[360px] p-0">
+              <DropdownMenuContent align="end" sideOffset={8} className="w-[420px] p-0">
                 <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b">
-                  <span className="text-sm font-medium">Notifications</span>
-                  <Button variant="outline" size="sm" onClick={markAllAsRead}>Mark all as read</Button>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Notifications</span>
+                    {user?.role === 'admin' && enquiries.length > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {enquiries.filter((e: any) => e.status === 'new').length} new
+                      </Badge>
+                    )}
+                  </div>
+                  {notifications.length > 0 && (
+                    <Button variant="outline" size="sm" onClick={markAllAsRead}>Mark all as read</Button>
+                  )}
                 </div>
-                <div className="max-h-80 overflow-auto py-2 divide-y divide-gray-100">
-                  {notifications.map((n) => (
-                    <div key={n.id} className="px-4 py-3">
-                      <div className="flex items-start gap-3 rounded-md bg-white p-3 hover:bg-gray-50 transition">
-                        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded">
-                          {/* logo */}
-                          <Image src={n.logo} alt="logo" fill className="object-contain" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm font-medium truncate">
-                              {n.title}
-                            </p>
-                            {!n.read && <span className="h-2 w-2 rounded-full bg-blue-500" aria-hidden="true" />}
-                          </div>
-                          <p className="text-xs text-gray-600 truncate">{n.description}</p>
-                          <p className="mt-1 text-[10px] text-gray-400">{n.time}</p>
-                        </div>
-                      </div>
+                <div className="max-h-96 overflow-auto py-2">
+                  {isLoadingEnquiries && user?.role === 'admin' ? (
+                    <div className="px-4 py-8 text-center text-sm text-gray-500">
+                      Loading enquiries...
                     </div>
-                  ))}
+                  ) : notifications.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-sm text-gray-500">
+                      No notifications
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-100">
+                      {notifications.map((n) => (
+                        <div key={n.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
+                          {n.type === 'enquiry' && n.enquiryData ? (
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100">
+                                <Mail className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-start justify-between gap-2 mb-1">
+                                  <div className="flex-1">
+                                    <p className="text-sm font-semibold text-gray-900">
+                                      {n.enquiryData.full_name}
+                                    </p>
+                                    {n.enquiryData.company_name && (
+                                      <div className="flex items-center gap-1 mt-0.5">
+                                        <Building2 className="h-3 w-3 text-gray-400" />
+                                        <p className="text-xs text-gray-500 truncate">
+                                          {n.enquiryData.company_name}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    {n.enquiryData.status === 'new' && (
+                                      <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-blue-600">
+                                        New
+                                      </Badge>
+                                    )}
+                                    {!n.read && <span className="h-2 w-2 rounded-full bg-blue-500" aria-hidden="true" />}
+                                  </div>
+                                </div>
+                                <p className="text-xs text-gray-700 line-clamp-2 mb-2">
+                                  {n.description}
+                                </p>
+                                <div className="flex items-center justify-between gap-2 mt-2">
+                                  <div className="flex items-center gap-3 text-[10px] text-gray-500">
+                                    {n.enquiryData.email && (
+                                      <span className="truncate max-w-[120px]">{n.enquiryData.email}</span>
+                                    )}
+                                    {n.enquiryData.phone && (
+                                      <span>{n.enquiryData.phone}</span>
+                                    )}
+                                  </div>
+                                  <span className="text-[10px] text-gray-400 shrink-0">{n.time}</span>
+                                </div>
+                                {n.enquiryData.user_type && n.enquiryData.user_type !== 'anonymous' && (
+                                  <div className="mt-2">
+                                    <Badge variant="outline" className="text-[10px]">
+                                      {n.enquiryData.user_type.toUpperCase()}
+                                    </Badge>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-start gap-3">
+                              {n.logo ? (
+                                <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded">
+                                  <Image src={n.logo} alt="logo" fill className="object-contain" />
+                                </div>
+                              ) : (
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100">
+                                  <Bell className="h-4 w-4 text-gray-600" />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="text-sm font-medium truncate">
+                                    {n.title}
+                                  </p>
+                                  {!n.read && <span className="h-2 w-2 rounded-full bg-blue-500" aria-hidden="true" />}
+                                </div>
+                                <p className="text-xs text-gray-600 truncate">{n.description}</p>
+                                <p className="mt-1 text-[10px] text-gray-400">{n.time}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className="border-t px-4 py-2">
-                  <Button variant="ghost" className="w-full justify-center">View all notifications</Button>
-                </div>
+                {user?.role === 'admin' && enquiries.length > 0 && (
+                  <div className="border-t px-4 py-2 bg-gray-50">
+                    <p className="text-xs text-gray-500 text-center">
+                      {enquiries.length} total {enquiries.length === 1 ? 'enquiry' : 'enquiries'}
+                    </p>
+                  </div>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
             

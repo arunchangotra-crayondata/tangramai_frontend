@@ -61,7 +61,6 @@ export default function DashboardPage() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [viewModalOpen, setViewModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
-  const [agentDetailsData, setAgentDetailsData] = useState<any>(null)
 
   // Debug log when chatOpen changes
   useEffect(() => {
@@ -177,11 +176,10 @@ export default function DashboardPage() {
               <Button 
                 className="bg-black text-white hover:bg-black/90"
                 onClick={() => {
-                  console.log('Button clicked, opening chat dialog')
-                  setChatOpen(true)
+                  router.push('/onboard')
                 }}
               >
-                START BUILDING YOUR AGENT
+                ONBOARD AGENT
               </Button>
             </div>
           </div>
@@ -217,9 +215,6 @@ export default function DashboardPage() {
                     <TableHead>S. No</TableHead>
                     <TableHead>Agent Name</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Organisation Name</TableHead>
-                    <TableHead>Language</TableHead>
-                    <TableHead>Last Updated</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
@@ -232,9 +227,7 @@ export default function DashboardPage() {
                         <TableCell>{idx + 1}</TableCell>
                         <TableCell className="font-medium">{a.agent_name}</TableCell>
                         <TableCell>{a.asset_type || "-"}</TableCell>
-                        <TableCell>{data?.isv?.isv_name || a.isv_id}</TableCell>
-                        <TableCell>English</TableCell>
-                        <TableCell>{a.updated_at || "—"}</TableCell>
+                        
                         <TableCell>
                           <span className={`inline-flex items-center rounded px-2 py-1 text-xs font-medium ${statusStyle[status]}`}>
                             {status}
@@ -245,19 +238,8 @@ export default function DashboardPage() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={async () => {
-                                setSelectedAgent(a)
-                                // Fetch full agent details
-                                try {
-                                  const response = await fetch(`/api/agents/${a.agent_id}`)
-                                  if (response.ok) {
-                                    const data = await response.json()
-                                    setAgentDetailsData(data)
-                                  }
-                                } catch (error) {
-                                  console.error('Error fetching agent details:', error)
-                                }
-                                setViewModalOpen(true)
+                              onClick={() => {
+                                router.push(`/agents/${a.agent_id}`)
                               }}
                             >
                               View
@@ -265,18 +247,8 @@ export default function DashboardPage() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={async () => {
+                              onClick={() => {
                                 setSelectedAgent(a)
-                                // Fetch full agent details for edit
-                                try {
-                                  const response = await fetch(`/api/agents/${a.agent_id}`)
-                                  if (response.ok) {
-                                    const data = await response.json()
-                                    setAgentDetailsData(data)
-                                  }
-                                } catch (error) {
-                                  console.error('Error fetching agent details:', error)
-                                }
                                 setEditModalOpen(true)
                               }}
                             >
@@ -346,11 +318,10 @@ export default function DashboardPage() {
             admin_approved: (selectedAgent.admin_approved === 'yes' ? 'yes' : 'no') as 'yes' | 'no',
             is_approved: selectedAgent.admin_approved === 'yes',
           }}
-          agentDetails={agentDetailsData}
           open={editModalOpen}
           onOpenChange={setEditModalOpen}
-          onSuccess={() => {
-            // Refresh agent list after successful edit
+          onSave={() => {
+            // Refresh agent list after successful save
             if (isvId) {
               fetch(`https://agents-store.onrender.com/api/isv/profile/${isvId}`, { cache: "no-store" })
                 .then(res => res.json())

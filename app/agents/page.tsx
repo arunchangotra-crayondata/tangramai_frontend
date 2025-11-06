@@ -396,7 +396,7 @@ export default function AgentLibraryPage() {
                 value={deploymentFilter}
                 onChange={(e) => setDeploymentFilter(e.target.value)}
               >
-                <option value="All">By Deployment Type</option>
+                <option value="All">By Asset Type</option>
                 {allDeploymentTypes.map(type => (
                   <option key={type} value={type}>{type}</option>
                 ))}

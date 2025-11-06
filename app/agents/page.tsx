@@ -38,6 +38,7 @@ type Agent = {
   deploymentType: string;
   persona: string;
   assetType: string;
+  agents_ordering?: number;
 };
 
 type ApiAgent = {
@@ -51,6 +52,7 @@ type ApiAgent = {
   asset_type?: string | null;
   by_persona?: string | null;
   admin_approved?: string | null;
+  agents_ordering?: string | number | null;
 };
 
 async function fetchAgents() {
@@ -124,26 +126,44 @@ export default function AgentLibraryPage() {
         const apiAgents: ApiAgent[] = data?.agents || [];
         const mappedAgents = apiAgents
           .filter(a => a.admin_approved === "yes") // Only show approved agents
-          .map((a) => ({
-            id: a.agent_id,
-            title: a.agent_name,
-            description: a.description,
-            tags: a.tags
-              ? a.tags
-                  .split(",")
-                  .map((t) => t.trim())
-                  .filter(Boolean)
-              : [],
-            badges: [
-              { label: (a as any).by_value || "", variant: "default" as const },
-            ],
-            // Add new fields for filtering
-            capabilities: a.by_capability ? a.by_capability.split(",").map(c => c.trim()).filter(Boolean) : [],
-            providers: a.service_provider ? a.service_provider.split(",").map(p => p.trim()).filter(Boolean) : [],
-            deploymentType: a.asset_type || "",
-            persona: a.by_persona || "",
-            assetType: a.asset_type || "",
-          }));
+          .map((a) => {
+            // Parse agents_ordering - handle "na", null, undefined, or numeric string
+            let ordering: number | undefined;
+            if (a.agents_ordering !== null && a.agents_ordering !== undefined && a.agents_ordering !== "na") {
+              const parsed = typeof a.agents_ordering === 'number' 
+                ? a.agents_ordering 
+                : parseInt(String(a.agents_ordering), 10);
+              ordering = isNaN(parsed) ? undefined : parsed;
+            }
+            
+            return {
+              id: a.agent_id,
+              title: a.agent_name,
+              description: a.description,
+              tags: a.tags
+                ? a.tags
+                    .split(",")
+                    .map((t) => t.trim())
+                    .filter(Boolean)
+                : [],
+              badges: [
+                { label: (a as any).by_value || "", variant: "default" as const },
+              ],
+              // Add new fields for filtering
+              capabilities: a.by_capability ? a.by_capability.split(",").map(c => c.trim()).filter(Boolean) : [],
+              providers: a.service_provider ? a.service_provider.split(",").map(p => p.trim()).filter(Boolean) : [],
+              deploymentType: a.asset_type || "",
+              persona: a.by_persona || "",
+              assetType: a.asset_type || "",
+              agents_ordering: ordering,
+            };
+          })
+          // Sort by agents_ordering: numeric values first (ascending), then undefined/null/"na" at the end
+          .sort((a, b) => {
+            const aOrder = a.agents_ordering ?? Number.MAX_SAFE_INTEGER;
+            const bOrder = b.agents_ordering ?? Number.MAX_SAFE_INTEGER;
+            return aOrder - bOrder;
+          });
         
         setAgents(mappedAgents.length > 0 ? mappedAgents : fallbackAgents);
       } catch (err) {
@@ -248,7 +268,13 @@ export default function AgentLibraryPage() {
     if (!aiSearchedAgentIds) return [];
     
     const aiAgents = agents.filter(agent => aiSearchedAgentIds.includes(agent.id));
-    return applyManualFilters(aiAgents);
+    const filtered = applyManualFilters(aiAgents);
+    // Sort by agents_ordering to maintain order
+    return filtered.sort((a, b) => {
+      const aOrder = a.agents_ordering ?? Number.MAX_SAFE_INTEGER;
+      const bOrder = b.agents_ordering ?? Number.MAX_SAFE_INTEGER;
+      return aOrder - bOrder;
+    });
   }, [agents, aiSearchedAgentIds, search, providerFilter, capabilityFilter, deploymentFilter, personaFilter]);
 
   // All agents (filtered by manual filters)
@@ -258,7 +284,13 @@ export default function AgentLibraryPage() {
       return agents.filter(agent => agent.id === agentIdFromUrl);
     }
     
-    return applyManualFilters(agents);
+    const filtered = applyManualFilters(agents);
+    // Sort by agents_ordering (already sorted in fetchData, but re-sort after filtering to maintain order)
+    return filtered.sort((a, b) => {
+      const aOrder = a.agents_ordering ?? Number.MAX_SAFE_INTEGER;
+      const bOrder = b.agents_ordering ?? Number.MAX_SAFE_INTEGER;
+      return aOrder - bOrder;
+    });
   }, [agents, search, providerFilter, capabilityFilter, deploymentFilter, personaFilter, agentIdFromUrl]);
 
   return (

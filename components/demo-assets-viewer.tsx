@@ -139,10 +139,33 @@ export default function DemoAssetsViewer({ assets, className, demoPreview }: Dem
       }
     })
     
-    console.log('All normalized URLs:', urls)
+    console.log('All normalized URLs (before sort):', urls)
     
-    // Return all valid URLs - images will load directly from S3 (CORS is fixed)
-    return urls
+    // Sort URLs alphabetically
+    const sortedUrls = urls.sort((a, b) => {
+      // Extract filename or last part of URL for comparison
+      const getSortKey = (url: string): string => {
+        try {
+          // For proxy URLs, extract the original URL from query param
+          if (url.includes('/api/image-proxy')) {
+            const urlObj = new URL(url, typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
+            const originalUrl = urlObj.searchParams.get('url') || url
+            return originalUrl.toLowerCase()
+          }
+          // For direct URLs, use the full URL
+          return url.toLowerCase()
+        } catch {
+          return url.toLowerCase()
+        }
+      }
+      
+      return getSortKey(a).localeCompare(getSortKey(b))
+    })
+    
+    console.log('All normalized URLs (after alphabetical sort):', sortedUrls)
+    
+    // Return all valid URLs sorted alphabetically
+    return sortedUrls
       .map(url => ({ url }))
       .filter(a => !!a.url)
   }, [assets, demoPreview])

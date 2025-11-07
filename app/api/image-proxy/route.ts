@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const imageUrl = searchParams.get('url')
+    const rangeHeader = request.headers.get('range') || request.headers.get('Range') || undefined
     
     if (!imageUrl) {
       console.error('Image proxy: Missing URL parameter')
@@ -97,6 +98,7 @@ export async function GET(request: NextRequest) {
       const command = new GetObjectCommand({
         Bucket: s3Params.bucket,
         Key: s3Params.key,
+        ...(rangeHeader ? { Range: rangeHeader } : {}),
       })
       
       const s3Response = await s3Client.send(command)
@@ -126,6 +128,8 @@ export async function GET(request: NextRequest) {
       
       const contentType = s3Response.ContentType || 'image/jpeg'
       const contentLength = imageBuffer.length
+      const contentRange = s3Response.ContentRange
+      const isPartial = Boolean(rangeHeader && contentRange)
       
       console.log('Image proxy: Successfully fetched image from S3:', {
         bucket: s3Params.bucket,
@@ -136,14 +140,16 @@ export async function GET(request: NextRequest) {
       
       // Return the image with proper headers
       return new NextResponse(imageBuffer, {
-        status: 200,
+        status: isPartial ? 206 : 200,
         headers: {
           'Content-Type': contentType,
           'Content-Length': contentLength.toString(),
           'Cache-Control': 'public, max-age=31536000, immutable',
+          'Accept-Ranges': 'bytes',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type',
+          ...(contentRange ? { 'Content-Range': contentRange } : {}),
         },
       })
     } catch (s3Error) {
@@ -159,6 +165,7 @@ export async function GET(request: NextRequest) {
           headers: {
             'Accept': 'image/*',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            ...(rangeHeader ? { Range: rangeHeader } : {}),
           },
           redirect: 'follow',
           signal: controller.signal,
@@ -174,6 +181,8 @@ export async function GET(request: NextRequest) {
         const imageBuffer = await response.arrayBuffer()
         const contentType = response.headers.get('content-type') || 'image/jpeg'
         const contentLength = imageBuffer.byteLength
+        const contentRange = response.headers.get('content-range') || undefined
+        const isPartial = response.status === 206 || Boolean(rangeHeader && contentRange)
         
         console.log('Image proxy: Successfully fetched image via fallback:', {
           url: decodedUrl,
@@ -182,14 +191,16 @@ export async function GET(request: NextRequest) {
         })
         
         return new NextResponse(imageBuffer, {
-          status: 200,
+          status: isPartial ? 206 : 200,
           headers: {
             'Content-Type': contentType,
             'Content-Length': contentLength.toString(),
             'Cache-Control': 'public, max-age=31536000, immutable',
+            'Accept-Ranges': 'bytes',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type',
+            ...(contentRange ? { 'Content-Range': contentRange } : {}),
           },
         })
       } catch (fetchError) {

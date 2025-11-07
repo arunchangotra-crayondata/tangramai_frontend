@@ -402,7 +402,7 @@ export default function DemoAssetsViewer({ assets, className, demoPreview }: Dem
 
       {/* Overlay dialog - Centered with white background */}
       <Dialog open={isOverlayOpen} onOpenChange={setIsOverlayOpen}>
-        <DialogContent className="!max-w-[95vw] !w-[95vw] !h-[95vh] !p-4 bg-white border border-gray-200 !m-0 !rounded-2xl shadow-2xl">
+        <DialogContent showCloseButton={false} className="!max-w-[95vw] !w-[95vw] !h-[95vh] !p-4 bg-white border border-gray-200 !m-0 !rounded-2xl shadow-2xl">
           <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
             {/* Left Navigation Button */}
             {normalized.length > 1 && (

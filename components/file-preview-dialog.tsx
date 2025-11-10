@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { X, Download } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 interface FilePreviewDialogProps {
   open: boolean
@@ -15,6 +15,17 @@ export function FilePreviewDialog({ open, onOpenChange, filePath }: FilePreviewD
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [fileUrl, setFileUrl] = useState<string>("")
+  const [downloadUrl, setDownloadUrl] = useState<string>("")
+  const objectUrlRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current)
+        objectUrlRef.current = null
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!open || !filePath) return
@@ -36,19 +47,36 @@ export function FilePreviewDialog({ open, onOpenChange, filePath }: FilePreviewD
         // For other URLs, use them directly
         else if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
           setFileUrl(filePath)
+          setDownloadUrl(filePath)
           setLoading(false)
           return
         }
         
         // Use the API to get the presigned URL
         const response = await fetch(`/api/file-preview?path=${encodeURIComponent(pathToUse)}`)
-        const data = await response.json()
-        
+
+        const contentType = response.headers.get('Content-Type') || ''
+
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to load file')
+          if (contentType.includes('application/json')) {
+            const data = await response.json()
+            throw new Error(data.error || 'Failed to load file')
+          }
+          throw new Error('Failed to load file')
         }
-        
-        setFileUrl(data.url)
+
+        if (objectUrlRef.current) {
+          URL.revokeObjectURL(objectUrlRef.current)
+          objectUrlRef.current = null
+        }
+
+        const blob = await response.blob()
+        const objectUrl = URL.createObjectURL(blob)
+
+        objectUrlRef.current = objectUrl
+
+        setFileUrl(objectUrl)
+        setDownloadUrl(`/api/file-preview?path=${encodeURIComponent(pathToUse)}&download=1`)
         setLoading(false)
       } catch (err: any) {
         setError(err.message || 'Failed to load file preview')
@@ -60,8 +88,8 @@ export function FilePreviewDialog({ open, onOpenChange, filePath }: FilePreviewD
   }, [open, filePath])
 
   const handleDownload = () => {
-    if (fileUrl) {
-      window.open(fileUrl, '_blank')
+    if (downloadUrl) {
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer')
     }
   }
 

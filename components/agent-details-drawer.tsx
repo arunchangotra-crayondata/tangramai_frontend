@@ -7,6 +7,7 @@ import { Separator } from "./ui/separator"
 import { DemoPreviewGallery } from "./demo-preview-gallery"
 import { ExternalLink, CheckCircle, XCircle } from "lucide-react"
 import type { AgentAPIResponse } from "../lib/types/admin.types"
+import { DemoAccessLink } from "./demo-access-link"
 
 interface AgentDetailsDrawerProps {
   agent: AgentAPIResponse
@@ -174,15 +175,13 @@ export function AgentDetailsDrawer({
                 Demo Link
               </h3>
               <div className="flex items-center gap-2">
-                <a
+                <DemoAccessLink
                   href={agent.demo_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-800 underline flex items-center gap-2 font-medium"
                 >
                   <ExternalLink className="h-4 w-4" />
                   {agent.demo_link}
-                </a>
+                </DemoAccessLink>
               </div>
             </div>
           )}

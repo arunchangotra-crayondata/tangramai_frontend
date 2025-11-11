@@ -180,42 +180,6 @@ export default function CustomOnboardPage() {
     if (!formData.agentName.trim()) {
       errors.push("Agent name is required")
     }
-    if (!formData.agentDescription.trim()) {
-      errors.push("Agent description is required")
-    }
-    if (!formData.agentType) {
-      errors.push("Agent type is required")
-    }
-    if (!formData.sdkDetails.trim()) {
-      errors.push("SDK details are required")
-    }
-    if (!formData.apiDocumentation.trim()) {
-      errors.push("API documentation URL is required")
-    }
-    if (!formData.sampleInput.trim()) {
-      errors.push("Sample input is required")
-    }
-    if (!formData.sampleOutput.trim()) {
-      errors.push("Sample output is required")
-    }
-    if (!formData.securityDetails.trim()) {
-      errors.push("Security details are required")
-    }
-
-    // Array validation
-    if (formData.tags.length === 0) {
-      errors.push("At least one tag is required")
-    }
-    if (formData.targetPersonas.length === 0) {
-      errors.push("At least one target persona is required")
-    }
-    if (formData.keyFeatures.length === 0) {
-      errors.push("At least one key feature is required")
-    }
-    if (formData.coreCapabilities.length === 0) {
-      errors.push("At least one core capability is required")
-    }
-
     // URL validation
     const urlRegex = /^https?:\/\/.+\..+/
     if (formData.apiDocumentation && !urlRegex.test(formData.apiDocumentation)) {
@@ -470,9 +434,7 @@ export default function CustomOnboardPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="agentDescription">
-                    Agent Description <span className="text-red-500">*</span>
-                  </Label>
+                  <Label htmlFor="agentDescription">Agent Description</Label>
                   <Textarea
                     id="agentDescription"
                     placeholder="Detailed description of your agent"
@@ -488,7 +450,6 @@ export default function CustomOnboardPage() {
                   onChange={(value) => setFormData({ ...formData, agentType: value })}
                   options={agentTypeOptions}
                   placeholder="Select agent type"
-                  required
                 />
 
                 <MultiSelectInput
@@ -497,7 +458,6 @@ export default function CustomOnboardPage() {
                   onChange={(value) => setFormData({ ...formData, tags: value })}
                   options={tagOptions}
                   placeholder="Select or add tags"
-                  required
                 />
 
                 <MultiSelectInput
@@ -506,7 +466,6 @@ export default function CustomOnboardPage() {
                   onChange={(value) => setFormData({ ...formData, targetPersonas: value })}
                   options={targetPersonaOptions}
                   placeholder="Select target personas"
-                  required
                 />
 
                 <MultiSelectInput
@@ -515,7 +474,6 @@ export default function CustomOnboardPage() {
                   onChange={(value) => setFormData({ ...formData, keyFeatures: value })}
                   options={keyFeatureOptions}
                   placeholder="Select key features"
-                  required
                 />
 
                 <DropdownWithCustom
@@ -524,7 +482,6 @@ export default function CustomOnboardPage() {
                   onChange={(value) => setFormData({ ...formData, valueProposition: value })}
                   options={valuePropositionOptions}
                   placeholder="Select value proposition"
-                  required
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -572,7 +529,6 @@ export default function CustomOnboardPage() {
                   onChange={(value) => setFormData({ ...formData, coreCapabilities: value })}
                   options={capabilityOptions}
                   placeholder="Select core capabilities"
-                  required
                 />
 
               </div>
@@ -704,9 +660,7 @@ export default function CustomOnboardPage() {
 
               <div className="space-y-6">
                 <div>
-                  <Label htmlFor="sdkDetails">
-                    SDK Details <span className="text-red-500">*</span>
-                  </Label>
+                  <Label htmlFor="sdkDetails">SDK Details</Label>
                   <Textarea
                     id="sdkDetails"
                     placeholder="SDK installation and usage instructions"
@@ -717,9 +671,7 @@ export default function CustomOnboardPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="apiDocumentation">
-                    API Documentation (Swagger) <span className="text-red-500">*</span>
-                  </Label>
+                  <Label htmlFor="apiDocumentation">API Documentation (Swagger)</Label>
                   <Input
                     id="apiDocumentation"
                     placeholder="https://your-swagger-docs.com"
@@ -731,9 +683,7 @@ export default function CustomOnboardPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="sampleInput">
-                      Sample Input <span className="text-red-500">*</span>
-                    </Label>
+                    <Label htmlFor="sampleInput">Sample Input</Label>
                     <Textarea
                       id="sampleInput"
                       placeholder="Example input data"
@@ -744,9 +694,7 @@ export default function CustomOnboardPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="sampleOutput">
-                      Sample Output <span className="text-red-500">*</span>
-                    </Label>
+                    <Label htmlFor="sampleOutput">Sample Output</Label>
                     <Textarea
                       id="sampleOutput"
                       placeholder="Example output data"
@@ -758,9 +706,7 @@ export default function CustomOnboardPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="securityDetails">
-                    Security Details <span className="text-red-500">*</span>
-                  </Label>
+                  <Label htmlFor="securityDetails">Security Details</Label>
                   <Textarea
                     id="securityDetails"
                     placeholder="Security considerations and best practices"

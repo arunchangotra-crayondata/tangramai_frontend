@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { Input } from "./ui/input"
-import { Button } from "./ui/button"
 import ChatDialog from "./chat-dialog"
-import { Search, Mic } from "lucide-react"
+import { Search } from "lucide-react"
 import { useChatStore } from "../lib/store/chat.store"
+import { VoiceInputControls } from "./voice-input-controls"
 
 export function AgentSearchChat() {
   const [chatOpen, setChatOpen] = useState(false)
@@ -14,12 +14,6 @@ export function AgentSearchChat() {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && searchInput.trim()) {
-      setChatOpen(true)
-    }
-  }
-
-  const handleSearchClick = () => {
-    if (searchInput.trim()) {
       setChatOpen(true)
     }
   }
@@ -35,15 +29,14 @@ export function AgentSearchChat() {
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyPress={handleKeyPress}
         />
-        <Button 
-          size="icon" 
-          variant="ghost" 
-          onClick={handleSearchClick}
-          disabled
-          className="opacity-30 cursor-not-allowed"
-        >
-          <Mic className="h-5 w-5" />
-        </Button>
+
+        <VoiceInputControls
+          value={searchInput}
+          onValueChange={setSearchInput}
+          className="mr-1"
+          compact
+          ariaLabel="Use voice input for agent search"
+        />
         
         {/* Mode Toggle */}
         <div className="flex rounded-full border bg-gray-50 p-1 mr-2">

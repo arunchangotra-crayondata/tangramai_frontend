@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
@@ -13,39 +13,40 @@ import { DropdownWithCustom } from "./dropdown-with-custom"
 import { useToast } from "../hooks/use-toast"
 import { agentService } from "../lib/api/agent.service"
 import type { AgentAPIResponse } from "../lib/types/admin.types"
+import DemoAssetsViewer from "./demo-assets-viewer"
 
 type Step = 1 | 2 | 3 | 4
 
-// Predefined options (same as onboarding)
-const tagOptions = [
+// Default options used as fallback when metadata is unavailable
+const DEFAULT_TAG_OPTIONS = [
   "AI/ML", "Automation", "Productivity", "Analytics", "Integration", 
   "Cloud", "Enterprise", "Open Source", "Machine Learning", "Deep Learning",
   "Natural Language Processing", "Computer Vision", "Robotics", "IoT"
 ]
 
-const targetPersonaOptions = [
+const DEFAULT_TARGET_PERSONA_OPTIONS = [
   "Developer", "Marketing Professional", "Sales Professional", "HR Professional",
   "Finance Professional", "Customer Service Representative", "Data Analyst",
   "Project Manager", "Executive", "Product Manager", "Designer", "Researcher"
 ]
 
-const keyFeatureOptions = [
+const DEFAULT_KEY_FEATURE_OPTIONS = [
   "Real-time Processing", "Multi-language Support", "API Integration", 
   "Customizable Workflows", "Advanced Analytics", "Enterprise Security",
   "Auto-scaling", "Mobile Ready", "Cloud Native", "On-premise Deployment"
 ]
 
-const capabilityOptions = [
+const DEFAULT_CAPABILITY_OPTIONS = [
   "Conversational AI & Advisory", "Document Processing & Analysis", "Image Processing",
   "Video Processing", "Voice & Meetings", "Data Analysis & Insights", 
   "Content Generation", "Process Automation", "Predictive Analytics", "Machine Learning"
 ]
 
-const agentTypeOptions = ["Agent", "Solution", "Platform", "Tool", "Service"]
-const valuePropositionOptions = ["Analytics", "Customer Experience", "Data", "Productivity"]
+const DEFAULT_AGENT_TYPE_OPTIONS = ["Agent", "Solution", "Platform", "Tool", "Service"]
+const DEFAULT_VALUE_PROPOSITION_OPTIONS = ["Analytics", "Customer Experience", "Data", "Productivity"]
 
-const serviceProviderOptions = ["AWS", "Azure", "GCP", "Open-Source", "SaaS"]
-const serviceNameOptions = [
+const DEFAULT_SERVICE_PROVIDER_OPTIONS = ["AWS", "Azure", "GCP", "Open-Source", "SaaS"]
+const DEFAULT_SERVICE_NAME_OPTIONS = [
   "ABBYY FlexiCapture", "Amazon Athena", "Amazon Chime SDK Amazon Transcribe",
   "Amazon Comprehend", "Amazon EMR", "Amazon Kendra", "Amazon Kinesis Video Streams",
   "Amazon Lex", "Amazon Polly", "Amazon Redshift", "Amazon Rekognition Video",
@@ -65,7 +66,7 @@ const serviceNameOptions = [
   "TableFormer", "Tesseract OCR", "Vaex", "Vertex AI Search and Conversation",
   "Vosk", "Weaviate", "Zubtitle"
 ]
-const deploymentTypeOptions = ["Cloud", "On-Prem", "Hybrid", "Edge", "Serverless"]
+const DEFAULT_DEPLOYMENT_TYPE_OPTIONS = ["Cloud", "On-Prem", "Hybrid", "Edge", "Serverless"]
 
 interface FileWithPreview {
   file: File
@@ -120,6 +121,9 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
   const [isLoading, setIsLoading] = useState(false)
   const bulkFileInputRef = useRef<HTMLInputElement>(null)
   const readmeFileInputRef = useRef<HTMLInputElement>(null)
+  const dropdownOptionsLoadedRef = useRef(false)
+  const [apiDemoAssets, setApiDemoAssets] = useState<any[]>([])
+  const [demoPreview, setDemoPreview] = useState<string>("")
   
   const [formData, setFormData] = useState<FormData>({
     agentName: "",
@@ -144,6 +148,20 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
     deploymentOptions: [],
   })
 
+  const createDefaultDropdownOptions = () => ({
+    tags: [...DEFAULT_TAG_OPTIONS],
+    targetPersonas: [...DEFAULT_TARGET_PERSONA_OPTIONS],
+    keyFeatures: [...DEFAULT_KEY_FEATURE_OPTIONS],
+    coreCapabilities: [...DEFAULT_CAPABILITY_OPTIONS],
+    agentTypes: [...DEFAULT_AGENT_TYPE_OPTIONS],
+    valuePropositions: [...DEFAULT_VALUE_PROPOSITION_OPTIONS],
+    serviceProviders: [...DEFAULT_SERVICE_PROVIDER_OPTIONS],
+    serviceNames: [...DEFAULT_SERVICE_NAME_OPTIONS],
+    deploymentTypes: [...DEFAULT_DEPLOYMENT_TYPE_OPTIONS],
+  })
+
+  const [dropdownOptions, setDropdownOptions] = useState(createDefaultDropdownOptions)
+
   const steps = [
     { number: 1, title: "Agent Details", label: "Agent Details" },
     { number: 2, title: "Capabilities", label: "Capabilities" },
@@ -151,11 +169,162 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
     { number: 4, title: "Documentation", label: "Documentation" },
   ]
 
+  const mergeOptions = (existing: string[], incoming: string[]) => {
+    const set = new Set(existing)
+    incoming
+      .map(option => option?.trim())
+      .filter((option): option is string => Boolean(option))
+      .forEach(option => set.add(option))
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }
+
+  const existingAssetLinks = useMemo(() => {
+    const links: { url: string; label: string }[] = []
+
+    apiDemoAssets.forEach((asset, index) => {
+      const url =
+        asset?.asset_url ||
+        asset?.asset_file_path ||
+        asset?.demo_asset_link ||
+        asset?.demo_link
+
+      if (typeof url === "string" && url.trim()) {
+        links.push({
+          url: url.trim(),
+          label: asset?.demo_asset_name || `Asset ${index + 1}`,
+        })
+      }
+    })
+
+    if (demoPreview) {
+      demoPreview
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .forEach((url, idx) => {
+          links.push({
+            url,
+            label: `Preview ${idx + 1}`,
+          })
+        })
+    }
+
+    return links
+  }, [apiDemoAssets, demoPreview])
+
+  const fetchDropdownMetadata = async () => {
+    try {
+      const [agentsRes, capabilitiesRes] = await Promise.allSettled([
+        fetch("https://agents-store.onrender.com/api/agents", { cache: "no-store" }),
+        fetch("https://agents-store.onrender.com/api/capabilities", { cache: "no-store" }),
+      ])
+
+      const mergedOptions = createDefaultDropdownOptions()
+
+      if (agentsRes.status === "fulfilled" && agentsRes.value.ok) {
+        const agentsJson = await agentsRes.value.json()
+        const agentsList = agentsJson?.agents || []
+
+        const tags: string[] = []
+        const personas: string[] = []
+        const features: string[] = []
+        const valueProps: string[] = []
+        const agentTypes: string[] = []
+        const capabilities: string[] = []
+        const serviceProviders: string[] = []
+        const serviceNames: string[] = []
+        const deploymentTypes: string[] = []
+
+        agentsList.forEach((item: any) => {
+          if (item?.tags) {
+            tags.push(...item.tags.split(",").map((t: string) => t.trim()))
+          }
+          if (item?.by_persona) {
+            personas.push(...item.by_persona.split(",").map((p: string) => p.trim()))
+          }
+          if (item?.features) {
+            features.push(...item.features.split(/[,;\n]+/).map((f: string) => f.trim()))
+          }
+          if (item?.by_value) {
+            valueProps.push(item.by_value)
+          }
+          if (item?.asset_type) {
+            agentTypes.push(item.asset_type)
+          }
+          if (item?.by_capability) {
+            capabilities.push(...item.by_capability.split(",").map((c: string) => c.trim()))
+          }
+          if (item?.service_provider) {
+            serviceProviders.push(...item.service_provider.split(",").map((p: string) => p.trim()))
+          }
+          if (item?.service_name) {
+            serviceNames.push(...item.service_name.split(",").map((n: string) => n.trim()))
+          }
+          if (item?.deployment) {
+            deploymentTypes.push(item.deployment)
+          }
+        })
+
+        mergedOptions.tags = mergeOptions(mergedOptions.tags, tags)
+        mergedOptions.targetPersonas = mergeOptions(mergedOptions.targetPersonas, personas)
+        mergedOptions.keyFeatures = mergeOptions(mergedOptions.keyFeatures, features)
+        mergedOptions.valuePropositions = mergeOptions(mergedOptions.valuePropositions, valueProps)
+        mergedOptions.agentTypes = mergeOptions(mergedOptions.agentTypes, agentTypes)
+        mergedOptions.coreCapabilities = mergeOptions(mergedOptions.coreCapabilities, capabilities)
+        mergedOptions.serviceProviders = mergeOptions(mergedOptions.serviceProviders, serviceProviders)
+        mergedOptions.serviceNames = mergeOptions(mergedOptions.serviceNames, serviceNames)
+        mergedOptions.deploymentTypes = mergeOptions(mergedOptions.deploymentTypes, deploymentTypes)
+      }
+
+      if (capabilitiesRes.status === "fulfilled" && capabilitiesRes.value.ok) {
+        const capabilitiesJson = await capabilitiesRes.value.json()
+        const capabilityList = capabilitiesJson?.capabilities || []
+        const grouped = capabilitiesJson?.grouped_deployments || []
+
+        const capabilityNames = capabilityList.map((c: any) => c?.by_capability).filter(Boolean)
+        const providerNames: string[] = []
+        const serviceNames: string[] = []
+        const deploymentNames: string[] = []
+
+        grouped.forEach((group: any) => {
+          if (group?.service_provider) providerNames.push(group.service_provider)
+          if (group?.services) {
+            group.services.forEach((svc: any) => {
+              if (svc?.service_name) serviceNames.push(svc.service_name)
+              if (svc?.deployment) deploymentNames.push(svc.deployment)
+            })
+          }
+          if (Array.isArray(group?.deployments)) {
+            deploymentNames.push(...group.deployments)
+          }
+        })
+
+        mergedOptions.coreCapabilities = mergeOptions(mergedOptions.coreCapabilities, capabilityNames)
+        mergedOptions.serviceProviders = mergeOptions(mergedOptions.serviceProviders, providerNames)
+        mergedOptions.serviceNames = mergeOptions(mergedOptions.serviceNames, serviceNames)
+        mergedOptions.deploymentTypes = mergeOptions(mergedOptions.deploymentTypes, deploymentNames)
+      }
+
+      setDropdownOptions(mergedOptions)
+      dropdownOptionsLoadedRef.current = true
+    } catch (error) {
+      console.error("Failed to load dropdown metadata:", error)
+    }
+  }
+
   // Reset step when modal closes
   useEffect(() => {
     if (!open) {
       setCurrentStep(1)
       setIsSaving(false)
+      setApiDemoAssets([])
+      setDemoPreview("")
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (open && !dropdownOptionsLoadedRef.current) {
+      fetchDropdownMetadata()
     }
   }, [open])
 
@@ -177,21 +346,40 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
       }
       const data = await response.json()
       
-      // Populate form data from agent details
       if (data?.agent) {
         const agentData = data.agent
+        setApiDemoAssets(Array.isArray(data.demo_assets) ? data.demo_assets : [])
+        setDemoPreview(agentData.demo_preview || "")
+
+        const tags = agentData.tags ? agentData.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []
+        const personas = agentData.by_persona ? agentData.by_persona.split(",").map((p: string) => p.trim()).filter(Boolean) : []
+        const features = agentData.features ? agentData.features.split(/[,;\n]+/).map((f: string) => f.trim()).filter(Boolean) : []
+        const capabilities = data.capabilities?.map((c: any) => c.by_capability || "").filter(Boolean) || []
+        const valueProp = agentData.by_value ? [agentData.by_value] : []
+        const agentType = agentData.asset_type ? [agentData.asset_type] : []
+        const deploymentOptions = data.deployments?.map((d: any) => ({
+          serviceProvider: d.service_provider || "",
+          serviceName: d.service_name || "",
+          deploymentType: d.deployment || "",
+          cloudRegion: d.cloud_region || "",
+          capability: d.by_capability || d.capability_name || "",
+        })) || []
+        const deploymentProviders = deploymentOptions.map(option => option.serviceProvider).filter(Boolean)
+        const deploymentServiceNames = deploymentOptions.map(option => option.serviceName).filter(Boolean)
+        const deploymentTypes = deploymentOptions.map(option => option.deploymentType).filter(Boolean)
+
         setFormData(prev => ({
           ...prev,
           agentName: agentData.agent_name || "",
           agentDescription: agentData.description || "",
           agentType: agentData.asset_type || "",
-          tags: agentData.tags ? agentData.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
-          targetPersonas: agentData.by_persona ? agentData.by_persona.split(',').map((p: string) => p.trim()).filter(Boolean) : [],
-          keyFeatures: agentData.features ? agentData.features.split(/[,;\n]+/).map((f: string) => f.trim()).filter(Boolean) : [],
+          tags,
+          targetPersonas: personas,
+          keyFeatures: features,
           valueProposition: agentData.by_value || "",
           roiInformation: agentData.roi || "",
           demoLink: agentData.demo_link || "",
-          coreCapabilities: data.capabilities?.map((c: any) => c.by_capability || '').filter(Boolean) || [],
+          coreCapabilities: capabilities,
           demoLinks: data.demo_assets?.map((a: any) => a.demo_link || a.demo_asset_link).filter(Boolean) || [],
           bulkFiles: [],
           sdkDetails: data.documentation?.[0]?.sdk_details || "",
@@ -201,13 +389,20 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
           securityDetails: data.documentation?.[0]?.security_details || "",
           readmeFile: null,
           additionalRelatedFiles: data.documentation?.[0]?.related_files || "",
-          deploymentOptions: data.deployments?.map((d: any) => ({
-            serviceProvider: d.service_provider || "",
-            serviceName: d.service_name || "",
-            deploymentType: d.deployment || "",
-            cloudRegion: d.cloud_region || "",
-            capability: d.by_capability || d.capability_name || "",
-          })) || [],
+          deploymentOptions,
+        }))
+
+        setDropdownOptions(prev => ({
+          ...prev,
+          tags: mergeOptions(prev.tags, tags),
+          targetPersonas: mergeOptions(prev.targetPersonas, personas),
+          keyFeatures: mergeOptions(prev.keyFeatures, features),
+          coreCapabilities: mergeOptions(prev.coreCapabilities, capabilities),
+          agentTypes: mergeOptions(prev.agentTypes, agentType),
+          valuePropositions: mergeOptions(prev.valuePropositions, valueProp),
+          serviceProviders: mergeOptions(prev.serviceProviders, deploymentProviders),
+          serviceNames: mergeOptions(prev.serviceNames, deploymentServiceNames),
+          deploymentTypes: mergeOptions(prev.deploymentTypes, deploymentTypes),
         }))
       } else {
         // If no agent data, show error
@@ -323,6 +518,24 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
       ...prev,
       deploymentOptions: prev.deploymentOptions.filter((_, i) => i !== index)
     }))
+  }
+
+  const handleCopyLink = async (url: string) => {
+    if (!url) return
+    try {
+      await navigator.clipboard.writeText(url)
+      toast({
+        title: "Link copied",
+        description: "Demo asset link copied to clipboard.",
+      })
+    } catch (error) {
+      console.error("Failed to copy link:", error)
+      toast({
+        title: "Copy failed",
+        description: "We couldn't copy the link. Please copy it manually.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleSave = async () => {
@@ -489,7 +702,7 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                           label="Agent Type"
                           value={formData.agentType}
                           onChange={(value) => setFormData({ ...formData, agentType: value })}
-                          options={agentTypeOptions}
+                          options={dropdownOptions.agentTypes}
                           placeholder="Select agent type"
                           required
                         />
@@ -498,7 +711,7 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                           label="Tags"
                           value={formData.tags}
                           onChange={(value) => setFormData({ ...formData, tags: value })}
-                          options={tagOptions}
+                          options={dropdownOptions.tags}
                           placeholder="Select or add tags"
                         />
 
@@ -506,7 +719,7 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                           label="Target Personas"
                           value={formData.targetPersonas}
                           onChange={(value) => setFormData({ ...formData, targetPersonas: value })}
-                          options={targetPersonaOptions}
+                          options={dropdownOptions.targetPersonas}
                           placeholder="Select target personas"
                         />
 
@@ -514,7 +727,7 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                           label="Key Features"
                           value={formData.keyFeatures}
                           onChange={(value) => setFormData({ ...formData, keyFeatures: value })}
-                          options={keyFeatureOptions}
+                          options={dropdownOptions.keyFeatures}
                           placeholder="Select key features"
                         />
 
@@ -522,22 +735,22 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                           label="Value Proposition"
                           value={formData.valueProposition}
                           onChange={(value) => setFormData({ ...formData, valueProposition: value })}
-                          options={valuePropositionOptions}
+                          options={dropdownOptions.valuePropositions}
                           placeholder="Select value proposition"
                         />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                          <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label htmlFor="roiInformation" className="text-base font-semibold text-gray-900">
                               ROI Information
                             </Label>
-                            <Input
-                              id="roiInformation"
-                              placeholder="Expected ROI or benefits"
-                              value={formData.roiInformation}
-                              onChange={(e) => setFormData({ ...formData, roiInformation: e.target.value })}
-                              className="h-11 text-base border-gray-300 focus:ring-2 focus:ring-black focus:border-black"
-                            />
+                          <Textarea
+                            id="roiInformation"
+                            placeholder="Summarize expected ROI, quantifiable outcomes, or key business impact"
+                            value={formData.roiInformation}
+                            onChange={(e) => setFormData({ ...formData, roiInformation: e.target.value })}
+                            className="min-h-[160px] text-base border-gray-300 focus:ring-2 focus:ring-black focus:border-black resize-vertical"
+                          />
                           </div>
 
                           <div className="space-y-2">
@@ -561,8 +774,10 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                   {currentStep === 2 && (
                     <div>
                       <div className="mb-6 pb-4 border-b border-gray-200">
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Capabilities</h2>
-                        <p className="text-gray-600">What can your AI agent do and what technical features does it offer?</p>
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Capabilities & Deployment</h2>
+                        <p className="text-gray-600">
+                          Define what your agent can do, then map the deployment footprint that enables those capabilities.
+                        </p>
                       </div>
 
                       <div className="space-y-6 md:space-y-8">
@@ -570,9 +785,102 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                           label="Core Capabilities"
                           value={formData.coreCapabilities}
                           onChange={(value) => setFormData({ ...formData, coreCapabilities: value })}
-                          options={capabilityOptions}
+                          options={dropdownOptions.coreCapabilities}
                           placeholder="Select core capabilities"
                         />
+
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+                            <Label className="text-base font-semibold text-gray-900">Deployment Options</Label>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={addDeploymentOption}
+                              className="h-9 text-green-600 border-green-600 hover:bg-green-50 hover:border-green-700"
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Deployment Option
+                            </Button>
+                          </div>
+
+                          <div className="space-y-4">
+                            {formData.deploymentOptions.map((option, index) => (
+                              <div key={index} className="rounded-lg border-2 border-gray-200 bg-gray-50 p-5 md:p-6">
+                                <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-200">
+                                  <h4 className="font-semibold text-gray-900">Deployment Option {index + 1}</h4>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeDeploymentOption(index)}
+                                    className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <DropdownWithCustom
+                                    label="Service Provider"
+                                    value={option.serviceProvider}
+                                    onChange={(value) => updateDeploymentOption(index, "serviceProvider", value)}
+                                    options={dropdownOptions.serviceProviders}
+                                    placeholder="e.g., AWS, Azure, Google Cloud"
+                                  />
+
+                                  <DropdownWithCustom
+                                    label="Service Name"
+                                    value={option.serviceName}
+                                    onChange={(value) => updateDeploymentOption(index, "serviceName", value)}
+                                    options={dropdownOptions.serviceNames}
+                                    placeholder="Service name"
+                                  />
+
+                                  <DropdownWithCustom
+                                    label="Deployment Type"
+                                    value={option.deploymentType}
+                                    onChange={(value) => updateDeploymentOption(index, "deploymentType", value)}
+                                    options={dropdownOptions.deploymentTypes}
+                                    placeholder="e.g., Docker, Kubernetes"
+                                  />
+
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`cloudRegion-${index}`} className="text-sm font-semibold text-gray-900">
+                                      Cloud Region
+                                    </Label>
+                                    <Input
+                                      id={`cloudRegion-${index}`}
+                                      placeholder="e.g., us-east-1, eu-west-1"
+                                      value={option.cloudRegion}
+                                      onChange={(e) => updateDeploymentOption(index, "cloudRegion", e.target.value)}
+                                      className="h-11 text-base border-gray-300 focus:ring-2 focus:ring-black focus:border-black"
+                                    />
+                                  </div>
+
+                                  <div className="md:col-span-2 space-y-2">
+                                    <Label htmlFor={`capability-${index}`} className="text-sm font-semibold text-gray-900">
+                                      Capability
+                                    </Label>
+                                    <Input
+                                      id={`capability-${index}`}
+                                      placeholder="Related capability"
+                                      value={option.capability}
+                                      onChange={(e) => updateDeploymentOption(index, "capability", e.target.value)}
+                                      className="h-11 text-base border-gray-300 focus:ring-2 focus:ring-black focus:border-black"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+
+                            {formData.deploymentOptions.length === 0 && (
+                              <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                <p className="font-medium mb-1">No deployment options added yet</p>
+                                <p className="text-sm">Click "Add Deployment Option" to get started</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -586,6 +894,98 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                       </div>
 
                       <div className="space-y-6 md:space-y-8">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-base font-semibold text-gray-900">Existing Assets Preview</Label>
+                            {(apiDemoAssets.length > 0 || demoPreview) && (
+                              <span className="text-xs text-gray-500">
+                                Showing current demo assets from your catalog
+                              </span>
+                            )}
+                          </div>
+                          {apiDemoAssets.length > 0 || demoPreview ? (
+                            <DemoAssetsViewer
+                              assets={apiDemoAssets}
+                              demoPreview={demoPreview}
+                              className="border border-gray-200 rounded-xl bg-white p-4 shadow-sm"
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center">
+                              <svg
+                                className="h-10 w-10 text-gray-400"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <rect x="3" y="3" width="7" height="7" />
+                                <rect x="14" y="3" width="7" height="7" />
+                                <rect x="14" y="14" width="7" height="7" />
+                                <rect x="3" y="14" width="7" height="7" />
+                              </svg>
+                              <p className="text-sm font-medium text-gray-700">
+                                No existing demo assets found
+                              </p>
+                              <p className="text-xs text-gray-500 max-w-xs">
+                                Upload demo assets or add links below to showcase your agent during review.
+                              </p>
+                            </div>
+                          )}
+                          {existingAssetLinks.length > 0 && (
+                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                              <div className="mb-3 flex items-center justify-between">
+                                <h4 className="text-sm font-semibold text-gray-800">
+                                  Asset Links ({existingAssetLinks.length})
+                                </h4>
+                                <span className="text-xs text-gray-500">
+                                  Click any link to open in a new tab
+                                </span>
+                              </div>
+                              <div className="space-y-3">
+                                {existingAssetLinks.map((link, index) => (
+                                  <div
+                                    key={`${link.url}-${index}`}
+                                    className="flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-3 shadow-sm md:flex-row md:items-center md:justify-between md:gap-3"
+                                  >
+                                    <div className="min-w-0">
+                                      <p className="text-sm font-medium text-gray-900 truncate">
+                                        {link.label}
+                                      </p>
+                                      <a
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-blue-600 hover:text-blue-800 break-all"
+                                      >
+                                        {link.url}
+                                      </a>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <a
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+                                      >
+                                        Open
+                                      </a>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleCopyLink(link.url)}
+                                        className="inline-flex items-center rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+                                      >
+                                        Copy
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
                         <div className="space-y-2">
                           <Label className="text-base font-semibold text-gray-900">Demo Links</Label>
                           <div className="space-y-3">
@@ -811,100 +1211,6 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                             onChange={(e) => setFormData({ ...formData, additionalRelatedFiles: e.target.value })}
                             className="min-h-[140px] text-base border-gray-300 focus:ring-2 focus:ring-black focus:border-black resize-none"
                           />
-                        </div>
-
-                        {/* Deployment Options */}
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between pb-2 border-b border-gray-200">
-                            <Label className="text-base font-semibold text-gray-900">Deployment Options</Label>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={addDeploymentOption}
-                              className="h-9 text-green-600 border-green-600 hover:bg-green-50 hover:border-green-700"
-                            >
-                              <Plus className="h-4 w-4 mr-2" />
-                              Add Deployment Option
-                            </Button>
-                          </div>
-
-                          <div className="space-y-4">
-                            {formData.deploymentOptions.map((option, index) => (
-                              <div key={index} className="rounded-lg border-2 border-gray-200 bg-gray-50 p-5 md:p-6">
-                                <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-200">
-                                  <h4 className="font-semibold text-gray-900">Deployment Option {index + 1}</h4>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => removeDeploymentOption(index)}
-                                    className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <DropdownWithCustom
-                                    label="Service Provider"
-                                    value={option.serviceProvider}
-                                    onChange={(value) => updateDeploymentOption(index, 'serviceProvider', value)}
-                                    options={serviceProviderOptions}
-                                    placeholder="e.g., AWS, Azure, Google Cloud"
-                                  />
-
-                                  <DropdownWithCustom
-                                    label="Service Name"
-                                    value={option.serviceName}
-                                    onChange={(value) => updateDeploymentOption(index, 'serviceName', value)}
-                                    options={serviceNameOptions}
-                                    placeholder="Service name"
-                                  />
-
-                                  <DropdownWithCustom
-                                    label="Deployment Type"
-                                    value={option.deploymentType}
-                                    onChange={(value) => updateDeploymentOption(index, 'deploymentType', value)}
-                                    options={deploymentTypeOptions}
-                                    placeholder="e.g., Docker, Kubernetes"
-                                  />
-
-                                  <div className="space-y-2">
-                                    <Label htmlFor={`cloudRegion-${index}`} className="text-sm font-semibold text-gray-900">
-                                      Cloud Region
-                                    </Label>
-                                    <Input
-                                      id={`cloudRegion-${index}`}
-                                      placeholder="e.g., us-east-1, eu-west-1"
-                                      value={option.cloudRegion}
-                                      onChange={(e) => updateDeploymentOption(index, 'cloudRegion', e.target.value)}
-                                      className="h-11 text-base border-gray-300 focus:ring-2 focus:ring-black focus:border-black"
-                                    />
-                                  </div>
-
-                                  <div className="md:col-span-2 space-y-2">
-                                    <Label htmlFor={`capability-${index}`} className="text-sm font-semibold text-gray-900">
-                                      Capability
-                                    </Label>
-                                    <Input
-                                      id={`capability-${index}`}
-                                      placeholder="Related capability"
-                                      value={option.capability}
-                                      onChange={(e) => updateDeploymentOption(index, 'capability', e.target.value)}
-                                      className="h-11 text-base border-gray-300 focus:ring-2 focus:ring-black focus:border-black"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-
-                            {formData.deploymentOptions.length === 0 && (
-                              <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                                <p className="font-medium mb-1">No deployment options added yet</p>
-                                <p className="text-sm">Click "Add Deployment Option" to get started</p>
-                              </div>
-                            )}
-                          </div>
                         </div>
                       </div>
                     </div>

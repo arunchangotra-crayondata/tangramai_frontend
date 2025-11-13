@@ -5,7 +5,8 @@ import { Input } from "../../components/ui/input";
 import { AgentSearchChat } from "../../components/agent-search-chat";
 import { AgentCard } from "../../components/agent-card";
 import ChatDialog from "../../components/chat-dialog";
-import { Search, ChevronDown } from "lucide-react";
+import { Search } from "lucide-react";
+import { VoiceInputControls } from "../../components/voice-input-controls";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useChatStore } from "../../lib/store/chat.store";
@@ -397,8 +398,17 @@ export default function AgentLibraryPage() {
                 placeholder="Quick search by name, tags, or description..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full"
+                className="pl-10 pr-28 py-2 w-full"
               />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                <VoiceInputControls
+                  value={search}
+                  onValueChange={setSearch}
+                  buttonVariant="ghost"
+                  compact
+                  ariaLabel="Use voice search"
+                />
+              </div>
             </div>
             
             {/* Filters */}

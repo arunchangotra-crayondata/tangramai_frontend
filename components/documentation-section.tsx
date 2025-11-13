@@ -22,6 +22,47 @@ export function DocumentationSection({ documentation }: DocumentationSectionProp
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewFilePath, setPreviewFilePath] = useState("")
 
+  const isS3Resource = (path: string) => {
+    if (!path) return false
+    if (!path.startsWith('http://') && !path.startsWith('https://')) {
+      return true
+    }
+
+    try {
+      const url = new URL(path)
+      return url.hostname.includes('.s3.') && url.hostname.endsWith('.amazonaws.com')
+    } catch {
+      return false
+    }
+  }
+
+  const buildProxyUrl = (path: string, download = false) => {
+    if (!path) return ""
+    if (isS3Resource(path)) {
+      const base = `/api/file-preview?path=${encodeURIComponent(path)}`
+      return download ? `${base}&download=1` : base
+    }
+    return path
+  }
+
+  const getDisplayLabel = (path: string) => {
+    if (!path) return ""
+
+    if (!path.startsWith('http://') && !path.startsWith('https://')) {
+      const parts = path.split('/')
+      return parts[parts.length - 1] || 'View File'
+    }
+
+    try {
+      const url = new URL(path)
+      const segments = url.pathname.split('/').filter(Boolean)
+      const fileName = segments[segments.length - 1]
+      return fileName ? decodeURIComponent(fileName) : url.hostname
+    } catch {
+      return path
+    }
+  }
+
   const handlePreviewClick = async (filePath: string) => {
     // For PDFs and images, show preview
     const isPdf = filePath.toLowerCase().endsWith('.pdf')
@@ -31,15 +72,9 @@ export function DocumentationSection({ documentation }: DocumentationSectionProp
       setPreviewFilePath(filePath)
       setPreviewOpen(true)
     } else {
-      // For other files (like README), get download URL
-      try {
-        const response = await fetch(`/api/file-preview?path=${encodeURIComponent(filePath)}`)
-        const data = await response.json()
-        if (data.url) {
-          window.open(data.url, '_blank')
-        }
-      } catch (error) {
-        console.error('Failed to download file:', error)
+      const targetUrl = buildProxyUrl(filePath, true)
+      if (targetUrl) {
+        window.open(targetUrl, '_blank', 'noopener,noreferrer')
       }
     }
   }
@@ -60,12 +95,12 @@ export function DocumentationSection({ documentation }: DocumentationSectionProp
                     <h3 className="font-semibold text-sm mb-2">SDK Details</h3>
                     <div className="flex items-center gap-2">
                       <a
-                        href={documentation.sdk_details}
+                        href={buildProxyUrl(documentation.sdk_details)}
                         target="_blank"
                         rel="noreferrer"
                         className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate"
                       >
-                        <span className="truncate">{documentation.sdk_details}</span>
+                        <span className="truncate">{getDisplayLabel(documentation.sdk_details)}</span>
                         <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
                       </a>
                     </div>
@@ -86,12 +121,12 @@ export function DocumentationSection({ documentation }: DocumentationSectionProp
                     <h3 className="font-semibold text-sm mb-2">API Swagger</h3>
                     <div className="flex items-center gap-2">
                       <a
-                        href={documentation.swagger_details}
+                        href={buildProxyUrl(documentation.swagger_details)}
                         target="_blank"
                         rel="noreferrer"
                         className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate"
                       >
-                        <span className="truncate">{documentation.swagger_details}</span>
+                        <span className="truncate">{getDisplayLabel(documentation.swagger_details)}</span>
                         <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
                       </a>
                     </div>
@@ -112,12 +147,12 @@ export function DocumentationSection({ documentation }: DocumentationSectionProp
                     <h3 className="font-semibold text-sm mb-2">Security Details</h3>
                     <div className="flex items-center gap-2">
                       <a
-                        href={documentation.security_details}
+                        href={buildProxyUrl(documentation.security_details)}
                         target="_blank"
                         rel="noreferrer"
                         className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 truncate"
                       >
-                        <span className="truncate">{documentation.security_details}</span>
+                        <span className="truncate">{getDisplayLabel(documentation.security_details)}</span>
                         <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
                       </a>
                     </div>

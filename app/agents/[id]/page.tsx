@@ -13,6 +13,7 @@ import { join } from "path"
 import ExpandableAddress from "../../../components/expandable-address"
 import ScrollToTop from "../../../components/scroll-to-top"
 import { DocumentationSection } from "../../../components/documentation-section"
+import { DemoAccessLink } from "../../../components/demo-access-link"
 
 type AgentDetailApiResponse = {
   agent?: {
@@ -299,43 +300,41 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
                 {/* Try It Now Button */}
                 {agent?.demo_link && (
                   <div className="mb-6 flex justify-center">
-                    <a
-                      href={agent.demo_link}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        width: 120.2935791015625,
-                        height: 43.510398864746094,
-                        maxWidth: 363.41,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 4,
-                        borderWidth: 2,
-                        borderStyle: 'solid',
-                        borderImage: 'linear-gradient(98.05deg, #E2118E 5.32%, #AAF2FF 27.12%, #1576FF 99.78%) 1',
-                        borderImageSlice: 1,
-                        borderRadius: 4,
-                        paddingTop: 13.26,
-                        paddingRight: 17.34,
-                        paddingBottom: 13.26,
-                        paddingLeft: 17.34,
-                        fontFamily: 'Inter, sans-serif',
-                        fontWeight: 500,
-                        fontSize: 14,
-                        lineHeight: '100%',
-                        letterSpacing: '0.5px',
-                        textAlign: 'center',
-                        textTransform: 'uppercase',
-                        backgroundColor: '#000',
-                        color: '#fff',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
+                  <DemoAccessLink
+                    href={agent.demo_link}
+                    style={{
+                      width: 120.2935791015625,
+                      height: 43.510398864746094,
+                      maxWidth: 363.41,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 4,
+                      borderWidth: 2,
+                      borderStyle: 'solid',
+                      borderImage: 'linear-gradient(98.05deg, #E2118E 5.32%, #AAF2FF 27.12%, #1576FF 99.78%) 1',
+                      borderImageSlice: 1,
+                      borderRadius: 4,
+                      paddingTop: 13.26,
+                      paddingRight: 17.34,
+                      paddingBottom: 13.26,
+                      paddingLeft: 17.34,
+                      fontFamily: 'Inter, sans-serif',
+                      fontWeight: 500,
+                      fontSize: 14,
+                      lineHeight: '100%',
+                      letterSpacing: '0.5px',
+                      textAlign: 'center',
+                      textTransform: 'uppercase',
+                      backgroundColor: '#000',
+                      color: '#fff',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
                       TRY IT NOW
-                    </a>
+                  </DemoAccessLink>
                   </div>
                 )}
                 <TabsList className="w-full justify-start bg-transparent p-0 gap-6 h-12 rounded-none border-0">

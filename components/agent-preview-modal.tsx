@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { Card, CardContent } from "./ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion"
-import { CheckCircle, XCircle, ExternalLink, MapPin, Phone, Mail, Globe, Edit, Save, Pencil, Upload, X, Plus, FileText } from "lucide-react"
+import { CheckCircle, XCircle, ExternalLink, MapPin, Phone, Mail, Globe, Save, Pencil, Upload, X, Plus, FileText } from "lucide-react"
 import ReadMore from "./read-more"
 import CollapsibleList from "./collapsible-list"
 import DemoAssetsViewer from "./demo-assets-viewer"
@@ -17,6 +17,7 @@ import { Label } from "./ui/label"
 import { useToast } from "../hooks/use-toast"
 import { agentService } from "../lib/api/agent.service"
 import type { AgentAPIResponse } from "../lib/types/admin.types"
+import { DemoAccessLink } from "./demo-access-link"
 import { DocumentationSection } from "./documentation-section"
 
 // Types for the full agent details API response
@@ -961,15 +962,28 @@ export function AgentPreviewModal({
                       )}
                     </div>
                   </div>
-                ) : (demoAssets.length > 0 || agentData?.demo_preview) ? (
-                  <div className="relative w-[720px] overflow-hidden rounded-xl">
-                    <img src="/gradiant%20image%20right.png" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover object-right" />
-                    <DemoAssetsViewer 
-                      assets={demoAssets} 
-                      demoPreview={agentData?.demo_preview}
-                    />
+                ) : (
+                  demoAssets.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Demo Assets</h3>
+                      <DemoAssetsViewer assets={demoAssets} />
+                    </div>
+                  )
+                )}
+
+                {/* Demo Link */}
+                {agentData.demo_link && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Demo Link</h3>
+                    <DemoAccessLink
+                      href={agentData.demo_link}
+                      className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      View Demo
+                    </DemoAccessLink>
                   </div>
-                ) : null}
+                )}
 
                 {/* ISV Information - Only show in view mode, not in edit mode */}
                 {!isEditMode && isvInfo.isv_name && (

@@ -51,10 +51,11 @@ export async function GET(request: NextRequest) {
     const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
 
     return NextResponse.json({ url })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating presigned URL:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate file URL'
     return NextResponse.json(
-      { error: error.message || 'Failed to generate file URL' },
+      { error: errorMessage },
       { status: 500 }
     )
   }

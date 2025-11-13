@@ -107,23 +107,38 @@ export async function GET(request: NextRequest) {
         throw new Error('Empty response body from S3')
       }
       
-      // Convert stream to buffer
-      const chunks: Uint8Array[] = []
-      const reader = s3Response.Body.transformToWebStream().getReader()
+      // Convert stream to buffer using arrayBuffer() method (type-safe)
+      let imageBuffer: Uint8Array
       
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        if (value) chunks.push(value)
-      }
-      
-      // Combine chunks into single buffer
-      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0)
-      const imageBuffer = new Uint8Array(totalLength)
-      let offset = 0
-      for (const chunk of chunks) {
-        imageBuffer.set(chunk, offset)
-        offset += chunk.length
+      if (s3Response.Body && typeof s3Response.Body === 'object') {
+        // Try to use transformToWebStream if available
+        if ('transformToWebStream' in s3Response.Body && typeof (s3Response.Body as any).transformToWebStream === 'function') {
+          const chunks: Uint8Array[] = []
+          const stream = (s3Response.Body as any).transformToWebStream() as ReadableStream<Uint8Array>
+          const reader = stream.getReader()
+          
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            if (value) chunks.push(value)
+          }
+          
+          // Combine chunks into single buffer
+          const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0)
+          imageBuffer = new Uint8Array(totalLength)
+          let offset = 0
+          for (const chunk of chunks) {
+            imageBuffer.set(chunk, offset)
+            offset += chunk.length
+          }
+        } else {
+          // Fallback: try to get as arrayBuffer directly
+          const arrayBuffer = await (s3Response.Body as any).arrayBuffer?.() || 
+                            await (s3Response.Body as any) as ArrayBuffer
+          imageBuffer = new Uint8Array(arrayBuffer)
+        }
+      } else {
+        throw new Error('Invalid response body from S3')
       }
       
       const contentType = s3Response.ContentType || 'image/jpeg'

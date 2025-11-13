@@ -153,8 +153,13 @@ export async function GET(request: NextRequest) {
         size: `${(contentLength / 1024).toFixed(2)} KB`
       })
       
+      // Convert Uint8Array to ArrayBuffer for NextResponse
+      // Create a new ArrayBuffer to ensure type compatibility
+      const arrayBuffer = new ArrayBuffer(imageBuffer.length)
+      new Uint8Array(arrayBuffer).set(imageBuffer)
+      
       // Return the image with proper headers
-      return new NextResponse(imageBuffer, {
+      return new NextResponse(arrayBuffer, {
         status: isPartial ? 206 : 200,
         headers: {
           'Content-Type': contentType,

@@ -1,6 +1,6 @@
 "use client"
 
-import { ComponentPropsWithoutRef, ReactNode, useCallback } from "react"
+import { ComponentPropsWithoutRef, ReactNode, useCallback, MouseEvent } from "react"
 import { useAuthStore } from "../lib/store/auth.store"
 import { useModal } from "../hooks/use-modal"
 
@@ -27,7 +27,7 @@ export function DemoAccessLink({
   const { openModal } = useModal()
 
   const handleClick: ComponentPropsWithoutRef<"a">["onClick"] = useCallback(
-    (event) => {
+    (event: MouseEvent<HTMLAnchorElement>) => {
       if (!isAuthenticated) {
         event.preventDefault()
         openModal("auth", { mode: promptMode, role: promptRole })

@@ -364,9 +364,9 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
           cloudRegion: d.cloud_region || "",
           capability: d.by_capability || d.capability_name || "",
         })) || []
-        const deploymentProviders = deploymentOptions.map(option => option.serviceProvider).filter(Boolean)
-        const deploymentServiceNames = deploymentOptions.map(option => option.serviceName).filter(Boolean)
-        const deploymentTypes = deploymentOptions.map(option => option.deploymentType).filter(Boolean)
+        const deploymentProviders = deploymentOptions.map((option: { serviceProvider: string }) => option.serviceProvider).filter(Boolean)
+        const deploymentServiceNames = deploymentOptions.map((option: { serviceName: string }) => option.serviceName).filter(Boolean)
+        const deploymentTypes = deploymentOptions.map((option: { deploymentType: string }) => option.deploymentType).filter(Boolean)
 
         setFormData(prev => ({
           ...prev,

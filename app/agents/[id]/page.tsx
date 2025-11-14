@@ -14,6 +14,7 @@ import ExpandableAddress from "../../../components/expandable-address"
 import ScrollToTop from "../../../components/scroll-to-top"
 import { DocumentationSection } from "../../../components/documentation-section"
 import { DemoAccessLink } from "../../../components/demo-access-link"
+import { AgentDetailGestureWrapper } from "../../../components/agent-detail-gesture-wrapper"
 
 type AgentDetailApiResponse = {
   agent?: {
@@ -191,7 +192,11 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
     // ignore - keep nextAgentId null
   }
   return (
-    <div className="flex flex-col">
+    <AgentDetailGestureWrapper
+      agentId={id}
+      nextAgentId={nextAgentId}
+      prevAgentId={prevAgentId}
+    >
       <ScrollToTop />
       {/* Breadcrumb */}
       <div className="border-b bg-white py-4">
@@ -512,6 +517,6 @@ export default async function AgentDetailsPage({ params }: { params: Promise<{ i
           </button>
         </a>
       )}
-    </div>
+    </AgentDetailGestureWrapper>
   )
 }

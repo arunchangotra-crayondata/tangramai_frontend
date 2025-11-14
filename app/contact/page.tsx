@@ -8,6 +8,8 @@ import { Label } from "../../components/ui/label";
 import ChatDialog from "../../components/chat-dialog";
 import { useAuthStore } from "../../lib/store/auth.store";
 import { useToast } from "../../hooks/use-toast";
+import { GestureWrapper } from "../../components/gesture-wrapper";
+import { useRouter } from "next/navigation";
 
 export default function ContactPage() {
   const { user } = useAuthStore();
@@ -130,8 +132,15 @@ export default function ContactPage() {
     });
   };
 
+  const router = useRouter();
+
   return (
-    <div className="min-h-screen">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      className="min-h-screen"
+    >
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100">
         {/* Background gradient image - full width */}
@@ -293,6 +302,6 @@ export default function ContactPage() {
       </section>
 
       <ChatDialog open={chatOpen} onOpenChange={setChatOpen} initialMode="create" />
-    </div>
+    </GestureWrapper>
   );
 }

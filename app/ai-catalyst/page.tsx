@@ -7,9 +7,12 @@ import { Button } from "../../components/ui/button";
 import ChatDialog from "../../components/chat-dialog";
 import { Gauge, Settings, TrendingUp, CheckCircle2 } from "lucide-react";
 import Head from "next/head";
+import { GestureWrapper } from "../../components/gesture-wrapper";
+import { useRouter } from "next/navigation";
 
 export default function AICatalystPage() {
   const [chatOpen, setChatOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <>
@@ -17,7 +20,12 @@ export default function AICatalystPage() {
         <title>Deployment Service - Tangram AI</title>
         <meta name="description" content="AI Catalyst deployment service for accelerating AI agent development" />
       </Head>
-      <div className="flex flex-col">
+      <GestureWrapper
+        onSwipeRight={() => router.push("/")}
+        onSwipeLeft={() => router.push("/agents")}
+        threshold={50}
+        className="flex flex-col"
+      >
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 py-16 md:py-20 lg:py-24 min-h-[80vh] flex items-center">
         <div className="w-full px-8 md:px-12 lg:px-16">
@@ -188,7 +196,7 @@ export default function AICatalystPage() {
       </section>
 
       <ChatDialog open={chatOpen} onOpenChange={setChatOpen} initialMode="create" />
-    </div>
+    </GestureWrapper>
     </>
   );
 }

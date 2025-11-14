@@ -9,13 +9,27 @@ import { useState } from "react";
 import ChatDialog from "../components/chat-dialog";
 import Image from "next/image";
 import Link from "next/link";
+import { GestureWrapper } from "../components/gesture-wrapper";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   const { openModal } = useModal();
   const [chatOpen, setChatOpen] = useState(false);
+  const router = useRouter();
 
   return (
-    <div className="flex flex-col">
+    <GestureWrapper
+      onSwipeLeft={() => {
+        // Navigate to agents page on swipe left
+        router.push("/agents");
+      }}
+      onSwipeRight={() => {
+        // Could navigate to previous page or show menu
+        console.log("Swipe right on home");
+      }}
+      threshold={50}
+      className="flex flex-col"
+    >
       {/* Hero Section (Agents hero moved here) */}
       <section className="relative py-16 md:py-20 lg:py-24 min-h-[80vh] flex items-center">
         <div aria-hidden="true" className="absolute inset-0 -z-10">
@@ -381,6 +395,6 @@ AI success made easy. </span>
           </div>
         </div>
       </section>
-    </div>
+    </GestureWrapper>
   );
 }

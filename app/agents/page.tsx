@@ -8,8 +8,9 @@ import ChatDialog from "../../components/chat-dialog";
 import { Search } from "lucide-react";
 import { VoiceInputControls } from "../../components/voice-input-controls";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useChatStore } from "../../lib/store/chat.store";
+import { GestureWrapper } from "../../components/gesture-wrapper";
 
 // Fallback mock data (minimal) in case the API fails
 const fallbackAgents = [
@@ -294,8 +295,21 @@ export default function AgentLibraryPage() {
     });
   }, [agents, search, providerFilter, capabilityFilter, deploymentFilter, personaFilter, agentIdFromUrl]);
 
+  const router = useRouter();
+
   return (
-    <div className="flex flex-col">
+    <GestureWrapper
+      onSwipeRight={() => {
+        // Navigate back to home on swipe right
+        router.push("/");
+      }}
+      onSwipeLeft={() => {
+        // Could navigate to next section or page
+        console.log("Swipe left on agents");
+      }}
+      threshold={50}
+      className="flex flex-col"
+    >
       {/* Hero Section */}
       <section className="relative py-12 md:py-16 lg:py-20">
         <div aria-hidden="true" className="absolute inset-0 -z-10">
@@ -605,7 +619,7 @@ export default function AgentLibraryPage() {
         onOpenChange={setCreateChatOpen} 
         initialMode="create"
       />
-    </div>
+    </GestureWrapper>
   );
 }
 

@@ -11,6 +11,7 @@ import { Badge } from "./ui/badge"
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 import { useChatStore, type ChatMessage } from "../lib/store/chat.store"
+import { VoiceInputControls } from "./voice-input-controls"
 
 type MarkdownComponentProps = {
   children?: React.ReactNode
@@ -490,6 +491,13 @@ export default function ChatDialog({ open, onOpenChange, initialMode = "explore"
                 placeholder="Type your message..."
                 className="flex-1"
                 disabled={isSending}
+              />
+              <VoiceInputControls
+                value={input}
+                onValueChange={setInput}
+                className="mr-1"
+                compact
+                ariaLabel="Use voice input for chat"
               />
               <Button onClick={handleSend} className="bg-black text-white hover:bg-black/90" disabled={isSending}>
                 Send

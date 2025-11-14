@@ -9,6 +9,7 @@ import { useModal } from "../../hooks/use-modal"
 import { useAuthStore } from "../../lib/store/auth.store"
 import { useRouter } from "next/navigation"
 import { ArrowRight, Target, Globe, TrendingUp } from "lucide-react"
+import { GestureWrapper } from "../../components/gesture-wrapper"
 
 export default function ISVPage() {
   const { openModal } = useModal()
@@ -25,7 +26,12 @@ export default function ISVPage() {
     }
   }
   return (
-    <div className="min-h-screen">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      className="min-h-screen"
+    >
             {/* Hero Section with Gradient */}
             <section className="relative overflow-hidden bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 min-h-[90vh]">
         {/* Background gradient image - positioned to the left, visible */}
@@ -220,7 +226,7 @@ export default function ISVPage() {
           </div>
         </div>
       </section>
-    </div>
+    </GestureWrapper>
   )
 }
 

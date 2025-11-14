@@ -5,6 +5,7 @@ import { Button } from "../../components/ui/button"
 import { ArrowLeft, Upload, FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { GestureWrapper } from "../../components/gesture-wrapper"
 
 export default function OnboardPage() {
   const router = useRouter()
@@ -19,7 +20,12 @@ export default function OnboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      className="min-h-screen bg-white"
+    >
       {/* Header */}
       <div className="border-b">
         <div className="w-full px-8 md:px-12 lg:px-16 py-4">
@@ -134,6 +140,6 @@ export default function OnboardPage() {
           </div>
         </div>
       </div>
-    </div>
+    </GestureWrapper>
   )
 }

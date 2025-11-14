@@ -21,6 +21,7 @@ import { Toaster } from "../../components/ui/toaster"
 import { adminService } from "../../lib/api/admin.service"
 import { useAuthStore } from "../../lib/store/auth.store"
 import type { AgentAPIResponse, ISVAPIResponse, ResellerAPIResponse } from "../../lib/types/admin.types"
+import { GestureWrapper } from "../../components/gesture-wrapper"
 
 type TabType = "agents" | "isvs" | "resellers" | "enquiries"
 
@@ -512,7 +513,12 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      onSwipeLeft={() => router.push("/dashboard")}
+      threshold={50}
+      className="min-h-screen bg-gray-50"
+    >
       <div className="w-full px-8 md:px-12 lg:px-16 py-12 md:py-16 lg:py-20">
         {/* Header */}
         <div className="mb-8">
@@ -1163,6 +1169,6 @@ export default function AdminPage() {
       )}
 
       <Toaster />
-    </div>
+    </GestureWrapper>
   )
 }

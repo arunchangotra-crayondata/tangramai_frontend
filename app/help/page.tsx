@@ -1,6 +1,17 @@
+"use client"
+
+import { GestureWrapper } from "../../components/gesture-wrapper"
+import { useRouter } from "next/navigation"
+
 export default function HelpPage() {
+  const router = useRouter()
   return (
-    <div className="container mx-auto py-8">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      className="container mx-auto py-8"
+    >
       <h1 className="text-3xl font-bold mb-6">Help Center</h1>
       <div className="max-w-4xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -38,6 +49,6 @@ export default function HelpPage() {
           </div>
         </div>
       </div>
-    </div>
+    </GestureWrapper>
   )
 }

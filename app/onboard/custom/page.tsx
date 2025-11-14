@@ -12,6 +12,7 @@ import { MultiSelectInput } from "../../../components/multi-select-input"
 import { DropdownWithCustom } from "../../../components/dropdown-with-custom"
 import { useAuthStore } from "../../../lib/store/auth.store"
 import { OnboardAgentPreview } from "../../../components/onboard-agent-preview"
+import { GestureWrapper } from "../../../components/gesture-wrapper"
 
 type Step = 1 | 2 | 3 | 4 | 5
 
@@ -343,7 +344,12 @@ export default function CustomOnboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/onboard")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      className="min-h-screen bg-white"
+    >
       {/* Header */}
       <div className="border-b">
         <div className="w-full px-8 md:px-12 lg:px-16 py-4">
@@ -894,6 +900,6 @@ export default function CustomOnboardPage() {
           </div>
         </div>
       </div>
-    </div>
+    </GestureWrapper>
   )
 }

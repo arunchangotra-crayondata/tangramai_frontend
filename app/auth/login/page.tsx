@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useModal } from "../../../hooks/use-modal"
+import { GestureWrapper } from "../../../components/gesture-wrapper"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -16,11 +17,15 @@ export default function LoginPage() {
   }, [openModal, router])
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      threshold={50}
+      className="flex items-center justify-center min-h-screen"
+    >
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-4">Redirecting to Login...</h1>
         <p className="text-gray-600">Please wait while we redirect you to the login page.</p>
       </div>
-    </div>
+    </GestureWrapper>
   )
 }

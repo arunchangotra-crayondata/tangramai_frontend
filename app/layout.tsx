@@ -6,6 +6,8 @@ import { Analytics } from "@vercel/analytics/next"
 import { Navbar } from "../components/navbar"
 import { Footer } from "../components/footer"
 import { ModalProvider } from "../components/modal-provider"
+import { GestureProvider } from "../components/gesture-provider"
+import { GlobalGestureHandler } from "../components/global-gesture-handler"
 import { Suspense } from "react"
 import Image from "next/image"
 import "./globals.css"
@@ -24,12 +26,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Navbar />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-          <ModalProvider />
-        </Suspense>
+        <GestureProvider>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Navbar />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
+            <ModalProvider />
+            <GlobalGestureHandler />
+          </Suspense>
+        </GestureProvider>
         {/* Floating WhatsApp Icon */}
         <a
           href="https://wa.me/"

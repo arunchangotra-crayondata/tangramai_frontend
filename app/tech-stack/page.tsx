@@ -1,12 +1,14 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { DeploymentCard } from "../../components/deployment-card"
 import Image from "next/image"
 import { Search, ChevronDown, Cloud as CloudIcon } from "lucide-react"
 import Head from "next/head"
+import { GestureWrapper } from "../../components/gesture-wrapper"
 
 type Capability = {
   by_capability_id: string
@@ -84,13 +86,20 @@ export default function TechStackPage() {
       .filter(g => g.services.length > 0)
   }, [grouped, providerFilter, capabilityFilter, search])
 
+  const router = useRouter()
+
   return (
     <>
       <Head>
         <title>Deployment Option - Tangram AI</title>
         <meta name="description" content="Choose your preferred platform and deployment model for AI agents" />
       </Head>
-      <div className="flex flex-col min-h-screen">
+      <GestureWrapper
+        onSwipeRight={() => router.push("/")}
+        onSwipeLeft={() => router.push("/agents")}
+        threshold={50}
+        className="flex flex-col min-h-screen"
+      >
       {/* Hero Section */}
       <section className="relative py-16 md:py-20 lg:py-24 min-h-[90vh] flex items-center">
         <div aria-hidden="true" className="absolute inset-0 -z-10">
@@ -257,7 +266,7 @@ export default function TechStackPage() {
           )}
         </div>
       </section>
-    </div>
+    </GestureWrapper>
     </>
   )
 }

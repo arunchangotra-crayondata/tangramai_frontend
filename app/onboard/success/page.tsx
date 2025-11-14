@@ -3,12 +3,18 @@
 import { Button } from "../../../components/ui/button"
 import { Check } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { GestureWrapper } from "../../../components/gesture-wrapper"
 
 export default function OnboardSuccessPage() {
   const router = useRouter()
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      className="flex min-h-screen items-center justify-center bg-white"
+    >
       <div className="w-full px-8 md:px-12 lg:px-16 text-center max-w-2xl mx-auto">
         {/* Success Icon */}
         <div className="mb-8 flex justify-center">
@@ -29,6 +35,6 @@ export default function OnboardSuccessPage() {
           Next
         </Button>
       </div>
-    </div>
+    </GestureWrapper>
   )
 }

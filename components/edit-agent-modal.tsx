@@ -6,7 +6,7 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
 import { Label } from "./ui/label"
-import { ArrowLeft, ArrowRight, Check, ChevronRight, X, Upload, FileText, Image as ImageIcon, Save, Plus } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, ChevronRight, X, Upload, FileText, Image as ImageIcon, Save, Plus, Trash2 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { MultiSelectInput } from "./multi-select-input"
 import { DropdownWithCustom } from "./dropdown-with-custom"
@@ -90,7 +90,7 @@ interface FormData {
   agentType: string
   tags: string[]
   targetPersonas: string[]
-  keyFeatures: string[]
+  keyFeatures: string
   valueProposition: string
   roiInformation: string
   demoLink: string
@@ -125,13 +125,94 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
   const [apiDemoAssets, setApiDemoAssets] = useState<any[]>([])
   const [demoPreview, setDemoPreview] = useState<string>("")
   
+  // Helper function to extract S3 key from URL for comparison
+  const extractUrlKey = (url: string): string => {
+    if (!url || !url.trim()) return ""
+    
+    const trimmed = url.trim()
+    
+    // If it's an S3 URL, extract the key
+    if (trimmed.includes('.s3.') || trimmed.includes('amazonaws.com')) {
+      try {
+        const urlObj = new URL(trimmed)
+        // Remove leading slash from pathname and get the key
+        const key = urlObj.pathname.replace(/^\//, '')
+        // Remove query parameters if any
+        return key.split('?')[0].toLowerCase()
+      } catch {
+        // If URL parsing fails, try regex patterns to extract S3 key
+        // Pattern 1: https://bucket.s3.region.amazonaws.com/key
+        let match = trimmed.match(/s3\.[^/]+\.amazonaws\.com\/(.+?)(?:\?|$)/i)
+        if (match && match[1]) {
+          return match[1].split('?')[0].toLowerCase()
+        }
+        // Pattern 2: https://bucket.s3.amazonaws.com/key
+        match = trimmed.match(/amazonaws\.com\/(.+?)(?:\?|$)/i)
+        if (match && match[1]) {
+          return match[1].split('?')[0].toLowerCase()
+        }
+        // Pattern 3: Any URL with .s3. in it
+        match = trimmed.match(/\.s3\.[^/]+\/(.+?)(?:\?|$)/i)
+        if (match && match[1]) {
+          return match[1].split('?')[0].toLowerCase()
+        }
+        // Fallback: remove protocol and domain, keep path
+        return trimmed.replace(/^https?:\/\/[^/]+/, '').replace(/^\//, '').split('?')[0].toLowerCase()
+      }
+    }
+    
+    // If it's a relative path, remove leading slash
+    if (trimmed.startsWith('/')) {
+      return trimmed.substring(1).split('?')[0].toLowerCase()
+    }
+    
+    // Otherwise, return normalized version (remove trailing slash, query params)
+    return trimmed.split('?')[0].toLowerCase().replace(/\/$/, "")
+  }
+
+  // Deduplicate demoPreview URLs that already exist in apiDemoAssets
+  const deduplicatedDemoPreview = useMemo(() => {
+    if (!demoPreview) return ""
+    
+    // Extract all URL keys from apiDemoAssets for comparison
+    const existingUrlKeys = new Set<string>()
+    apiDemoAssets.forEach(asset => {
+      // Check all possible URL fields in the asset
+      const possibleUrls = [
+        asset?.asset_url,
+        asset?.asset_file_path,
+        asset?.demo_asset_link,
+        asset?.demo_link
+      ].filter((url): url is string => typeof url === "string" && url.trim() !== "")
+      
+      possibleUrls.forEach(url => {
+        const key = extractUrlKey(url)
+        if (key) {
+          existingUrlKeys.add(key)
+        }
+      })
+    })
+    
+    // Filter out URLs from demoPreview that already exist in apiDemoAssets
+    const previewUrls = demoPreview
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .filter(url => {
+        const key = extractUrlKey(url)
+        return key && !existingUrlKeys.has(key)
+      })
+    
+    return previewUrls.join(",")
+  }, [apiDemoAssets, demoPreview])
+  
   const [formData, setFormData] = useState<FormData>({
     agentName: "",
     agentDescription: "",
     agentType: "",
     tags: [],
     targetPersonas: [],
-    keyFeatures: [],
+    keyFeatures: "",
     valueProposition: "",
     roiInformation: "",
     demoLink: "",
@@ -151,7 +232,6 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
   const createDefaultDropdownOptions = () => ({
     tags: [...DEFAULT_TAG_OPTIONS],
     targetPersonas: [...DEFAULT_TARGET_PERSONA_OPTIONS],
-    keyFeatures: [...DEFAULT_KEY_FEATURE_OPTIONS],
     coreCapabilities: [...DEFAULT_CAPABILITY_OPTIONS],
     agentTypes: [...DEFAULT_AGENT_TYPE_OPTIONS],
     valuePropositions: [...DEFAULT_VALUE_PROPOSITION_OPTIONS],
@@ -179,7 +259,7 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
   }
 
   const existingAssetLinks = useMemo(() => {
-    const links: { url: string; label: string }[] = []
+    const links: { url: string; label: string; source: 'api' | 'preview'; assetId?: string; originalUrl?: string }[] = []
 
     apiDemoAssets.forEach((asset, index) => {
       const url =
@@ -192,25 +272,32 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
         links.push({
           url: url.trim(),
           label: asset?.demo_asset_name || `Asset ${index + 1}`,
+          source: 'api',
+          assetId: asset?.demo_asset_id,
+          originalUrl: url.trim(),
         })
       }
     })
 
-    if (demoPreview) {
-      demoPreview
+    // Use deduplicatedDemoPreview to avoid showing URLs that are already in apiDemoAssets
+    if (deduplicatedDemoPreview) {
+      const previewUrls = deduplicatedDemoPreview
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean)
-        .forEach((url, idx) => {
-          links.push({
-            url,
-            label: `Preview ${idx + 1}`,
-          })
+      
+      previewUrls.forEach((url, idx) => {
+        links.push({
+          url,
+          label: `Preview ${idx + 1}`,
+          source: 'preview',
+          originalUrl: url,
         })
+      })
     }
 
     return links
-  }, [apiDemoAssets, demoPreview])
+  }, [apiDemoAssets, deduplicatedDemoPreview])
 
   const fetchDropdownMetadata = async () => {
     try {
@@ -227,7 +314,6 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
 
         const tags: string[] = []
         const personas: string[] = []
-        const features: string[] = []
         const valueProps: string[] = []
         const agentTypes: string[] = []
         const capabilities: string[] = []
@@ -242,9 +328,7 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
           if (item?.by_persona) {
             personas.push(...item.by_persona.split(",").map((p: string) => p.trim()))
           }
-          if (item?.features) {
-            features.push(...item.features.split(/[,;\n]+/).map((f: string) => f.trim()))
-          }
+          // Key Features is now a textarea (paragraph format), no longer processed as dropdown options
           if (item?.by_value) {
             valueProps.push(item.by_value)
           }
@@ -267,7 +351,6 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
 
         mergedOptions.tags = mergeOptions(mergedOptions.tags, tags)
         mergedOptions.targetPersonas = mergeOptions(mergedOptions.targetPersonas, personas)
-        mergedOptions.keyFeatures = mergeOptions(mergedOptions.keyFeatures, features)
         mergedOptions.valuePropositions = mergeOptions(mergedOptions.valuePropositions, valueProps)
         mergedOptions.agentTypes = mergeOptions(mergedOptions.agentTypes, agentTypes)
         mergedOptions.coreCapabilities = mergeOptions(mergedOptions.coreCapabilities, capabilities)
@@ -353,7 +436,8 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
 
         const tags = agentData.tags ? agentData.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []
         const personas = agentData.by_persona ? agentData.by_persona.split(",").map((p: string) => p.trim()).filter(Boolean) : []
-        const features = agentData.features ? agentData.features.split(/[,;\n]+/).map((f: string) => f.trim()).filter(Boolean) : []
+        // Key Features is now a string (paragraph format) - keep the original format from API
+        const keyFeatures = agentData.features || ""
         const capabilities = data.capabilities?.map((c: any) => c.by_capability || "").filter(Boolean) || []
         const valueProp = agentData.by_value ? [agentData.by_value] : []
         const agentType = agentData.asset_type ? [agentData.asset_type] : []
@@ -375,7 +459,7 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
           agentType: agentData.asset_type || "",
           tags,
           targetPersonas: personas,
-          keyFeatures: features,
+          keyFeatures: keyFeatures,
           valueProposition: agentData.by_value || "",
           roiInformation: agentData.roi || "",
           demoLink: agentData.demo_link || "",
@@ -396,7 +480,6 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
           ...prev,
           tags: mergeOptions(prev.tags, tags),
           targetPersonas: mergeOptions(prev.targetPersonas, personas),
-          keyFeatures: mergeOptions(prev.keyFeatures, features),
           coreCapabilities: mergeOptions(prev.coreCapabilities, capabilities),
           agentTypes: mergeOptions(prev.agentTypes, agentType),
           valuePropositions: mergeOptions(prev.valuePropositions, valueProp),
@@ -538,10 +621,47 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
     }
   }
 
+  const handleRemoveDemoAsset = (link: { url: string; label: string; source: 'api' | 'preview'; assetId?: string; originalUrl?: string }) => {
+    if (link.source === 'api') {
+      // Remove from apiDemoAssets by matching URL or asset ID
+      setApiDemoAssets(prev => prev.filter(asset => {
+        const assetUrl = asset?.asset_url || asset?.asset_file_path || asset?.demo_asset_link || asset?.demo_link
+        // Match by asset ID if available, otherwise match by URL
+        if (link.assetId && asset?.demo_asset_id) {
+          return asset.demo_asset_id !== link.assetId
+        }
+        return assetUrl !== link.originalUrl
+      }))
+    } else if (link.source === 'preview') {
+      // Remove from demoPreview by matching URL
+      const previewUrls = demoPreview
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .filter(url => url !== link.originalUrl)
+      
+      setDemoPreview(previewUrls.join(","))
+    }
+    
+    toast({
+      title: "Asset removed",
+      description: "The demo asset has been removed. Click 'Save Changes' to persist the changes.",
+    })
+  }
+
   const handleSave = async () => {
     setIsSaving(true)
     try {
       const formDataObj = new FormData()
+
+      // Collect remaining demo asset URLs from apiDemoAssets (after deletions)
+      const remainingDemoAssetUrls = apiDemoAssets
+        .map(asset => asset?.demo_link || asset?.demo_asset_link || asset?.asset_url || asset?.asset_file_path)
+        .filter((url): url is string => typeof url === 'string' && url.trim() !== '')
+      
+      // Combine remaining assets with new demo links from formData
+      const allDemoAssets = [...remainingDemoAssetUrls, ...formData.demoLinks]
+        .filter((url, index, self) => self.indexOf(url) === index) // Remove duplicates
 
       // Add all text fields
       formDataObj.append('agent_name', formData.agentName || '')
@@ -549,11 +669,12 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
       formDataObj.append('description', formData.agentDescription || '')
       formDataObj.append('by_persona', formData.targetPersonas.join(',') || '')
       formDataObj.append('by_value', formData.valueProposition || '')
-      formDataObj.append('features', formData.keyFeatures.join(',') || '')
+      formDataObj.append('features', formData.keyFeatures || '')
       formDataObj.append('tags', formData.tags.join(',') || '')
       formDataObj.append('roi', formData.roiInformation || '')
       formDataObj.append('demo_link', formData.demoLink || '')
-      formDataObj.append('demo_assets', formData.demoLinks.join(',') || '')
+      formDataObj.append('demo_assets', allDemoAssets.join(',') || '')
+      formDataObj.append('demo_preview', demoPreview || '')
       formDataObj.append('capabilities', formData.coreCapabilities.join(',') || '')
       formDataObj.append('sdk_details', formData.sdkDetails || '')
       formDataObj.append('swagger_details', formData.apiDocumentation || '')
@@ -723,13 +844,18 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                           placeholder="Select target personas"
                         />
 
-                        <MultiSelectInput
-                          label="Key Features"
-                          value={formData.keyFeatures}
-                          onChange={(value) => setFormData({ ...formData, keyFeatures: value })}
-                          options={dropdownOptions.keyFeatures}
-                          placeholder="Select key features"
-                        />
+                        <div className="space-y-2">
+                          <Label htmlFor="keyFeatures" className="text-base font-semibold text-gray-900">
+                            Key Features
+                          </Label>
+                          <Textarea
+                            id="keyFeatures"
+                            placeholder="Describe the key features of your agent in paragraph format..."
+                            value={formData.keyFeatures}
+                            onChange={(e) => setFormData({ ...formData, keyFeatures: e.target.value })}
+                            className="min-h-[140px] text-base border-gray-300 focus:ring-2 focus:ring-black focus:border-black resize-none"
+                          />
+                        </div>
 
                         <DropdownWithCustom
                           label="Value Proposition"
@@ -897,16 +1023,16 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <Label className="text-base font-semibold text-gray-900">Existing Assets Preview</Label>
-                            {(apiDemoAssets.length > 0 || demoPreview) && (
+                            {(apiDemoAssets.length > 0 || deduplicatedDemoPreview) && (
                               <span className="text-xs text-gray-500">
                                 Showing current demo assets from your catalog
                               </span>
                             )}
                           </div>
-                          {apiDemoAssets.length > 0 || demoPreview ? (
+                          {apiDemoAssets.length > 0 || deduplicatedDemoPreview ? (
                             <DemoAssetsViewer
                               assets={apiDemoAssets}
-                              demoPreview={demoPreview}
+                              demoPreview={deduplicatedDemoPreview}
                               className="border border-gray-200 rounded-xl bg-white p-4 shadow-sm"
                             />
                           ) : (
@@ -946,7 +1072,7 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                               <div className="space-y-3">
                                 {existingAssetLinks.map((link, index) => (
                                   <div
-                                    key={`${link.url}-${index}`}
+                                    key={link.assetId ? `asset-${link.assetId}` : `${link.source}-${link.originalUrl || link.url}-${index}`}
                                     className="flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-3 shadow-sm md:flex-row md:items-center md:justify-between md:gap-3"
                                   >
                                     <div className="min-w-0">
@@ -977,6 +1103,15 @@ export function EditAgentModal({ agent, open, onOpenChange, onSave }: EditAgentM
                                         className="inline-flex items-center rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors"
                                       >
                                         Copy
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveDemoAsset(link)}
+                                        className="inline-flex items-center rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors"
+                                        title="Delete this demo asset"
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                        Delete
                                       </button>
                                     </div>
                                   </div>

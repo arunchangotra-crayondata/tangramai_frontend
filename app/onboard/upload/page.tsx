@@ -8,6 +8,7 @@ import { Badge } from "../../../components/ui/badge"
 import { ArrowLeft, ArrowRight, CloudUpload, FileSpreadsheet, RotateCw, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { GestureWrapper } from "../../../components/gesture-wrapper"
 
 type UploadState = "idle" | "uploading" | "success" | "error" | "validation-error"
 
@@ -165,7 +166,12 @@ export default function UploadAgentDataPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/onboard")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      className="min-h-screen bg-white"
+    >
       {/* Header */}
       <div className="border-b">
         <div className="w-full px-8 md:px-12 lg:px-16 py-4">
@@ -343,6 +349,6 @@ export default function UploadAgentDataPage() {
           </div>
         </div>
       )}
-    </div>
+    </GestureWrapper>
   )
 }

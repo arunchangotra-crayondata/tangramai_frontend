@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Button } from "../../components/ui/button"
 import { Card } from "../../components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion"
@@ -7,11 +8,18 @@ import { Input } from "../../components/ui/input"
 import { ArrowRight, Target, Globe, TrendingUp } from "lucide-react"
 import Image from "next/image"
 import { useModal } from "../../hooks/use-modal"
+import { GestureWrapper } from "../../components/gesture-wrapper"
 
 export default function ResellerPage() {
     const { openModal } = useModal()
+    const router = useRouter()
     return (
-        <div className="min-h-screen">
+        <GestureWrapper
+          onSwipeRight={() => router.push("/")}
+          onSwipeLeft={() => router.push("/agents")}
+          threshold={50}
+          className="min-h-screen"
+        >
             {/* Hero Section with Gradient */}
             <section className="relative overflow-hidden bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 min-h-[90vh]">
         {/* Background gradient image - positioned to the left, visible */}
@@ -268,7 +276,7 @@ export default function ResellerPage() {
                     </div>
                 </div>
             </section>
-        </div>
+        </GestureWrapper>
     )
 }
 

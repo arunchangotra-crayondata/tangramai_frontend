@@ -9,6 +9,7 @@ import { useToast } from "../../hooks/use-toast"
 import ChatDialog from "../../components/chat-dialog"
 import { AgentPreviewModal } from "../../components/agent-preview-modal"
 import { EditAgentModal } from "../../components/edit-agent-modal"
+import { GestureWrapper } from "../../components/gesture-wrapper"
 
 type Agent = {
   agent_id: string
@@ -155,7 +156,12 @@ export default function DashboardPage() {
   }, [agents, filter])
 
   return (
-    <div className="w-full px-8 md:px-12 lg:px-16 py-12 md:py-16 lg:py-20">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      className="w-full px-8 md:px-12 lg:px-16 py-12 md:py-16 lg:py-20"
+    >
       {isCheckingAuth ? (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
@@ -332,7 +338,7 @@ export default function DashboardPage() {
           }}
         />
       )}
-    </div>
+    </GestureWrapper>
   )
 }
 

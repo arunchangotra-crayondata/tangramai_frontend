@@ -1,10 +1,20 @@
+"use client"
+
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
 import { Lightbulb, Globe, Zap } from "lucide-react"
+import { GestureWrapper } from "../../components/gesture-wrapper"
+import { useRouter } from "next/navigation"
 
 export default function PartnersPage() {
+  const router = useRouter()
   return (
-    <div className="flex flex-col">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      className="flex flex-col"
+    >
       {/* Hero Section */}
       <section className="gradient-bg py-20">
         <div className="w-full px-8 md:px-12 lg:px-16">
@@ -241,6 +251,6 @@ export default function PartnersPage() {
           </div>
         </div>
       </section>
-    </div>
+    </GestureWrapper>
   )
 }

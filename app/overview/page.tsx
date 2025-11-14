@@ -28,8 +28,12 @@ import {
 import { useEffect, useState, useRef } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import Link from "next/link"
+import { GestureWrapper } from "../../components/gesture-wrapper"
+import { useRouter } from "next/navigation"
 
 export default function OverviewPage() {
+  const router = useRouter()
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -52,7 +56,13 @@ export default function OverviewPage() {
   }, [])
 
   return (
-    <main className="min-h-screen">
+    <GestureWrapper
+      onSwipeRight={() => router.push("/")}
+      onSwipeLeft={() => router.push("/agents")}
+      threshold={50}
+      as="main"
+      className="min-h-screen"
+    >
       <HeroSection />
       <MarketNeedSection />
       <PropositionSection />
@@ -60,7 +70,7 @@ export default function OverviewPage() {
       <OutcomesSection />
       <StrategySection />
       <CTASection />
-    </main>
+    </GestureWrapper>
   )
 }
 

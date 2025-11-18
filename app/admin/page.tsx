@@ -6,7 +6,7 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Badge } from "../../components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu"
-import { Search, SlidersHorizontal, MoreVertical, Eye, Edit, CheckCircle, XCircle, Trash2, ExternalLink, MessageSquare, Users, User, Mail, Building2, Phone, Calendar, UserCircle, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, SlidersHorizontal, MoreVertical, Eye, Edit, CheckCircle, XCircle, Trash2, ExternalLink, MessageSquare, Users, User, Mail, Building2, Phone, Calendar, UserCircle, ChevronDown, ChevronUp, ArrowUpDown, MessageCircle } from "lucide-react"
 import { AgentPreviewModal } from "../../components/agent-preview-modal"
 import { EditAgentModal } from "../../components/edit-agent-modal"
 import { RejectAgentModal } from "../../components/reject-agent-modal"
@@ -45,7 +45,7 @@ export default function AdminPage() {
 
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"all" | "approved" | "pending">("all")
+  const [statusFilter, setStatusFilter] = useState<"all" | "approved" | "pending" | "reject">("all")
   const [assetTypeFilter, setAssetTypeFilter] = useState<string>("all")
 
   // Authentication and Role Check
@@ -231,9 +231,15 @@ export default function AdminPage() {
 
     // Status filter
     if (statusFilter !== "all") {
-      filtered = filtered.filter(agent =>
-        statusFilter === "approved" ? agent.admin_approved === "yes" : agent.admin_approved === "no"
-      )
+      filtered = filtered.filter(agent => {
+        if (statusFilter === "approved") {
+          return agent.admin_approved === "yes"
+        } else if (statusFilter === "pending") {
+          return !agent.admin_approved || agent.admin_approved === "" || agent.admin_approved === null
+        } else {
+          return agent.admin_approved === "no"
+        }
+      })
     }
 
     // Asset type filter
@@ -316,7 +322,7 @@ export default function AdminPage() {
     return filtered
   }
 
-  // Format date to readable format
+  // Format date to readable format matching screenshot
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { 
@@ -325,6 +331,19 @@ export default function AdminPage() {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
+    })
+  }
+
+  // Format date exactly as shown in screenshot: "Oct 28, 2025, 10:26 PM"
+  const formatEnquiryDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
     })
   }
 
@@ -482,19 +501,25 @@ export default function AdminPage() {
     return types
   }
 
-  const getStatusBadge = (approved: "yes" | "no") => {
+  const getStatusBadge = (approved: "yes" | "no" | "pending") => {
     if (approved === "yes") {
       return (
-        <Badge className="bg-green-100 text-green-800 border-green-200">
-          <CheckCircle className="h-3 w-3 mr-1" />
+        <Badge className="bg-green-100 text-green-700 border-green-200 rounded-full px-3 py-1 text-xs font-medium">
           Approved
         </Badge>
       )
     }
     return (
-      <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
-        <XCircle className="h-3 w-3 mr-1" />
+      <Badge className="bg-orange-100 text-orange-700 border-orange-200 rounded-full px-3 py-1 text-xs font-medium">
         Pending
+      </Badge>
+    )
+  }
+
+  const getRejectBadge = () => {
+    return (
+      <Badge className="bg-red-100 text-red-700 border-red-200 rounded-full px-3 py-1 text-xs font-medium">
+        Reject
       </Badge>
     )
   }
@@ -520,132 +545,114 @@ export default function AdminPage() {
           <p className="text-gray-600 mt-2">Manage agents, ISVs, and resellers</p>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs and Search/Filters Row */}
         <div className="mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              {[
-                { id: "agents", label: "Agents", icon: MessageSquare },
-                { id: "isvs", label: "ISVs", icon: Users },
-                { id: "resellers", label: "Resellers", icon: User },
-                { id: "enquiries", label: "Enquiries", icon: Mail },
-              ].map((tab) => {
-                const Icon = tab.icon
-                return (
+          <div className="flex items-center justify-between border-b border-gray-200 pb-2">
+            {/* Tabs */}
+            <div className="flex-1">
+              <nav className="flex space-x-8">
+                {[
+                  { id: "agents", label: "Agents" },
+                  { id: "isvs", label: "ISVs" },
+                  { id: "resellers", label: "Reseller" },
+                  { id: "enquiries", label: "Enquiry" },
+                ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as TabType)}
-                    className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                    className={`py-2 px-1 font-medium text-sm border-b-2 transition-colors ${
                       activeTab === tab.id
                         ? "border-black text-black"
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
                     {tab.label}
                   </button>
-                )
-              })}
-            </nav>
-          </div>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder={`Search ${activeTab}...`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+                ))}
+              </nav>
             </div>
-          </div>
-          
-          <div className="flex gap-2">
-            {/* Status Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Status: {statusFilter === "all" ? "All" : statusFilter === "approved" ? "Approved" : "Pending"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => setStatusFilter("all")}>All</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("approved")}>Approved</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("pending")}>Pending</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
-            {/* Asset Type Filter (only for agents) */}
-            {activeTab === "agents" && (
+            {/* Search and Filters */}
+            <div className="flex items-center gap-3">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search by name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-64"
+                />
+              </div>
+
+              {/* Status Filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2">
-                    Asset Type: {assetTypeFilter === "all" ? "All" : assetTypeFilter}
+                    Status: {statusFilter === "all" ? "All" : statusFilter === "approved" ? "Approved" : statusFilter === "pending" ? "Pending" : "Reject"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setAssetTypeFilter("all")}>All</DropdownMenuItem>
-                  {getAssetTypes().map((type) => (
-                    <DropdownMenuItem key={type} onClick={() => setAssetTypeFilter(type)}>
-                      {type}
-                    </DropdownMenuItem>
-                  ))}
+                  <DropdownMenuItem onClick={() => setStatusFilter("all")}>All</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter("approved")}>Approved</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter("pending")}>Pending</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter("reject")}>Reject</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
 
-            {/* Enquiry Status Filter (only for enquiries) */}
-            {activeTab === "enquiries" && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    Status: {enquiryStatusFilter === "all" ? "All" : enquiryStatusFilter === "new" ? "New" : "Read"}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setEnquiryStatusFilter("all")}>All</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setEnquiryStatusFilter("new")}>New</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setEnquiryStatusFilter("read")}>Read</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+              {/* Asset Type Filter (only for agents) */}
+              {activeTab === "agents" && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      Asset Type: {assetTypeFilter === "all" ? "All" : assetTypeFilter}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setAssetTypeFilter("all")}>All</DropdownMenuItem>
+                    {getAssetTypes().map((type) => (
+                      <DropdownMenuItem key={type} onClick={() => setAssetTypeFilter(type)}>
+                        {type}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
 
-            {/* Enquiry User Type Filter (only for enquiries) */}
-            {activeTab === "enquiries" && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    User Type: {enquiryUserTypeFilter === "all" ? "All" : enquiryUserTypeFilter}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("all")}>All</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("client")}>Client</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("isv")}>ISV</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("reseller")}>Reseller</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("anonymous")}>Anonymous</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+              {/* Enquiry Status Filter (only for enquiries) */}
+              {activeTab === "enquiries" && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      Status: {enquiryStatusFilter === "all" ? "All" : enquiryStatusFilter === "new" ? "New" : "Read"}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setEnquiryStatusFilter("all")}>All</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEnquiryStatusFilter("new")}>New</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEnquiryStatusFilter("read")}>Read</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
 
-            {/* Clear Filters */}
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchTerm("")
-                setStatusFilter("all")
-                setAssetTypeFilter("all")
-                setEnquiryStatusFilter("all")
-                setEnquiryUserTypeFilter("all")
-              }}
-            >
-              Clear Filters
-            </Button>
+              {/* Enquiry User Type Filter (only for enquiries) */}
+              {activeTab === "enquiries" && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      User Type: {enquiryUserTypeFilter === "all" ? "All" : enquiryUserTypeFilter}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("all")}>All</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("client")}>Client</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("isv")}>ISV</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("reseller")}>Reseller</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEnquiryUserTypeFilter("anonymous")}>Anonymous</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
         </div>
 
@@ -674,35 +681,36 @@ export default function AdminPage() {
             {/* Agents Table */}
             {activeTab === "agents" && (
               <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold">Agents ({getFilteredAgents().length})</h2>
-                </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full border-collapse border border-gray-300">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Type</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ISV ID</th>
-                        
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">S. No</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">Agent Name</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">Asset Type</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">ISV ID</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">Status</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {getFilteredAgents().map((agent) => (
+                    <tbody className="bg-white">
+                      {getFilteredAgents().map((agent, index) => (
                         <tr key={agent.agent_id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border border-gray-300">{String(index + 1).padStart(5, '0')}</td>
+                          <td className="px-6 py-4 whitespace-nowrap border border-gray-300">
                             <div className="text-sm font-medium text-gray-900">{agent.agent_name}</div>
-                            <div className="text-sm text-gray-500">ID: {agent.agent_id}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{agent.asset_type}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{agent.isv_id}</td>
-                          
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {getStatusBadge(agent.admin_approved)}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border border-gray-300">{agent.asset_type}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border border-gray-300">{agent.isv_id}</td>
+                          <td className="px-6 py-4 whitespace-nowrap border border-gray-300">
+                            {agent.admin_approved === "yes" 
+                              ? getStatusBadge("yes")
+                              : agent.admin_approved === "no"
+                                ? getRejectBadge()
+                                : getStatusBadge("pending")
+                            }
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium border border-gray-300">
                             <div className="flex items-center gap-2">
                               <Button 
                                 variant="outline" 
@@ -710,6 +718,7 @@ export default function AdminPage() {
                                 onClick={() => {
                                   router.push(`/agents/${agent.agent_id}`)
                                 }}
+                                className="h-8"
                               >
                                 View
                               </Button>
@@ -720,30 +729,67 @@ export default function AdminPage() {
                                   setSelectedAgent(agent)
                                   setEditAgentModalOpen(true)
                                 }}
+                                className="h-8"
                               >
                                 Edit
                               </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleApproveAgent(agent)}
-                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                              >
-                                <CheckCircle className="mr-1 h-3 w-3" />
-                                Approve
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedAgent(agent)
-                                  setRejectAgentModalOpen(true)
-                                }}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <XCircle className="mr-1 h-3 w-3" />
-                                Reject
-                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-40">
+                                  <DropdownMenuItem 
+                                    onClick={() => {
+                                      router.push(`/agents/${agent.agent_id}`)
+                                    }}
+                                    className="cursor-pointer"
+                                  >
+                                    View
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleApproveAgent(agent)}
+                                    className="cursor-pointer hover:bg-gray-100"
+                                  >
+                                    Approve
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => {
+                                      setSelectedAgent(agent)
+                                      setRejectAgentModalOpen(true)
+                                    }}
+                                    className="cursor-pointer hover:bg-gray-100"
+                                  >
+                                    Reject
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={async () => {
+                                      if (confirm(`Are you sure you want to delete ${agent.agent_name}?`)) {
+                                        try {
+                                          // Add delete API call here if available
+                                          await fetch(`https://agents-store.onrender.com/api/admin/agents/${agent.agent_id}`, {
+                                            method: 'DELETE',
+                                            credentials: 'include'
+                                          })
+                                          await fetchAgents()
+                                          toast({
+                                            description: `${agent.agent_name} has been deleted.`,
+                                          })
+                                        } catch (err: any) {
+                                          toast({
+                                            description: err.message || "Failed to delete agent",
+                                            variant: "destructive",
+                                          })
+                                        }
+                                      }
+                                    }}
+                                    className="cursor-pointer hover:bg-gray-100"
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </td>
                         </tr>
@@ -957,117 +1003,163 @@ export default function AdminPage() {
             {/* Enquiries Table */}
             {activeTab === "enquiries" && (
               <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold">Contact Enquiries ({getFilteredEnquiries().length})</h2>
-                </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full border-collapse border border-gray-300">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Type</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">
+                          <div className="flex items-center gap-1">
+                            S. No
+                            <ArrowUpDown className="h-3 w-3 text-gray-400" />
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">
+                          <div className="flex items-center gap-1">
+                            Name
+                            <ArrowUpDown className="h-3 w-3 text-gray-400" />
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">
+                          <div className="flex items-center gap-1">
+                            Company
+                            <ArrowUpDown className="h-3 w-3 text-gray-400" />
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">
+                          <div className="flex items-center gap-1">
+                            Email
+                            <ArrowUpDown className="h-3 w-3 text-gray-400" />
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">
+                          <div className="flex items-center gap-1">
+                            Phone
+                            <ArrowUpDown className="h-3 w-3 text-gray-400" />
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">
+                          <div className="flex items-center gap-1">
+                            User Type
+                            <ArrowUpDown className="h-3 w-3 text-gray-400" />
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">
+                          <div className="flex items-center gap-1">
+                            Date
+                            <ArrowUpDown className="h-3 w-3 text-gray-400" />
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">
+                          <div className="flex items-center gap-1">
+                            Status
+                            <ArrowUpDown className="h-3 w-3 text-gray-400" />
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {getFilteredEnquiries().map((enquiry) => {
-                        const isExpanded = expandedEnquiries.has(enquiry.enquiry_id)
-                        return (
-                          <>
-                            <tr 
-                              key={enquiry.enquiry_id} 
-                              className={`hover:bg-gray-50 cursor-pointer transition-colors ${enquiry.status === 'new' ? 'bg-blue-50/30' : ''}`}
-                              onClick={() => toggleEnquiryExpansion(enquiry.enquiry_id)}
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center gap-2">
-                                  {isExpanded ? (
-                                    <ChevronUp className="h-4 w-4 text-gray-400" />
-                                  ) : (
-                                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                                  )}
-                                  <Mail className="h-4 w-4 text-blue-600" />
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {enquiry.full_name || 'Unknown'}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center gap-1">
-                                  {enquiry.company_name ? (
-                                    <>
-                                      <Building2 className="h-3 w-3 text-gray-400" />
-                                      <span className="text-sm text-gray-900">{enquiry.company_name}</span>
-                                    </>
-                                  ) : (
-                                    <span className="text-sm text-gray-400">-</span>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900 truncate max-w-[200px]">
-                                  {enquiry.email || '-'}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">
-                                  {enquiry.phone || '-'}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {enquiry.user_type && enquiry.user_type !== 'anonymous' ? (
-                                  <Badge variant="outline" className="text-xs">
-                                    {enquiry.user_type.toUpperCase()}
-                                  </Badge>
-                                ) : (
-                                  <span className="text-sm text-gray-400">Anonymous</span>
-                                )}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {enquiry.status === 'new' ? (
-                                  <Badge variant="default" className="bg-blue-600 text-white text-xs">
-                                    New
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="outline" className="text-xs">
-                                    Read
-                                  </Badge>
-                                )}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center gap-1 text-sm text-gray-500">
-                                  <Calendar className="h-3 w-3" />
-                                  <span>{getRelativeTime(enquiry.created_at)}</span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="text-sm text-gray-700 line-clamp-2 max-w-[300px]">
-                                  {enquiry.message || 'No message provided'}
-                                </div>
-                              </td>
-                            </tr>
-                            {isExpanded && (
-                              <tr className="bg-gray-50">
-                                <td colSpan={8} className="px-6 py-4">
-                                  <div>
-                                    <h4 className="text-xs font-semibold text-gray-500 uppercase mb-3">Message</h4>
-                                    <div className="bg-white border rounded-lg p-4 md:p-6">
-                                      <p className="text-sm md:text-base text-gray-700 whitespace-pre-wrap leading-relaxed">
-                                        {enquiry.message || 'No message provided'}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
+                    <tbody className="bg-white">
+                      {getFilteredEnquiries().map((enquiry, index) => (
+                        <tr key={enquiry.enquiry_id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                            {String(index + 1).padStart(5, '0')}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap border border-gray-300">
+                            <div className="text-sm font-medium text-gray-900">
+                              {enquiry.full_name || 'Unknown'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                            {enquiry.company_name || '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                            {enquiry.email || '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                            {enquiry.phone || '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                            {enquiry.user_type && enquiry.user_type !== 'anonymous' 
+                              ? enquiry.user_type.charAt(0).toUpperCase() + enquiry.user_type.slice(1)
+                              : 'Ananomous'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+                            {enquiry.created_at ? formatEnquiryDate(enquiry.created_at) : '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap border border-gray-300">
+                            {enquiry.status === 'new' ? (
+                              <Badge className="bg-amber-100 text-orange-700 border-amber-200 rounded-md px-2.5 py-1 text-xs font-medium">
+                                New
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-gray-100 text-gray-700 border-gray-200 rounded-md px-2.5 py-1 text-xs font-medium">
+                                Read
+                              </Badge>
                             )}
-                          </>
-                        )
-                      })}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium border border-gray-300">
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                title="View message"
+                              >
+                                <MessageCircle className="h-4 w-4 text-gray-600" />
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-40">
+                                  <DropdownMenuItem 
+                                    onClick={() => {
+                                      // Handle view action
+                                    }}
+                                    className="cursor-pointer"
+                                  >
+                                    View
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => {
+                                      // Handle mark as read action
+                                    }}
+                                    className="cursor-pointer hover:bg-gray-100"
+                                  >
+                                    Mark as Read
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={async () => {
+                                      if (confirm(`Are you sure you want to delete this enquiry?`)) {
+                                        try {
+                                          await fetch(`https://agents-store.onrender.com/api/enquiries/${enquiry.enquiry_id}`, {
+                                            method: 'DELETE',
+                                            credentials: 'include'
+                                          })
+                                          await fetchEnquiries()
+                                          toast({
+                                            description: 'Enquiry has been deleted.',
+                                          })
+                                        } catch (err: any) {
+                                          toast({
+                                            description: err.message || "Failed to delete enquiry",
+                                            variant: "destructive",
+                                          })
+                                        }
+                                      }
+                                    }}
+                                    className="cursor-pointer hover:bg-gray-100 text-red-600"
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                   {getFilteredEnquiries().length === 0 && (

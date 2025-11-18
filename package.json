@@ -12,6 +12,7 @@
     "build": "next build",
     "build:render": "npm ci --legacy-peer-deps && npm rebuild lightningcss --build-from-source && npm run build",
     "dev": "next dev",
+    "dev:clean": "powershell -Command \"Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; next dev\"",
     "lint": "eslint .",
     "start": "next start",
     "check-versions": "npm list lightningcss || true"

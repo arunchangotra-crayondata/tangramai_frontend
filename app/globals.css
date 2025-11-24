@@ -201,3 +201,65 @@
   animation: scroll-vertical 20s linear infinite;
   will-change: transform;
 }
+
+/* Horizontal marquee for tags (left to right scrolling) */
+@keyframes scroll-tags {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+@keyframes scroll-tags-reverse {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-scroll-tags {
+  animation: scroll-tags 40s linear infinite;
+  will-change: transform;
+  display: flex;
+}
+.animate-scroll-tags-reverse {
+  animation: scroll-tags-reverse 40s linear infinite;
+  will-change: transform;
+  display: flex;
+}
+
+/* Fade-in scroll animation */
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-section.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Blink animation for typing cursor */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Staggered card animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-animate-1 {
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.card-animate-2 {
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.card-animate-3 {
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+}

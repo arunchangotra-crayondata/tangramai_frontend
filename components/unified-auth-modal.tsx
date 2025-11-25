@@ -268,8 +268,15 @@ export function UnifiedAuthModal({
     </div>
   )
 
+  if (!isOpen) return null
+
   return (
     <>
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/40"
+      onClick={onClose}
+    >
+      <div className="min-h-full flex flex-col items-center justify-center py-8">
     <ModalWrapper isOpen={isOpen} onClose={onClose}>
       <div className="space-y-6">
         {/* Header */}
@@ -490,33 +497,25 @@ export function UnifiedAuthModal({
         >
           {isLoading ? "Loading..." : authMode === "login" ? "Continue" : "Create Account"}
         </button>
-
-        {authMode === "signup" && (
-          <div className="text-center text-sm" style={{ fontFamily: "Poppins, sans-serif", color: "#111827" }}>
-            Already onboard?{" "}
-            <button onClick={toggleMode} className="font-medium underline-offset-4 hover:underline">
-              Sign in
-            </button>
-          </div>
-        )}
       </div>
     </ModalWrapper>
 
     {/* New section below main login window - separate element */}
     {isOpen && authMode === "login" && (
       <div 
-        className="fixed z-50 flex items-center justify-center"
+        className="flex items-center justify-center mt-[10px]"
         style={{
-          top: "calc(40% + 290px)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          marginTop: "10px",
+          width: "560px",
+          maxWidth: "560px",
+          minWidth: "540px",
+          padding: "0 20px",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         <div 
           className="relative overflow-hidden"
           style={{
-            width: "518px",
+            width: "540px",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "repeat",
@@ -527,6 +526,7 @@ export function UnifiedAuthModal({
             style={{
               width: "100%",
               height: "62px",
+              minHeight: "62px",
               border: "1px solid #E5E7EB",
               padding: "0 32px",
             }}
@@ -587,6 +587,99 @@ export function UnifiedAuthModal({
         </div>
       </div>
     )}
+
+    {/* New section below main signup window - separate element */}
+    {isOpen && authMode === "signup" && (
+      <div 
+        className="flex items-center justify-center mt-[-10px]"
+        style={{
+          width: "580px",
+          maxWidth: "580px",
+          minWidth: "540px",
+          padding: "0 20px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div 
+          className="relative overflow-hidden"
+          style={{
+            width: "600px",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "repeat",
+            padding: "10px",
+          }}
+        >
+          <div 
+            className="relative bg-white flex items-center"
+            style={{
+              width: "100%",
+              height: "62px",
+              minHeight: "62px",
+              border: "1px solid #E5E7EB",
+              padding: "0 32px",
+            }}
+          >
+            <div className="flex items-center justify-between w-full" style={{ gap: "8px" }}>
+              <p style={{
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 500,
+                fontStyle: "normal",
+                fontSize: "16px",
+                lineHeight: "150%",
+                letterSpacing: "-0.4px",
+                verticalAlign: "middle",
+                color: "#111827",
+                whiteSpace: "nowrap",
+              }}>
+                Already onboard{" "}
+                <span style={{
+                  fontFamily: "Poppins, sans-serif",
+                  fontWeight: 500,
+                  fontStyle: "normal",
+                  fontSize: "16px",
+                  lineHeight: "150%",
+                  letterSpacing: "-0.4px",
+                  verticalAlign: "middle",
+                  color: "#65717C",
+                }}>
+                  and have an existing account?
+                </span>
+              </p>
+              <button 
+                onClick={toggleMode} 
+                className="uppercase transition-colors hover:bg-gray-200"
+                style={{
+                  width: "92px",
+                  height: "37px",
+                  maxWidth: "363.41px",
+                  borderRadius: "8px",
+                  border: "1px solid #E5E7EB",
+                  padding: "12px 16px",
+                  backgroundColor: "#FAFAFA",
+                  fontFamily: "Poppins, sans-serif",
+                  fontWeight: 500,
+                  fontStyle: "normal",
+                  fontSize: "14px",
+                  lineHeight: "100%",
+                  letterSpacing: "0.5px",
+                  textAlign: "center",
+                  verticalAlign: "middle",
+                  textTransform: "uppercase",
+                  color: "#181818",
+                  whiteSpace: "nowrap",
+                  cursor: "pointer",
+                }}
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+      </div>
+    </div>
     </>
   )
 }

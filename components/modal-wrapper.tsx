@@ -16,7 +16,8 @@ interface ModalWrapperProps {
 export function ModalWrapper({ isOpen, onClose, children }: ModalWrapperProps) {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"
+      // Allow scrolling when modal is open so users can access content below
+      document.body.style.overflow = "auto"
 
       const handleEscape = (e: KeyboardEvent) => {
         if (e.key === "Escape") onClose()
@@ -33,12 +34,15 @@ export function ModalWrapper({ isOpen, onClose, children }: ModalWrapperProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
       {/* Outer container with pattern background - extends 10px beyond inner content */}
       <div
-        className="relative w-full max-w-[540px] max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        className="relative max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
         style={{
+          width: "540px",
+          maxWidth: "540px",
+          minWidth: "540px",
           padding: "10px",
           backgroundImage: "url('/Pattern_login_back.png')",
           backgroundSize: "cover",

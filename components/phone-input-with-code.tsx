@@ -41,7 +41,17 @@ export function PhoneInputWithCode({
 
   return (
     <div>
-      <label className="text-sm font-medium text-gray-900">
+      <label 
+        style={{
+          fontFamily: "Poppins, sans-serif",
+          fontWeight: 400,
+          fontStyle: "normal",
+          fontSize: "14px",
+          lineHeight: "24px",
+          letterSpacing: "0%",
+          color: "#555555",
+        }}
+      >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -51,7 +61,16 @@ export function PhoneInputWithCode({
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 px-3 py-2 h-11 border border-gray-300 border-r-0 rounded-l-lg bg-gray-50 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="flex items-center gap-2 px-3 py-2 h-11 border border-gray-300 border-r-0 rounded-l-lg bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            style={{
+              fontFamily: "Poppins, sans-serif",
+              fontWeight: 400,
+              fontStyle: "normal",
+              fontSize: "14px",
+              lineHeight: "24px",
+              letterSpacing: "0%",
+              color: "#555555",
+            }}
           >
             <span className="text-lg">{selectedCountry.flag}</span>
             <span>{selectedCountry.code}</span>

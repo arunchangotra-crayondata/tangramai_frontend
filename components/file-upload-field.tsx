@@ -105,7 +105,17 @@ export function FileUploadField({
 
   return (
     <div>
-      <label className="text-sm font-medium text-gray-900">
+      <label 
+        style={{
+          fontFamily: "Poppins, sans-serif",
+          fontWeight: 400,
+          fontStyle: "normal",
+          fontSize: "14px",
+          lineHeight: "24px",
+          letterSpacing: "0%",
+          color: "#555555",
+        }}
+      >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>

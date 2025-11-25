@@ -493,10 +493,6 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                  {/* Connecting line to next card */}
-                  <div className="hidden lg:block absolute top-1/2 left-full h-0.5 z-0" style={{ backgroundColor: "#7C3AED", transform: "translateY(-50%)", width: "calc(100% + 1.5rem)", left: "100%" }}>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ backgroundColor: "#7C3AED" }}></div>
-                  </div>
                 </div>
 
                 {/* Card 2: Try an agent */}
@@ -558,11 +554,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                  {/* Connecting line to next card */}
-                  <div className="hidden lg:block absolute top-1/2 left-full h-0.5 z-0" style={{ backgroundColor: "#D97706", transform: "translateY(-50%)", width: "calc(100% + 1.5rem)", left: "100%" }}>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ backgroundColor: "#D97706" }}></div>
-                    </div>
-                  </div>
+                </div>
 
                 {/* Card 3: Pick your stack */}
                 <div className="relative z-10">
@@ -620,11 +612,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                  {/* Connecting line to next card */}
-                  <div className="hidden lg:block absolute top-1/2 left-full h-0.5 z-0" style={{ backgroundColor: "#EC4899", transform: "translateY(-50%)", width: "calc(100% + 1.5rem)", left: "100%" }}>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ backgroundColor: "#EC4899" }}></div>
-                    </div>
-                  </div>
+                </div>
 
                 {/* Card 4: Launch your trial */}
                 <div className="relative z-10">

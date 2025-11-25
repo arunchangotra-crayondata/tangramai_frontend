@@ -18,7 +18,19 @@ export function InputField({ label, placeholder, type = "text", value, onChange,
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium text-gray-900">{label}</Label>
+        <Label 
+          style={{
+            fontFamily: "Poppins, sans-serif",
+            fontWeight: 400,
+            fontStyle: "normal",
+            fontSize: "14px",
+            lineHeight: "24px",
+            letterSpacing: "0%",
+            color: "#555555",
+          }}
+        >
+          {label}
+        </Label>
         {rightElement}
       </div>
       <Input
@@ -26,7 +38,22 @@ export function InputField({ label, placeholder, type = "text", value, onChange,
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
-        className="h-11 rounded-lg border-gray-200 text-sm focus-visible:ring-2 focus-visible:ring-gray-900/10"
+        className="w-full focus-visible:ring-1 focus-visible:ring-gray-400 focus-visible:border-gray-400 placeholder:italic placeholder:text-gray-400"
+        style={{
+          width: "100%",
+          maxWidth: "504px",
+          height: "42px",
+          borderRadius: "4px",
+          border: "1px solid #E5E7EB",
+          backgroundColor: "#FFFFFF",
+          fontFamily: "Poppins, sans-serif",
+          fontWeight: 400,
+          fontStyle: "normal",
+          fontSize: "14px",
+          lineHeight: "28px",
+          letterSpacing: "0%",
+          color: "#B3B3B3",
+        }}
       />
     </div>
   )

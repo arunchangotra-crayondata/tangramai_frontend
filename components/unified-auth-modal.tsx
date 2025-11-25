@@ -203,9 +203,33 @@ export function UnifiedAuthModal({
   }) => (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-900">{label}</label>
+        <label 
+          style={{
+            fontFamily: "Poppins, sans-serif",
+            fontWeight: 400,
+            fontStyle: "normal",
+            fontSize: "14px",
+            lineHeight: "24px",
+            letterSpacing: "0%",
+            color: "#555555",
+          }}
+        >
+          {label}
+        </label>
         {withForgotLink && (
-          <button type="button" className="text-sm font-medium text-blue-600 hover:underline">
+          <button 
+            type="button" 
+            className="hover:underline"
+            style={{
+              fontFamily: "Poppins, sans-serif",
+              fontWeight: 400,
+              fontStyle: "normal",
+              fontSize: "12px",
+              lineHeight: "24px",
+              letterSpacing: "0%",
+              color: "#555555",
+            }}
+          >
             Forgot password?
           </button>
         )}
@@ -213,10 +237,25 @@ export function UnifiedAuthModal({
       <div className="relative">
         <input
           type={showPassword ? "text" : "password"}
-          placeholder="Enter your password"
+          placeholder="Set your secret key"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="h-11 w-full rounded-lg border border-gray-200 px-4 pr-12 text-sm outline-none transition-colors focus:border-black focus:ring-2 focus:ring-black/10"
+          className="w-full px-4 pr-12 outline-none transition-colors focus:border-gray-400 focus:ring-1 focus:ring-gray-400 placeholder:italic placeholder:text-gray-400"
+          style={{
+            width: "100%",
+            maxWidth: "504px",
+            height: "42px",
+            borderRadius: "4px",
+            border: "1px solid #E5E7EB",
+            backgroundColor: "#FFFFFF",
+            fontFamily: "Poppins, sans-serif",
+            fontWeight: 400,
+            fontStyle: "normal",
+            fontSize: "14px",
+            lineHeight: "28px",
+            letterSpacing: "0%",
+            color: "#B3B3B3",
+          }}
         />
         <button
           type="button"
@@ -230,47 +269,52 @@ export function UnifiedAuthModal({
   )
 
   return (
+    <>
     <ModalWrapper isOpen={isOpen} onClose={onClose}>
-      <div className="space-y-8">
+      <div className="space-y-6">
+        {/* Header */}
         <div className="space-y-2 text-center">
-          <h2 className="text-2xl font-semibold text-gray-900">
+          <h2 
+            className="font-bold"
+            style={{
+              fontFamily: "Poppins, sans-serif",
+              fontWeight: 600,
+              fontStyle: "normal",
+              fontSize: "24px",
+              lineHeight: "100%",
+              letterSpacing: "0px",
+              textAlign: "center",
+              verticalAlign: "middle",
+              background: "linear-gradient(90deg, #2F0368 0%, #5E04D2 100%)",
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              color: "transparent",
+            }}
+          >
             {authMode === "login" ? "Welcome back" : "Create your account"}
           </h2>
-          <p className="text-sm text-gray-500">
+          <p 
+            style={{
+              fontFamily: "Poppins, sans-serif",
+              fontWeight: 400,
+              fontStyle: "normal",
+              fontSize: "14px",
+              lineHeight: "150%",
+              letterSpacing: "-0.4px",
+              textAlign: "center",
+              verticalAlign: "middle",
+              color: "#65717C",
+            }}
+          >
             {authMode === "login"
               ? "Access Tangram AI with your credentials."
               : "Choose your profile type and share the essentials to get started."}
           </p>
         </div>
 
+        {/* User Type Selection */}
         <AuthTabs activeTab={authRole} onTabChange={setAuthRole} />
-
-        <div className="rounded-xl border border-gray-100 bg-gray-50 p-1">
-          <div className="grid grid-cols-2 gap-1">
-            <button
-              type="button"
-              onClick={() => setAuthMode("login")}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                authMode === "login"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:bg-white/60"
-              }`}
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              onClick={() => setAuthMode("signup")}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                authMode === "signup"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:bg-white/60"
-              }`}
-            >
-              Sign Up
-            </button>
-          </div>
-        </div>
 
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -279,13 +323,43 @@ export function UnifiedAuthModal({
         )}
 
         <div className="space-y-6">
-          <InputField
-            label="Email"
-            placeholder="you@example.com"
-            type="email"
-            value={email}
-            onChange={setEmail}
-          />
+          <div className="space-y-2">
+            <label 
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 400,
+                fontStyle: "normal",
+                fontSize: "14px",
+                lineHeight: "24px",
+                letterSpacing: "0%",
+                color: "#555555",
+              }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="you@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 outline-none transition-colors focus:border-gray-400 focus:ring-1 focus:ring-gray-400 placeholder:italic placeholder:text-gray-400"
+              style={{
+                width: "100%",
+                maxWidth: "504px",
+                height: "42px",
+                borderRadius: "4px",
+                border: "1px solid #E5E7EB",
+                backgroundColor: "#FFFFFF",
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 400,
+                fontStyle: "normal",
+                fontSize: "14px",
+                lineHeight: "28px",
+                letterSpacing: "0%",
+                color: "#B3B3B3",
+              }}
+            />
+          </div>
 
           {(authMode === "login" || authRole === "reseller" || authRole === "isv") && (
             <PasswordField withForgotLink={authMode === "login"} />
@@ -391,21 +465,128 @@ export function UnifiedAuthModal({
           )}
         </div>
 
-        <PrimaryButton
-          state={isLoading ? "loading" : "default"}
+        <button
+          type="button"
           onClick={handleSubmit}
           disabled={!isFormValid() || isLoading}
+          className="w-full uppercase transition-colors disabled:bg-gray-200 disabled:text-gray-400"
+          style={{
+            width: "100%",
+            maxWidth: "504px",
+            height: "38px",
+            borderRadius: "4px",
+            backgroundColor: isLoading || !isFormValid() ? "#E5E7EB" : "#181818",
+            fontFamily: "Poppins, sans-serif",
+            fontWeight: 500,
+            fontStyle: "normal",
+            fontSize: "14px",
+            lineHeight: "100%",
+            letterSpacing: "0.5px",
+            textAlign: "center",
+            verticalAlign: "middle",
+            textTransform: "uppercase",
+            color: isLoading || !isFormValid() ? "#9CA3AF" : "#FFFFFF",
+          }}
         >
-          {authMode === "login" ? "Continue" : "Create Account"}
-        </PrimaryButton>
+          {isLoading ? "Loading..." : authMode === "login" ? "Continue" : "Create Account"}
+        </button>
 
-        <div className="text-center text-sm text-gray-600">
-          {authMode === "login" ? "New to Tangram AI?" : "Already onboard?"}{" "}
-          <button onClick={toggleMode} className="font-medium text-gray-900 underline-offset-4 hover:underline">
-            {authMode === "login" ? "Create an account" : "Sign in"}
-          </button>
-        </div>
+        {authMode === "signup" && (
+          <div className="text-center text-sm" style={{ fontFamily: "Poppins, sans-serif", color: "#111827" }}>
+            Already onboard?{" "}
+            <button onClick={toggleMode} className="font-medium underline-offset-4 hover:underline">
+              Sign in
+            </button>
+          </div>
+        )}
       </div>
     </ModalWrapper>
+
+    {/* New section below main login window - separate element */}
+    {isOpen && authMode === "login" && (
+      <div 
+        className="fixed z-50 flex items-center justify-center"
+        style={{
+          top: "calc(40% + 290px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          marginTop: "10px",
+        }}
+      >
+        <div 
+          className="relative overflow-hidden"
+          style={{
+            width: "518px",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "repeat",
+          }}
+        >
+          <div 
+            className="relative bg-white flex items-center"
+            style={{
+              width: "100%",
+              height: "62px",
+              border: "1px solid #E5E7EB",
+              padding: "0 32px",
+            }}
+          >
+            <div className="flex items-center justify-between w-full">
+              <p style={{
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 500,
+                fontStyle: "normal",
+                fontSize: "16px",
+                lineHeight: "150%",
+                letterSpacing: "-0.4px",
+                verticalAlign: "middle",
+                color: "#111827",
+              }}>
+                New to Tangram AI?{" "}
+                <span style={{
+                  fontFamily: "Poppins, sans-serif",
+                  fontWeight: 500,
+                  fontStyle: "normal",
+                  fontSize: "16px",
+                  lineHeight: "150%",
+                  letterSpacing: "-0.4px",
+                  verticalAlign: "middle",
+                  color: "#6B7280",
+                }}>
+                  Create an account
+                </span>
+              </p>
+              <button 
+                onClick={toggleMode} 
+                className="uppercase transition-colors hover:bg-gray-200"
+                style={{
+                  width: "92px",
+                  height: "37px",
+                  maxWidth: "363.41px",
+                  borderRadius: "8px",
+                  border: "1px solid #E5E7EB",
+                  padding: "12px 16px",
+                  backgroundColor: "#FAFAFA",
+                  fontFamily: "Poppins, sans-serif",
+                  fontWeight: 500,
+                  fontStyle: "normal",
+                  fontSize: "14px",
+                  lineHeight: "100%",
+                  letterSpacing: "0.5px",
+                  textAlign: "center",
+                  verticalAlign: "middle",
+                  textTransform: "uppercase",
+                  color: "#181818",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Sign Up
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }

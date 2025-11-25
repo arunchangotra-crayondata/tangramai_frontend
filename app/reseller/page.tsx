@@ -583,7 +583,7 @@ export default function ResellerPage() {
                   style={{
                     width: "258px",
                     height: "151px",
-                    
+                    marginTop: "25px",
                   }}
                 >
                   {/* Background Mask Image */}
@@ -616,6 +616,7 @@ export default function ResellerPage() {
                       width: "calc(100% - 24px)",
                       height: "calc(100% - 18px)",
                       margin: "9px 12px",
+                      
                     }}
                   >
                     <Image 
@@ -708,6 +709,7 @@ export default function ResellerPage() {
                   style={{
                     width: "258px",
                     height: "151px",
+                    marginTop: "25px",
                   }}
                 >
                   {/* Background Mask Image */}

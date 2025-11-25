@@ -232,7 +232,7 @@ export default function ResellerPage() {
                   color: "#091917",
                 }}
               >
-                You're a good fit for the Tangram.ai Reseller Program if you help clients adopt AI-driven solutions<br />
+                You're a good fit for the Tangram.ai Reseller Program if you help clients adopt AI-driven solutions
                 and want to expand your portfolio with enterprise-ready intelligence.
               </p>
             </div>
@@ -241,7 +241,7 @@ export default function ResellerPage() {
             <div 
               className="flex justify-center mt-12"
               style={{
-                gap: "24.49px",
+                gap: "0px",
               }}
             >
               {/* Card 1 */}
@@ -252,7 +252,7 @@ export default function ResellerPage() {
                   height: "230.77px",
                   padding: "24.51px",
                   border: "1px solid #E5E7EB",
-                  borderRadius: "12px",
+                  
                   background: "#FFFFFF",
                 }}
               >
@@ -277,26 +277,8 @@ export default function ResellerPage() {
                 >
                   <span style={{ fontSize: "16px", color: "#000", lineHeight: "1" }}>+</span>
                 </div>
-                <div 
-                  className="absolute top-0 right-0 flex items-center justify-center"
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    transform: "translate(50%, -50%)",
-                  }}
-                >
-                  <span style={{ fontSize: "16px", color: "#000", lineHeight: "1" }}>+</span>
-                </div>
-                <div 
-                  className="absolute bottom-0 right-0 flex items-center justify-center"
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    transform: "translate(50%, 50%)",
-                  }}
-                >
-                  <span style={{ fontSize: "16px", color: "#000", lineHeight: "1" }}>+</span>
-                </div>
+                
+               
                 
                 <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-6">
                   <Target className="w-6 h-6 text-white" />
@@ -336,7 +318,7 @@ export default function ResellerPage() {
                   height: "230.77px",
                   padding: "24.51px",
                   border: "1px solid #E5E7EB",
-                  borderRadius: "12px",
+                 
                   background: "#FFFFFF",
                 }}
               >
@@ -361,26 +343,8 @@ export default function ResellerPage() {
                 >
                   <span style={{ fontSize: "16px", color: "#000", lineHeight: "1" }}>+</span>
                 </div>
-                <div 
-                  className="absolute top-0 right-0 flex items-center justify-center"
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    transform: "translate(50%, -50%)",
-                  }}
-                >
-                  <span style={{ fontSize: "16px", color: "#000", lineHeight: "1" }}>+</span>
-                </div>
-                <div 
-                  className="absolute bottom-0 right-0 flex items-center justify-center"
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    transform: "translate(50%, 50%)",
-                  }}
-                >
-                  <span style={{ fontSize: "16px", color: "#000", lineHeight: "1" }}>+</span>
-                </div>
+                
+                
                 
                 <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-6">
                   <Globe className="w-6 h-6 text-white" />
@@ -420,7 +384,7 @@ export default function ResellerPage() {
                   height: "230.77px",
                   padding: "24.51px",
                   border: "1px solid #E5E7EB",
-                  borderRadius: "12px",
+                  
                   background: "#FFFFFF",
                 }}
               >
@@ -504,7 +468,7 @@ export default function ResellerPage() {
       <section 
         className="relative"
         style={{
-          width: "1513px",
+          width: "100%",
           height: "698px",
           background: "linear-gradient(180deg, #FFFFFF 0%, #E8F6F7 76.44%, #FAFAFA 100%)",
           margin: "0 auto",
@@ -523,7 +487,12 @@ export default function ResellerPage() {
                   fontSize: "32px",
                   lineHeight: "100%",
                   letterSpacing: "0px",
-                  color: "#06552C",
+                  verticalAlign: "middle",
+                  background: "linear-gradient(90deg, #02341A 0%, #006E84 100%)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  color: "transparent",
                 }}
               >
                 Benefits of Reseller Partnership
@@ -533,7 +502,7 @@ export default function ResellerPage() {
                   fontFamily: "Poppins, sans-serif",
                   fontWeight: 400,
                   fontStyle: "normal",
-                  fontSize: "16px",
+                  fontSize: "18px",
                   lineHeight: "150%",
                   letterSpacing: "0px",
                   color: "#374151",
@@ -548,114 +517,251 @@ export default function ResellerPage() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Card 1: Up to 40% off */}
                 <div 
-                  className="bg-white rounded-lg p-6 flex flex-col items-center text-center"
+                  className="relative rounded-lg overflow-hidden"
                   style={{
-                    border: "1px dashed #D1D5DB",
+                    width: "258px",
+                    height: "151px",
                   }}
                 >
-                  <div 
-                    className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                  {/* Background Mask Image */}
+                  <div
+                    className="absolute inset-0 pointer-events-none w-full h-full"
                     style={{
-                      backgroundColor: "#F3F4F6",
+                      zIndex: 0,
                     }}
                   >
-                    <Percent className="w-6 h-6" style={{ color: "#06552C" }} />
+                    <Image
+                      src="/Mask group.png"
+                      alt=""
+                      fill
+                      className="object-cover"
+                      unoptimized
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    />
                   </div>
-                  <p 
+                  
+                  {/* Card Content */}
+                  <div 
+                    className="relative bg-white rounded-lg p-6 flex flex-col items-start text-left"
                     style={{
-                      fontFamily: "Poppins, sans-serif",
-                      fontWeight: 500,
-                      fontSize: "14px",
-                      lineHeight: "140%",
-                      color: "#111827",
+                      border: "1px dashed #D1D5DB",
+                      zIndex: 1,
+                      width: "calc(100% - 24px)",
+                      height: "calc(100% - 18px)",
+                      margin: "9px 12px",
                     }}
                   >
-                    Up to 40% off Annual Plans for Clients
-                  </p>
+                    <Image 
+                      src="/percentage-round.png" 
+                      alt="Percentage" 
+                      width={24} 
+                      height={24}
+                      className="object-contain mb-4"
+                      unoptimized
+                    />
+                    <p 
+                      style={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontWeight: 500,
+                        fontSize: "14px",
+                        lineHeight: "140%",
+                        color: "#111827",
+                      }}
+                    >
+                      Up to 40% off Annual Plans for Clients
+                    </p>
+                  </div>
                 </div>
 
                 {/* Card 2: Rev-Share Model */}
                 <div 
-                  className="bg-white rounded-lg p-6 flex flex-col items-center text-center"
+                  className="relative rounded-lg overflow-hidden "
                   style={{
-                    border: "1px dashed #D1D5DB",
+                    width: "258px",
+                    height: "151px",
+                    
                   }}
                 >
-                  <div 
-                    className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                  {/* Background Mask Image */}
+                  <div
+                    className="absolute inset-0 pointer-events-none w-full h-full"
                     style={{
-                      backgroundColor: "#F3F4F6",
+                      zIndex: 0,
                     }}
                   >
-                    <DollarSign className="w-6 h-6" style={{ color: "#06552C" }} />
+                    <Image
+                      src="/Mask group.png"
+                      alt=""
+                      fill
+                      className="object-cover"
+                      unoptimized
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    />
                   </div>
-                  <p 
+                  
+                  {/* Card Content */}
+                  <div 
+                    className="relative bg-white rounded-lg p-6 flex flex-col items-start text-left"
                     style={{
-                      fontFamily: "Poppins, sans-serif",
-                      fontWeight: 500,
-                      fontSize: "14px",
-                      lineHeight: "140%",
-                      color: "#111827",
+                      border: "1px dashed #D1D5DB",
+                      zIndex: 1,
+                      width: "calc(100% - 24px)",
+                      height: "calc(100% - 18px)",
+                      margin: "9px 12px",
                     }}
                   >
-                    Rev-Share Model on Closed Deals
-                  </p>
+                    <Image 
+                      src="/coins.png" 
+                      alt="Coins" 
+                      width={24} 
+                      height={24}
+                      className="object-contain mb-4"
+                      unoptimized
+                    />
+                    <p 
+                      style={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontWeight: 500,
+                        fontSize: "14px",
+                        lineHeight: "140%",
+                        color: "#111827",
+                      }}
+                    >
+                      Rev-Share Model on Closed Deals
+                    </p>
+                  </div>
                 </div>
 
                 {/* Card 3: Enterprise Demo Account */}
                 <div 
-                  className="bg-white rounded-lg p-6 flex flex-col items-center text-center"
+                  className="relative rounded-lg overflow-hidden"
                   style={{
-                    border: "1px dashed #D1D5DB",
+                    width: "258px",
+                    height: "151px",
                   }}
                 >
-                  <div 
-                    className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                  {/* Background Mask Image */}
+                  <div
+                    className="absolute inset-0 pointer-events-none w-full h-full"
                     style={{
-                      backgroundColor: "#F3F4F6",
+                      zIndex: 0,
                     }}
                   >
-                    <Monitor className="w-6 h-6" style={{ color: "#06552C" }} />
+                    <Image
+                      src="/Mask group.png"
+                      alt=""
+                      fill
+                      className="object-cover"
+                      unoptimized
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    />
                   </div>
-                  <p 
+                  
+                  {/* Card Content */}
+                  <div 
+                    className="relative bg-white rounded-lg p-6 flex flex-col items-start text-left"
                     style={{
-                      fontFamily: "Poppins, sans-serif",
-                      fontWeight: 500,
-                      fontSize: "14px",
-                      lineHeight: "140%",
-                      color: "#111827",
+                      border: "1px dashed #D1D5DB",
+                      zIndex: 1,
+                      width: "calc(100% - 24px)",
+                      height: "calc(100% - 18px)",
+                      margin: "9px 12px",
                     }}
                   >
-                    Access to a Enterprise - level Demo Account
-                  </p>
+                    <Image 
+                      src="/fingerprint-circled-lock.png" 
+                      alt="Fingerprint Lock" 
+                      width={24} 
+                      height={24}
+                      className="object-contain mb-4"
+                      unoptimized
+                    />
+                    <p 
+                      style={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontWeight: 500,
+                        fontSize: "14px",
+                        lineHeight: "140%",
+                        color: "#111827",
+                      }}
+                    >
+                      Access to a Enterprise - level Demo Account
+                    </p>
+                  </div>
                 </div>
 
                 {/* Card 4: Dedicated Support */}
                 <div 
-                  className="bg-white rounded-lg p-6 flex flex-col items-center text-center"
+                  className="relative rounded-lg overflow-hidden"
                   style={{
-                    border: "1px dashed #D1D5DB",
+                    width: "258px",
+                    height: "151px",
                   }}
                 >
-                  <div 
-                    className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                  {/* Background Mask Image */}
+                  <div
+                    className="absolute inset-0 pointer-events-none w-full h-full"
                     style={{
-                      backgroundColor: "#F3F4F6",
+                      zIndex: 0,
                     }}
                   >
-                    <Headphones className="w-6 h-6" style={{ color: "#06552C" }} />
+                    <Image
+                      src="/Mask group.png"
+                      alt=""
+                      fill
+                      className="object-cover"
+                      unoptimized
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    />
                   </div>
-                  <p 
+                  
+                  {/* Card Content */}
+                  <div 
+                    className="relative bg-white rounded-lg p-6 flex flex-col items-start text-left"
                     style={{
-                      fontFamily: "Poppins, sans-serif",
-                      fontWeight: 500,
-                      fontSize: "14px",
-                      lineHeight: "140%",
-                      color: "#111827",
+                      border: "1px dashed #D1D5DB",
+                      zIndex: 1,
+                      width: "calc(100% - 24px)",
+                      height: "calc(100% - 18px)",
+                      margin: "9px 12px",
                     }}
                   >
-                    Dedicated Support and Co-Selling
-                  </p>
+                    <Image 
+                      src="/headset-help.png" 
+                      alt="Headset Help" 
+                      width={24} 
+                      height={24}
+                      className="object-contain mb-4"
+                      unoptimized
+                    />
+                    <p 
+                      style={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontWeight: 500,
+                        fontSize: "14px",
+                        lineHeight: "140%",
+                        color: "#111827",
+                      }}
+                    >
+                      Dedicated Support and Co-Selling
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

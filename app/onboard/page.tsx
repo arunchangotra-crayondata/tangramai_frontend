@@ -6,17 +6,19 @@ import { ArrowLeft, Upload, FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { CustomOnboardModal } from "../../components/custom-onboard-modal"
+import { UploadAgentModal } from "../../components/upload-agent-modal"
 
 export default function OnboardPage() {
   const router = useRouter()
   const [selectedOption, setSelectedOption] = useState<"upload" | "custom" | null>(null)
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false)
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
   const handleNext = () => {
     if (selectedOption === "custom") {
       setIsCustomModalOpen(true)
     } else if (selectedOption === "upload") {
-      router.push("/onboard/upload")
+      setIsUploadModalOpen(true)
     }
   }
 
@@ -307,6 +309,15 @@ export default function OnboardPage() {
         isOpen={isCustomModalOpen} 
         onClose={() => {
           setIsCustomModalOpen(false)
+          setSelectedOption(null)
+        }} 
+      />
+
+      {/* Upload Agent Modal */}
+      <UploadAgentModal 
+        isOpen={isUploadModalOpen} 
+        onClose={() => {
+          setIsUploadModalOpen(false)
           setSelectedOption(null)
         }} 
       />

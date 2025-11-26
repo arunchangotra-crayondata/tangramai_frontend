@@ -5,16 +5,20 @@ import { Button } from "../../components/ui/button"
 import { ArrowLeft, Upload, FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { CustomOnboardModal } from "../../components/custom-onboard-modal"
+import { UploadAgentModal } from "../../components/upload-agent-modal"
 
 export default function OnboardPage() {
   const router = useRouter()
   const [selectedOption, setSelectedOption] = useState<"upload" | "custom" | null>(null)
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false)
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
   const handleNext = () => {
     if (selectedOption === "custom") {
-      router.push("/onboard/custom")
+      setIsCustomModalOpen(true)
     } else if (selectedOption === "upload") {
-      router.push("/onboard/upload")
+      setIsUploadModalOpen(true)
     }
   }
 
@@ -49,8 +53,37 @@ export default function OnboardPage() {
 
           {/* Right Side - Content */}
           <div className="flex flex-col justify-center">
-            <h1 className="mb-4 text-4xl font-bold">Onboard Your AI Agents</h1>
-            <p className="mb-8 text-lg text-muted-foreground">
+            <h1 
+              className="mb-4"
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 600,
+                fontStyle: "normal",
+                fontSize: "32px",
+                lineHeight: "130%",
+                letterSpacing: "0px",
+                verticalAlign: "middle",
+                color: "#00092C",
+              }}
+            >
+              Onboard Your AI Agents
+            </h1>
+            <p 
+              className="mb-8"
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 400,
+                fontStyle: "normal",
+                fontSize: "16px",
+                lineHeight: "150%",
+                letterSpacing: "0px",
+                verticalAlign: "middle",
+                color: "#00092C",
+                width: "414px",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+              }}
+            >
               Reseller with us to showcase your AI solutions to our enterprise clients.
             </p>
 
@@ -59,32 +92,92 @@ export default function OnboardPage() {
               {/* Upload File Option */}
               <button
                 onClick={() => setSelectedOption("upload")}
-                className={`w-full rounded-lg border-2 p-6 text-left transition-all ${
-                  selectedOption === "upload"
-                    ? "border-primary bg-primary/5"
-                    : "border-border bg-white hover:border-primary/50"
-                }`}
+                className="text-left transition-all bg-white"
+                style={{
+                  width: "414px",
+                  height: "94px",
+                  borderRadius: "2px",
+                  border: selectedOption === "upload" ? "1.5px solid #004BEC" : "1px solid #E5E7EB",
+                  padding: "24px",
+                }}
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <Upload className="h-6 w-6 text-primary" />
+                  <div
+                    className="shrink-0"
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      borderRadius: "32px",
+                      border: selectedOption === "upload" ? "1px solid #004BEC" : "1px solid #E5E7EB",
+                      background: "#FFFFFF",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {selectedOption === "upload" && (
+                      <div 
+                        style={{
+                          width: "8px",
+                          height: "8px",
+                          borderRadius: "50%",
+                          background: "#004BEC",
+                        }}
+                      />
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="mb-2 text-lg font-bold">Upload File</h3>
-                    <p className="text-sm text-muted-foreground">
+                  <div 
+                    className="flex-1 flex flex-col"
+                    style={{
+                      width: "304px",
+                      height: "59px",
+                      gap: "4px",
+                    }}
+                  >
+                    <h3 
+                      style={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontWeight: 500,
+                        fontStyle: "normal",
+                        fontSize: "14px",
+                        lineHeight: "150%",
+                        letterSpacing: "0px",
+                        color: "#111827",
+                        margin: 0,
+                      }}
+                    >
+                      Upload File
+                    </h3>
+                    <p 
+                      style={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontWeight: 400,
+                        fontStyle: "normal",
+                        fontSize: "11px",
+                        lineHeight: "150%",
+                        letterSpacing: "0px",
+                        color: "#6B7280",
+                        margin: 0,
+                      }}
+                    >
                       Bulk upload multiple agents, CSV/Excel format supported, Quick and efficient
                     </p>
                   </div>
-                  <div
-                    className={`mt-1 h-5 w-5 shrink-0 rounded-full border-2 ${
-                      selectedOption === "upload" ? "border-primary bg-primary" : "border-gray-300 bg-white"
-                    }`}
+                  <div 
+                    className="flex shrink-0 items-center justify-center"
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                    }}
                   >
-                    {selectedOption === "upload" && (
-                      <div className="flex h-full items-center justify-center">
-                        <div className="h-2 w-2 rounded-full bg-white" />
-                      </div>
-                    )}
+                    <Image 
+                      src={selectedOption === "upload" ? "/FileArrowUp_update.png" : "/FileArrowUp.png"} 
+                      alt="Upload" 
+                      width={28} 
+                      height={28}
+                      className="object-contain"
+                      unoptimized
+                    />
                   </div>
                 </div>
               </button>
@@ -92,48 +185,142 @@ export default function OnboardPage() {
               {/* Custom Onboard Option */}
               <button
                 onClick={() => setSelectedOption("custom")}
-                className={`w-full rounded-lg border-2 p-6 text-left transition-all ${
-                  selectedOption === "custom"
-                    ? "border-primary bg-primary/5"
-                    : "border-border bg-white hover:border-primary/50"
-                }`}
+                className="text-left transition-all bg-white"
+                style={{
+                  width: "414px",
+                  height: "94px",
+                  borderRadius: "2px",
+                  border: selectedOption === "custom" ? "1.5px solid #004BEC" : "1px solid #E5E7EB",
+                  padding: "24px",
+                }}
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <FileText className="h-6 w-6 text-primary" />
+                  <div
+                    className="shrink-0"
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      borderRadius: "32px",
+                      border: selectedOption === "custom" ? "1px solid #004BEC" : "1px solid #E5E7EB",
+                      background: "#FFFFFF",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {selectedOption === "custom" && (
+                      <div 
+                        style={{
+                          width: "8px",
+                          height: "8px",
+                          borderRadius: "50%",
+                          background: "#004BEC",
+                        }}
+                      />
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="mb-2 text-lg font-bold">Custom Onboard</h3>
-                    <p className="text-sm text-muted-foreground">
+                  <div 
+                    className="flex-1 flex flex-col"
+                    style={{
+                      width: "304px",
+                      height: "59px",
+                      gap: "4px",
+                    }}
+                  >
+                    <h3 
+                      style={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontWeight: 500,
+                        fontStyle: "normal",
+                        fontSize: "14px",
+                        lineHeight: "150%",
+                        letterSpacing: "0px",
+                        color: "#111827",
+                        margin: 0,
+                      }}
+                    >
+                      Custom Onboard
+                    </h3>
+                    <p 
+                      style={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontWeight: 400,
+                        fontStyle: "normal",
+                        fontSize: "11px",
+                        lineHeight: "150%",
+                        letterSpacing: "0px",
+                        color: "#6B7280",
+                        margin: 0,
+                      }}
+                    >
                       Step-by-step guidance, Validation and suggestions, Perfect for single agents
                     </p>
                   </div>
-                  <div
-                    className={`mt-1 h-5 w-5 shrink-0 rounded-full border-2 ${
-                      selectedOption === "custom" ? "border-primary bg-primary" : "border-gray-300 bg-white"
-                    }`}
+                  <div 
+                    className="flex shrink-0 items-center justify-center"
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                    }}
                   >
-                    {selectedOption === "custom" && (
-                      <div className="flex h-full items-center justify-center">
-                        <div className="h-2 w-2 rounded-full bg-white" />
-                      </div>
-                    )}
+                    <Image 
+                      src={selectedOption === "custom" ? "/Textbox_update.png" : "/Textbox.png"} 
+                      alt="Custom Onboard" 
+                      width={28} 
+                      height={28}
+                      className="object-contain"
+                      unoptimized
+                    />
                   </div>
                 </div>
               </button>
             </div>
 
-            <Button
+            <button
               onClick={handleNext}
               disabled={!selectedOption}
-              size="lg"
-              className="mt-8 w-full max-w-xs bg-black text-white hover:bg-black/90"
+              className="mt-8"
+              style={{
+                width: "82px",
+                height: "38px",
+                borderRadius: "4px",
+                backgroundColor: "#000000",
+                color: "#FFFFFF",
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 400,
+                fontStyle: "normal",
+                fontSize: "14px",
+                lineHeight: "24px",
+                letterSpacing: "0px",
+                verticalAlign: "middle",
+                border: "none",
+                cursor: selectedOption ? "pointer" : "not-allowed",
+                opacity: selectedOption ? 1 : 0.5,
+              }}
             >
               Next
-            </Button>
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Custom Onboard Modal */}
+      <CustomOnboardModal 
+        isOpen={isCustomModalOpen} 
+        onClose={() => {
+          setIsCustomModalOpen(false)
+          setSelectedOption(null)
+        }} 
+      />
+
+      {/* Upload Agent Modal */}
+      <UploadAgentModal 
+        isOpen={isUploadModalOpen} 
+        onClose={() => {
+          setIsUploadModalOpen(false)
+          setSelectedOption(null)
+        }} 
+      />
     </div>
   )
 }

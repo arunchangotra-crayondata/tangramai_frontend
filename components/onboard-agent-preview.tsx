@@ -17,7 +17,7 @@ interface FormData {
   agentType: string
   tags: string[]
   targetPersonas: string[]
-  keyFeatures: string[]
+  keyFeatures: string
   valueProposition: string
   roiInformation: string
   demoLink: string
@@ -161,8 +161,8 @@ export function OnboardAgentPreview({ formData }: OnboardAgentPreviewProps) {
                 <Card>
                   <CardContent className="p-6">
                     <h4 className="text-sm font-medium text-gray-700 mb-3">Key Features</h4>
-                    {formData.keyFeatures.length > 0 ? (
-                      <CollapsibleList items={formData.keyFeatures} />
+                    {formData.keyFeatures.trim() ? (
+                      <CollapsibleList items={formData.keyFeatures.split(/[;,]|\n/).map(f => f.trim()).filter(f => f.length > 0)} />
                     ) : (
                       <p className="text-gray-500 italic">No features specified</p>
                     )}

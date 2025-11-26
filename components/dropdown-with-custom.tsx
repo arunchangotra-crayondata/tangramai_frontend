@@ -73,29 +73,65 @@ export function DropdownWithCustom({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-900">
-        {label} {required && <span className="text-red-500">*</span>}
+      <label 
+        className="text-sm font-medium text-gray-900"
+        style={{
+          fontFamily: "Poppins, sans-serif",
+          fontWeight: 500,
+          fontStyle: "normal",
+          fontSize: "14px",
+          lineHeight: "150%",
+          letterSpacing: "0%",
+          color: "#111827",
+        }}
+      >
+        {label} {required && <span style={{ color: "#111827" }}>*</span>}
       </label>
       
       <div className="relative" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-left text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          className="relative pr-10 text-left text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          style={{
+            width: "450px",
+            minWidth: "240px",
+            height: "44px",
+            borderRadius: "4px",
+            paddingTop: "11px",
+            paddingRight: "16px",
+            paddingBottom: "11px",
+            paddingLeft: "16px",
+            border: "1px solid #E5E7EB",
+            borderTop: "1px solid #E5E7EB",
+            fontFamily: "Poppins, sans-serif",
+            fontWeight: 400,
+            fontStyle: "normal",
+            fontSize: "14px",
+            lineHeight: "150%",
+            letterSpacing: "0%",
+            verticalAlign: "middle",
+            color: value ? "#111827" : "#6B7280",
+          }}
         >
-          <span className={cn(value ? "text-gray-900" : "text-gray-500")}>
+          <span>
             {value || placeholder}
           </span>
+          <ChevronDown className={cn(
+            "absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 transition-transform",
+            isOpen && "rotate-180"
+          )} />
         </button>
-        
-        <ChevronDown className={cn(
-          "absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 transition-transform",
-          isOpen && "rotate-180"
-        )} />
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
+          <div 
+            className="absolute z-50 mt-1 rounded-lg border border-gray-200 bg-white shadow-lg"
+            style={{
+              width: "450px",
+              minWidth: "240px",
+            }}
+          >
             <div className="max-h-60 overflow-y-auto">
               {options.map((option) => (
                 <button

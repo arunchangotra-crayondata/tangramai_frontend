@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Badge } from "../../components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog"
 import { Search, SlidersHorizontal, MoreVertical, Eye, Edit, CheckCircle, XCircle, Trash2, ExternalLink, MessageSquare, Users, User, Mail, Building2, Phone, Calendar, UserCircle, ChevronDown, ChevronUp } from "lucide-react"
 import { AgentPreviewModal } from "../../components/agent-preview-modal"
 import { EditAgentModal } from "../../components/edit-agent-modal"
@@ -28,7 +29,7 @@ export default function AdminPage() {
   const { toast } = useToast()
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
-  const [activeTab, setActiveTab] = useState<TabType>("agents")
+  const [activeTab, setActiveTab] = useState<TabType>("isvs")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
@@ -45,8 +46,22 @@ export default function AdminPage() {
 
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"all" | "approved" | "pending">("all")
+  const [statusFilter, setStatusFilter] = useState<"all" | "approved" | "pending" | "rejected">("all")
   const [assetTypeFilter, setAssetTypeFilter] = useState<string>("all")
+  const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set())
+  const [selectedEnquiries, setSelectedEnquiries] = useState<Set<string>>(new Set())
+
+  const toggleEnquirySelection = (enquiryId: string) => {
+    setSelectedEnquiries(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(enquiryId)) {
+        newSet.delete(enquiryId)
+      } else {
+        newSet.add(enquiryId)
+      }
+      return newSet
+    })
+  }
 
   // Authentication and Role Check
   useEffect(() => {
@@ -104,6 +119,10 @@ export default function AdminPage() {
   
   // Expanded rows state for enquiries
   const [expandedEnquiries, setExpandedEnquiries] = useState<Set<string>>(new Set())
+  
+  // Message modal state
+  const [messageModalOpen, setMessageModalOpen] = useState(false)
+  const [selectedMessage, setSelectedMessage] = useState<{ name: string; company: string; message: string } | null>(null)
   
   const toggleEnquiryExpansion = (enquiryId: string) => {
     setExpandedEnquiries(prev => {
@@ -218,30 +237,8 @@ export default function AdminPage() {
 
   // Filter functions
   const getFilteredAgents = () => {
-    let filtered = agents
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(agent =>
-        agent.agent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        agent.asset_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        agent.isv_id.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    }
-
-    // Status filter
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(agent =>
-        statusFilter === "approved" ? agent.admin_approved === "yes" : agent.admin_approved === "no"
-      )
-    }
-
-    // Asset type filter
-    if (assetTypeFilter !== "all") {
-      filtered = filtered.filter(agent => agent.asset_type === assetTypeFilter)
-    }
-
-    return filtered
+    // Return all agents without any filtering
+    return agents
   }
 
   const getFilteredISVs = () => {
@@ -482,21 +479,56 @@ export default function AdminPage() {
     return types
   }
 
-  const getStatusBadge = (approved: "yes" | "no") => {
+  const getStatusBadge = (approved: "yes" | "no", isRejected: boolean = false) => {
     if (approved === "yes") {
       return (
-        <Badge className="bg-green-100 text-green-800 border-green-200">
-          <CheckCircle className="h-3 w-3 mr-1" />
+        <span 
+          className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+          style={{
+            backgroundColor: "#D1FAE5",
+            color: "#065F46",
+          }}
+        >
           Approved
-        </Badge>
+        </span>
+      )
+    }
+    if (isRejected) {
+    return (
+        <span 
+          className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+          style={{
+            backgroundColor: "#FEE2E2",
+            color: "#991B1B",
+          }}
+        >
+          Reject
+        </span>
       )
     }
     return (
-      <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
-        <XCircle className="h-3 w-3 mr-1" />
+      <span 
+        className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+        style={{
+          backgroundColor: "#FEF3C7",
+          color: "#92400E",
+        }}
+      >
         Pending
-      </Badge>
+      </span>
     )
+  }
+
+  const toggleAgentSelection = (agentId: string) => {
+    setSelectedAgents(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(agentId)) {
+        newSet.delete(agentId)
+      } else {
+        newSet.add(agentId)
+      }
+      return newSet
+    })
   }
 
   // Show loading screen while checking authentication
@@ -511,26 +543,116 @@ export default function AdminPage() {
     )
   }
 
+  // Get status counts for agents
+  const getStatusCounts = () => {
+    const all = agents.length
+    const approved = agents.filter(a => a.admin_approved === "yes").length
+    const pending = agents.filter(a => a.admin_approved === "no").length
+    const rejected = agents.filter(a => a.admin_approved === "no").length // For now, same as pending
+    return { all, approved, pending, rejected }
+  }
+
+  const statusCounts = getStatusCounts()
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="w-full px-8 md:px-12 lg:px-16 py-12 md:py-16 lg:py-20">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Manage agents, ISVs, and resellers</p>
+    <div className="min-h-screen bg-white relative">
+      {/* Gradient Background - Always visible for all tabs */}
+      <div
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "229px",
+          top: "0px",
+          left: "0px",
+          background: "radial-gradient(100% 100% at 50% 0%, #FFFEDA 0%, #FFFFFF 100%)",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      />
+      <div className="w-full px-8 md:px-12 lg:px-16 py-12 md:py-16 lg:py-20 relative z-10">
+         {/* Breadcrumbs */}
+         <div className="mb-4">
+           <nav className="flex items-center gap-2 text-sm">
+             <a href="/" className="text-gray-600 hover:text-gray-900">Home</a>
+             <span className="text-gray-400">&gt;</span>
+             <span className="text-gray-600">Dashboard</span>
+           </nav>
         </div>
 
-        {/* Tabs */}
-        <div className="mb-6">
-          <div className="border-b border-gray-200">
+         {/* Header with Title and ONBOARD AGENT Button */}
+         <div className="mb-6 flex items-start justify-between">
+           <div>
+             <h1 
+               style={{
+                 fontFamily: "Poppins, sans-serif",
+                 fontWeight: 600,
+                 fontStyle: "normal",
+                 fontSize: "28px",
+                 lineHeight: "130%",
+                 letterSpacing: "0%",
+                 color: "#001737",
+                 margin: 0,
+                 marginBottom: "8px",
+               }}
+             >
+               Admin Dashboard
+             </h1>
+             <p 
+               style={{
+                 fontFamily: "Poppins, sans-serif",
+                 fontWeight: 400,
+                 fontStyle: "normal",
+                 fontSize: "16px",
+                 lineHeight: "150%",
+                 letterSpacing: "0%",
+                 verticalAlign: "middle",
+                 color: "#6B7280",
+                 margin: 0,
+               }}
+             >
+               Manage agents, ISVs, and resellers
+             </p>
+           </div>
+           {activeTab === "agents" && (
+             <Button
+               onClick={() => router.push("/onboard")}
+               style={{
+                 width: "146px",
+                 height: "38px",
+                 borderRadius: "4px",
+                 background: "#181818",
+                 fontFamily: "Poppins, sans-serif",
+                 fontWeight: 400,
+                 fontStyle: "normal",
+                 fontSize: "14px",
+                 lineHeight: "24px",
+                 letterSpacing: "0px",
+                 verticalAlign: "middle",
+                 color: "#FFFFFF",
+                 border: "none",
+                 padding: 0,
+                 display: "inline-flex",
+                 alignItems: "center",
+                 justifyContent: "center",
+                 cursor: "pointer",
+               }}
+               className="hover:bg-[#181818]/90"
+             >
+               ONBOARD AGENT
+             </Button>
+           )}
+         </div>
+
+         {/* Main Navigation Tabs and Search/Filters - Show for all tabs */}
+         <div className="mb-6 flex items-center justify-between gap-4 border-b border-gray-200">
+           <div>
             <nav className="-mb-px flex space-x-8">
               {[
-                { id: "agents", label: "Agents", icon: MessageSquare },
-                { id: "isvs", label: "ISVs", icon: Users },
-                { id: "resellers", label: "Resellers", icon: User },
-                { id: "enquiries", label: "Enquiries", icon: Mail },
+                { id: "agents", label: "Agents", count: agents.length },
+                 { id: "isvs", label: "ISV", count: isvs.length },
+                { id: "resellers", label: "Resellers", count: resellers.length },
+                 { id: "enquiries", label: "Enquiry", count: enquiries.length },
               ].map((tab) => {
-                const Icon = tab.icon
                 return (
                   <button
                     key={tab.id}
@@ -540,28 +662,45 @@ export default function AdminPage() {
                         ? "border-black text-black"
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                     }`}
+                     style={{
+                       fontFamily: "Poppins, sans-serif",
+                       fontWeight: 500,
+                       fontSize: "14px",
+                       lineHeight: "24px",
+                       color: activeTab === tab.id ? "#091917" : "#091917",
+                     }}
                   >
-                    <Icon className="h-4 w-4" />
-                    {tab.label}
+                    {tab.label} ({tab.count})
                   </button>
                 )
               })}
             </nav>
-          </div>
         </div>
 
-        {/* Search and Filters */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+           {/* Search and Filters - Show for all tabs */}
+           <div className="flex items-center gap-2">
+             {/* Search Bar */}
+             <div className="relative" style={{ width: "360px", height: "36px" }}>
+               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" style={{ color: "#00092C" }} />
               <Input
-                placeholder={`Search ${activeTab}...`}
+                 placeholder="Search by name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
-              />
-            </div>
+                 style={{
+                   width: "360px",
+                   height: "36px",
+                   borderWidth: "1px",
+                   fontFamily: "Inter, sans-serif",
+                   fontWeight: 400,
+                   fontStyle: "normal",
+                   fontSize: "13px",
+                   lineHeight: "150%",
+                   letterSpacing: "0px",
+                   verticalAlign: "middle",
+                   color: "#ACADBA",
+                 }}
+               />
           </div>
           
           <div className="flex gap-2">
@@ -646,8 +785,11 @@ export default function AdminPage() {
             >
               Clear Filters
             </Button>
+             </div>
           </div>
         </div>
+
+
 
         {/* Content */}
         {isLoading ? (
@@ -673,81 +815,230 @@ export default function AdminPage() {
           <>
             {/* Agents Table */}
             {activeTab === "agents" && (
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold">Agents ({getFilteredAgents().length})</h2>
-                </div>
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead>
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Type</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ISV ID</th>
-                        
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                         <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                           height: "41px",
+                           fontFamily: "Poppins, sans-serif",
+                           fontWeight: 500,
+                           fontStyle: "normal",
+                           fontSize: "14px",
+                           lineHeight: "150%",
+                           letterSpacing: "0px",
+                           verticalAlign: "middle",
+                           color: "#111827",
+                           backgroundColor: "#FFFFFF"
+                         }}>S. No</th>
+                         <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                           height: "41px",
+                           fontFamily: "Poppins, sans-serif",
+                           fontWeight: 500,
+                           fontStyle: "normal",
+                           fontSize: "14px",
+                           lineHeight: "150%",
+                           letterSpacing: "0px",
+                           verticalAlign: "middle",
+                           color: "#111827",
+                           backgroundColor: "#FFFFFF"
+                         }}>Agent Name</th>
+                         <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                           height: "41px",
+                           fontFamily: "Poppins, sans-serif",
+                           fontWeight: 500,
+                           fontStyle: "normal",
+                           fontSize: "14px",
+                           lineHeight: "150%",
+                           letterSpacing: "0px",
+                           verticalAlign: "middle",
+                           color: "#111827",
+                           backgroundColor: "#FFFFFF"
+                         }}>Asset Type</th>
+                         <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                           height: "41px",
+                           fontFamily: "Poppins, sans-serif",
+                           fontWeight: 500,
+                           fontStyle: "normal",
+                           fontSize: "14px",
+                           lineHeight: "150%",
+                           letterSpacing: "0px",
+                           verticalAlign: "middle",
+                           color: "#111827",
+                           backgroundColor: "#FFFFFF"
+                         }}>ISV ID</th>
+                         <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                           height: "41px",
+                           fontFamily: "Poppins, sans-serif",
+                           fontWeight: 500,
+                           fontStyle: "normal",
+                           fontSize: "14px",
+                           lineHeight: "150%",
+                           letterSpacing: "0px",
+                           verticalAlign: "middle",
+                           color: "#111827",
+                           backgroundColor: "#FFFFFF"
+                         }}>Status</th>
+                         <th className="px-6 text-left border-b border-gray-200" style={{ 
+                           height: "41px",
+                           fontFamily: "Poppins, sans-serif",
+                           fontWeight: 500,
+                           fontStyle: "normal",
+                           fontSize: "14px",
+                           lineHeight: "150%",
+                           letterSpacing: "0px",
+                           verticalAlign: "middle",
+                           color: "#111827",
+                           backgroundColor: "#FFFFFF"
+                         }}>Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {getFilteredAgents().map((agent) => (
+                    <tbody className="bg-white">
+                      {getFilteredAgents().map((agent, index) => {
+                        const isRejected = statusFilter === "rejected" || (agent.admin_approved === "no" && false) // Can be enhanced with rejection_reason check
+                         return (
                         <tr key={agent.agent_id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">{agent.agent_name}</div>
-                            <div className="text-sm text-gray-500">ID: {agent.agent_id}</div>
+                             <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                               height: "41px",
+                               fontFamily: "Poppins, sans-serif",
+                               fontWeight: 400,
+                               fontStyle: "normal",
+                               fontSize: "14px",
+                               lineHeight: "150%",
+                               letterSpacing: "0px",
+                               verticalAlign: "middle",
+                               color: "#111827",
+                               backgroundColor: "#FFFFFF"
+                             }}>
+                               {index + 1}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{agent.asset_type}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{agent.isv_id}</td>
-                          
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {getStatusBadge(agent.admin_approved)}
+                             <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
+                               <div style={{
+                                 fontFamily: "Poppins, sans-serif",
+                                 fontWeight: 400,
+                                 fontStyle: "normal",
+                                 fontSize: "14px",
+                                 lineHeight: "150%",
+                                 letterSpacing: "0px",
+                                 verticalAlign: "middle",
+                                 color: "#111827"
+                               }}>{agent.agent_name}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                             <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                               height: "41px",
+                               fontFamily: "Poppins, sans-serif",
+                               fontWeight: 400,
+                               fontStyle: "normal",
+                               fontSize: "14px",
+                               lineHeight: "150%",
+                               letterSpacing: "0px",
+                               verticalAlign: "middle",
+                               color: "#111827",
+                               backgroundColor: "#FFFFFF"
+                             }}>{agent.asset_type || "-"}</td>
+                             <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                               height: "41px",
+                               fontFamily: "Poppins, sans-serif",
+                               fontWeight: 400,
+                               fontStyle: "normal",
+                               fontSize: "14px",
+                               lineHeight: "150%",
+                               letterSpacing: "0px",
+                               verticalAlign: "middle",
+                               color: "#111827",
+                               backgroundColor: "#FFFFFF"
+                             }}>{agent.isv_id}</td>
+                            <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
+                              {getStatusBadge(agent.admin_approved, isRejected)}
+                            </td>
+                             <td className="px-6 whitespace-nowrap text-sm font-medium border-b border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
                             <div className="flex items-center gap-2">
                               <Button 
-                                variant="outline" 
+                                   variant="ghost" 
                                 size="sm"
                                 onClick={() => {
-                                  router.push(`/agents/${agent.agent_id}`)
-                                }}
+                                     setSelectedAgent(agent)
+                                     setAgentDetailsOpen(true)
+                                   }}
+                                   style={{
+                                     width: "45px",
+                                     height: "32px",
+                                     minWidth: "45px",
+                                     maxWidth: "45px",
+                                     minHeight: "32px",
+                                     maxHeight: "32px",
+                                     fontFamily: "Poppins, sans-serif",
+                                     fontWeight: 500,
+                                     fontSize: "14px",
+                                     color: "#111827",
+                                     backgroundColor: "#FFFFFF",
+                                     border: "1px solid #E5E7EB",
+                                     padding: 0,
+                                     boxSizing: "border-box",
+                                   }}
+                                   className="hover:bg-gray-50"
                               >
                                 View
                               </Button>
                               <Button 
-                                variant="outline" 
+                                   variant="ghost" 
                                 size="sm"
                                 onClick={() => {
                                   setSelectedAgent(agent)
                                   setEditAgentModalOpen(true)
                                 }}
+                                   style={{
+                                     width: "45px",
+                                     height: "32px",
+                                     minWidth: "45px",
+                                     maxWidth: "45px",
+                                     minHeight: "32px",
+                                     maxHeight: "32px",
+                                     fontFamily: "Poppins, sans-serif",
+                                     fontWeight: 500,
+                                     fontSize: "14px",
+                                     color: "#111827",
+                                     backgroundColor: "#FFFFFF",
+                                     border: "1px solid #E5E7EB",
+                                     padding: 0,
+                                     boxSizing: "border-box",
+                                   }}
+                                   className="hover:bg-gray-50"
                               >
                                 Edit
                               </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem 
                                 onClick={() => handleApproveAgent(agent)}
-                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                      className="text-green-600"
                               >
-                                <CheckCircle className="mr-1 h-3 w-3" />
+                                      <CheckCircle className="mr-2 h-4 w-4" />
                                 Approve
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
                                 onClick={() => {
                                   setSelectedAgent(agent)
                                   setRejectAgentModalOpen(true)
                                 }}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                      className="text-red-600"
                               >
-                                <XCircle className="mr-1 h-3 w-3" />
+                                      <XCircle className="mr-2 h-4 w-4" />
                                 Reject
-                              </Button>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                           </td>
                         </tr>
-                      ))}
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -756,39 +1047,135 @@ export default function AdminPage() {
 
             {/* ISVs Table */}
             {activeTab === "isvs" && (
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold">ISVs ({getFilteredISVs().length})</h2>
-                </div>
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead>
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ISV Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agents</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domain</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>ISV Name</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Email</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Agents</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Domain</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Status</th>
+                        <th className="px-6 text-left border-b border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white">
                       {getFilteredISVs().map((isv) => (
                         <tr key={isv.isv_id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">{isv.isv_name}</div>
-                            <div className="text-sm text-gray-500">ID: {isv.isv_id}</div>
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
+                            <div style={{ fontFamily: "Poppins, sans-serif", fontSize: "14px", fontWeight: 400, lineHeight: "150%", color: "#111827" }}>{isv.isv_name}</div>
+                            <div style={{ fontFamily: "Poppins, sans-serif", fontSize: "14px", fontWeight: 400, lineHeight: "150%", color: "#6B7280" }}>ID: {isv.isv_id}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{isv.isv_email_no}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <span className="font-medium">{isv.approved_agent_count}</span>
-                            <span className="text-gray-500">/{isv.agent_count}</span>
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                            height: "41px",
+                            fontFamily: "Poppins, sans-serif",
+                            fontWeight: 400,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "150%",
+                            letterSpacing: "0px",
+                            verticalAlign: "middle",
+                            color: "#111827",
+                            backgroundColor: "#FFFFFF"
+                          }}>{isv.isv_email_no}</td>
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                            height: "41px",
+                            fontFamily: "Poppins, sans-serif",
+                            fontWeight: 400,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "150%",
+                            letterSpacing: "0px",
+                            verticalAlign: "middle",
+                            color: "#111827",
+                            backgroundColor: "#FFFFFF"
+                          }}>
+                            <span style={{ fontWeight: 500 }}>{isv.approved_agent_count}</span>
+                            <span style={{ color: "#6B7280" }}>/{isv.agent_count}</span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{isv.isv_domain}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                            height: "41px",
+                            fontFamily: "Poppins, sans-serif",
+                            fontWeight: 400,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "150%",
+                            letterSpacing: "0px",
+                            verticalAlign: "middle",
+                            color: "#111827",
+                            backgroundColor: "#FFFFFF"
+                          }}>{isv.isv_domain}</td>
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
                             {getStatusBadge(isv.admin_approved)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-6 whitespace-nowrap text-sm font-medium border-b border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -845,79 +1232,198 @@ export default function AdminPage() {
 
             {/* Resellers Table */}
             {activeTab === "resellers" && (
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold">Resellers ({getFilteredResellers().length})</h2>
-                </div>
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead>
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reseller Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Whitelisted Domain</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>S. No</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Reseller Name</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Email</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Whitelisted Domain</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Status</th>
+                        <th className="px-6 text-left border-b border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {getFilteredResellers().map((reseller) => (
+                    <tbody className="bg-white">
+                      {getFilteredResellers().map((reseller, index) => (
                         <tr key={reseller.reseller_id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">{reseller.reseller_name}</div>
-                            <div className="text-sm text-gray-500">ID: {reseller.reseller_id}</div>
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                            height: "41px",
+                            fontFamily: "Poppins, sans-serif",
+                            fontWeight: 400,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "150%",
+                            letterSpacing: "0px",
+                            verticalAlign: "middle",
+                            color: "#111827",
+                            backgroundColor: "#FFFFFF"
+                          }}>
+                            {index + 1}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{reseller.reseller_email_no}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{reseller.whitelisted_domain}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
+                            <div style={{ 
+                              fontFamily: "Poppins, sans-serif",
+                              fontWeight: 400,
+                              fontStyle: "normal",
+                              fontSize: "14px",
+                              lineHeight: "150%",
+                              letterSpacing: "0px",
+                              verticalAlign: "middle",
+                              color: "#111827"
+                            }}>{reseller.reseller_name}</div>
+                          </td>
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                            height: "41px",
+                            fontFamily: "Poppins, sans-serif",
+                            fontWeight: 400,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "150%",
+                            letterSpacing: "0px",
+                            verticalAlign: "middle",
+                            color: "#111827",
+                            backgroundColor: "#FFFFFF"
+                          }}>{reseller.reseller_email_no}</td>
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                            height: "41px",
+                            fontFamily: "Poppins, sans-serif",
+                            fontWeight: 400,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "150%",
+                            letterSpacing: "0px",
+                            verticalAlign: "middle",
+                            color: "#111827",
+                            backgroundColor: "#FFFFFF"
+                          }}>{reseller.whitelisted_domain}</td>
+                          <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
                             {getStatusBadge(reseller.admin_approved)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem 
+                          <td className="px-6 whitespace-nowrap border-b border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
                                   onClick={() => {
                                     setSelectedReseller(reseller)
                                     setResellerModalOpen(true)
                                   }}
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                style={{
+                                  width: "45px",
+                                  height: "32px",
+                                  minWidth: "45px",
+                                  maxWidth: "45px",
+                                  minHeight: "32px",
+                                  maxHeight: "32px",
+                                  fontFamily: "Poppins, sans-serif",
+                                  fontWeight: 500,
+                                  fontSize: "14px",
+                                  color: "#111827",
+                                  backgroundColor: "#FFFFFF",
+                                  border: "1px solid #E5E7EB",
+                                  padding: 0,
+                                  boxSizing: "border-box",
+                                }}
+                                className="hover:bg-gray-50"
+                              >
+                                View
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
                                   onClick={() => {
                                     setSelectedReseller(reseller)
                                     handleEditReseller()
                                   }}
-                                >
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  onClick={() => handleApproveReseller(reseller)}
-                                  className="text-green-600"
-                                >
-                                  <CheckCircle className="mr-2 h-4 w-4" />
-                                  Approve
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => {
-                                    setSelectedReseller(reseller)
-                                    setRejectResellerModalOpen(true)
-                                  }}
-                                  className="text-red-600"
-                                >
-                                  <XCircle className="mr-2 h-4 w-4" />
-                                  Reject
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                style={{
+                                  width: "45px",
+                                  height: "32px",
+                                  minWidth: "45px",
+                                  maxWidth: "45px",
+                                  minHeight: "32px",
+                                  maxHeight: "32px",
+                                  fontFamily: "Poppins, sans-serif",
+                                  fontWeight: 500,
+                                  fontSize: "14px",
+                                  color: "#111827",
+                                  backgroundColor: "#FFFFFF",
+                                  border: "1px solid #E5E7EB",
+                                  padding: 0,
+                                  boxSizing: "border-box",
+                                }}
+                                className="hover:bg-gray-50"
+                              >
+                                Edit
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -956,116 +1462,285 @@ export default function AdminPage() {
 
             {/* Enquiries Table */}
             {activeTab === "enquiries" && (
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold">Contact Enquiries ({getFilteredEnquiries().length})</h2>
-                </div>
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead>
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Type</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>S. No</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Name</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Company</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Email</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Phone</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>User Type</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Date</th>
+                        <th className="px-6 text-left border-b border-r border-gray-200" style={{ 
+                          height: "41px",
+                          fontFamily: "Poppins, sans-serif",
+                          fontWeight: 500,
+                          fontStyle: "normal",
+                          fontSize: "14px",
+                          lineHeight: "150%",
+                          letterSpacing: "0px",
+                          verticalAlign: "middle",
+                          color: "#111827",
+                          backgroundColor: "#FFFFFF"
+                        }}>Status</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {getFilteredEnquiries().map((enquiry) => {
-                        const isExpanded = expandedEnquiries.has(enquiry.enquiry_id)
+                    <tbody className="bg-white">
+                      {getFilteredEnquiries().map((enquiry, index) => {
                         return (
-                          <>
                             <tr 
                               key={enquiry.enquiry_id} 
-                              className={`hover:bg-gray-50 cursor-pointer transition-colors ${enquiry.status === 'new' ? 'bg-blue-50/30' : ''}`}
-                              onClick={() => toggleEnquiryExpansion(enquiry.enquiry_id)}
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center gap-2">
-                                  {isExpanded ? (
-                                    <ChevronUp className="h-4 w-4 text-gray-400" />
-                                  ) : (
-                                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                                  )}
-                                  <Mail className="h-4 w-4 text-blue-600" />
-                                  <div className="text-sm font-medium text-gray-900">
+                            className={`hover:bg-gray-50 ${enquiry.status === 'new' ? 'bg-blue-50/30' : ''}`}
+                          >
+                            <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                              height: "41px",
+                              fontFamily: "Poppins, sans-serif",
+                              fontWeight: 400,
+                              fontStyle: "normal",
+                              fontSize: "14px",
+                              lineHeight: "150%",
+                              letterSpacing: "0px",
+                              verticalAlign: "middle",
+                              color: "#111827",
+                              backgroundColor: "#FFFFFF"
+                            }}>
+                              {index + 1}
+                            </td>
+                            <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                              height: "41px",
+                              fontFamily: "Poppins, sans-serif",
+                              fontWeight: 400,
+                              fontStyle: "normal",
+                              fontSize: "14px",
+                              lineHeight: "150%",
+                              letterSpacing: "0px",
+                              verticalAlign: "middle",
+                              color: "#111827",
+                              backgroundColor: "#FFFFFF"
+                            }}>
                                     {enquiry.full_name || 'Unknown'}
-                                  </div>
-                                </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center gap-1">
-                                  {enquiry.company_name ? (
-                                    <>
-                                      <Building2 className="h-3 w-3 text-gray-400" />
-                                      <span className="text-sm text-gray-900">{enquiry.company_name}</span>
-                                    </>
-                                  ) : (
-                                    <span className="text-sm text-gray-400">-</span>
-                                  )}
-                                </div>
+                            <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                              height: "41px",
+                              fontFamily: "Poppins, sans-serif",
+                              fontWeight: 400,
+                              fontStyle: "normal",
+                              fontSize: "14px",
+                              lineHeight: "150%",
+                              letterSpacing: "0px",
+                              verticalAlign: "middle",
+                              color: "#111827",
+                              backgroundColor: "#FFFFFF"
+                            }}>
+                              {enquiry.company_name || '-'}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900 truncate max-w-[200px]">
+                            <td className="px-6 whitespace-nowrap border-b border-r border-gray-200 truncate max-w-[200px]" style={{ 
+                              height: "41px",
+                              fontFamily: "Poppins, sans-serif",
+                              fontWeight: 400,
+                              fontStyle: "normal",
+                              fontSize: "14px",
+                              lineHeight: "150%",
+                              letterSpacing: "0px",
+                              verticalAlign: "middle",
+                              color: "#111827",
+                              backgroundColor: "#FFFFFF"
+                            }}>
                                   {enquiry.email || '-'}
-                                </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">
+                            <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                              height: "41px",
+                              fontFamily: "Poppins, sans-serif",
+                              fontWeight: 400,
+                              fontStyle: "normal",
+                              fontSize: "14px",
+                              lineHeight: "150%",
+                              letterSpacing: "0px",
+                              verticalAlign: "middle",
+                              color: "#111827",
+                              backgroundColor: "#FFFFFF"
+                            }}>
                                   {enquiry.phone || '-'}
-                                </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
                                 {enquiry.user_type && enquiry.user_type !== 'anonymous' ? (
-                                  <Badge variant="outline" className="text-xs">
+                                  <span style={{ 
+                                    fontFamily: "Poppins, sans-serif", 
+                                    fontWeight: 400,
+                                    fontStyle: "normal",
+                                    fontSize: "14px",
+                                    lineHeight: "150%",
+                                    letterSpacing: "0px",
+                                    verticalAlign: "middle",
+                                    color: "#111827" 
+                                  }}>
                                     {enquiry.user_type.toUpperCase()}
-                                  </Badge>
+                                  </span>
                                 ) : (
-                                  <span className="text-sm text-gray-400">Anonymous</span>
+                                  <span style={{ 
+                                    fontFamily: "Poppins, sans-serif", 
+                                    fontWeight: 400,
+                                    fontStyle: "normal",
+                                    fontSize: "14px",
+                                    lineHeight: "150%",
+                                    letterSpacing: "0px",
+                                    verticalAlign: "middle",
+                                    color: "#6B7280" 
+                                  }}>Anonymous</span>
                                 )}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-6 whitespace-nowrap border-b border-r border-gray-200" style={{ 
+                              height: "41px",
+                              fontFamily: "Poppins, sans-serif",
+                              fontWeight: 400,
+                              fontStyle: "normal",
+                              fontSize: "14px",
+                              lineHeight: "150%",
+                              letterSpacing: "0px",
+                              verticalAlign: "middle",
+                              color: "#111827",
+                              backgroundColor: "#FFFFFF"
+                            }}>
+                              {formatDate(enquiry.created_at)}
+                            </td>
+                            <td className="px-6 whitespace-nowrap border-b border-gray-200" style={{ height: "41px", backgroundColor: "#FFFFFF" }}>
+                              <div className="flex items-center gap-2">
                                 {enquiry.status === 'new' ? (
-                                  <Badge variant="default" className="bg-blue-600 text-white text-xs">
+                                  <span 
+                                    className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+                                    style={{
+                                      backgroundColor: "#FEF3C7",
+                                      color: "#92400E",
+                                      fontFamily: "Poppins, sans-serif",
+                                    }}
+                                  >
                                     New
-                                  </Badge>
+                                  </span>
                                 ) : (
-                                  <Badge variant="outline" className="text-xs">
+                                  <Badge variant="outline" className="text-xs" style={{ fontFamily: "Poppins, sans-serif" }}>
                                     Read
                                   </Badge>
                                 )}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center gap-1 text-sm text-gray-500">
-                                  <Calendar className="h-3 w-3" />
-                                  <span>{getRelativeTime(enquiry.created_at)}</span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="text-sm text-gray-700 line-clamp-2 max-w-[300px]">
-                                  {enquiry.message || 'No message provided'}
-                                </div>
-                              </td>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => {
+                                    setSelectedMessage({
+                                      name: enquiry.full_name || 'Unknown',
+                                      company: enquiry.company_name || '',
+                                      message: enquiry.message || 'No message provided'
+                                    })
+                                    setMessageModalOpen(true)
+                                  }}
+                                  style={{
+                                    fontFamily: "Poppins, sans-serif",
+                                  }}
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => toggleEnquiryExpansion(enquiry.enquiry_id)}>
+                                      <Eye className="mr-2 h-4 w-4" />
+                                      View
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => {
+                                      // Add edit functionality if needed
+                                    }}>
+                                      <Edit className="mr-2 h-4 w-4" />
+                                      Edit
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </td>
                             </tr>
-                            {isExpanded && (
-                              <tr className="bg-gray-50">
-                                <td colSpan={8} className="px-6 py-4">
-                                  <div>
-                                    <h4 className="text-xs font-semibold text-gray-500 uppercase mb-3">Message</h4>
-                                    <div className="bg-white border rounded-lg p-4 md:p-6">
-                                      <p className="text-sm md:text-base text-gray-700 whitespace-pre-wrap leading-relaxed">
-                                        {enquiry.message || 'No message provided'}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </>
                         )
                       })}
                     </tbody>
@@ -1163,6 +1838,98 @@ export default function AdminPage() {
       )}
 
       <Toaster />
+
+      {/* Message Modal */}
+      <Dialog open={messageModalOpen} onOpenChange={setMessageModalOpen}>
+        <DialogContent 
+          className="max-w-2xl"
+          style={{
+            width: "430px",
+            height: "228px",
+            maxWidth: "430px",
+            maxHeight: "228px",
+            padding: "24px",
+            fontFamily: "Poppins, sans-serif"
+          }}
+        >
+          <DialogHeader style={{
+            width: "385px",
+            height: "38px",
+            marginBottom: "16px",
+            textAlign: "left",
+            fontFamily: "Poppins, sans-serif"
+          }}>
+            <DialogTitle style={{
+              fontFamily: "Poppins, sans-serif",
+              fontWeight: 600,
+              fontSize: "20px",
+              color: "#111827",
+              marginBottom: "8px",
+              textAlign: "left"
+            }}>
+              {selectedMessage?.name}
+            </DialogTitle>
+            {selectedMessage?.company && (
+              <p style={{
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 400,
+                fontSize: "14px",
+                color: "#6B7280",
+                marginBottom: "16px",
+                textAlign: "left",
+                marginTop: 0
+              }}>
+                {selectedMessage.company}
+              </p>
+            )}
+          </DialogHeader>
+          <div style={{
+            width: "372px",
+            height: "131px",
+            margin: "0 auto",
+            textAlign: "left",
+            fontFamily: "Poppins, sans-serif"
+          }}>
+            <h4 style={{
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "12px",
+              fontWeight: 600,
+              color: "#6B7280",
+              textTransform: "uppercase",
+              marginBottom: "8px",
+              textAlign: "left"
+            }}>
+              Message
+            </h4>
+            <div className="bg-white border rounded-lg" style={{
+              borderColor: "#E5E7EB",
+              width: "372px",
+              height: "auto",
+              overflowY: "auto",
+              overflowX: "hidden",
+              padding: "16px 16px 30px 16px",
+              boxSizing: "border-box",
+              textAlign: "left",
+              fontFamily: "Poppins, sans-serif"
+            }}>
+              <p style={{
+                fontFamily: "Poppins, sans-serif",
+                fontSize: "14px",
+                fontWeight: 400,
+                color: "#374151",
+                whiteSpace: "pre-wrap",
+                lineHeight: "1.75",
+                margin: 0,
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                textAlign: "left"
+              }}>
+                {selectedMessage?.message}
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
